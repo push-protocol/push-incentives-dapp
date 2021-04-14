@@ -120,119 +120,54 @@ function Home({ setBadgeCount, bellPressed }) {
             userClickedAt(0)
           }}
         >
-          <ControlImage src="./svg/feedbox.svg" active={controlAt == 0 ? 1 : 0} />
-          <ControlText active={controlAt == 0 ? 1 : 0}>Feedbox</ControlText>
+          <ControlImage src="./svg/share.svg" active={controlAt == 0 ? 1 : 0} />
+          <ControlText active={controlAt == 0 ? 1 : 0}>Yield Farming</ControlText>
         </ControlButton>
 
-        <ControlButton index={1} active={controlAt == 1 ? 1 : 0} border="#35c5f3"
+        <ControlButton index={1} active={controlAt == 1 ? 1 : 0} border="#e20880"
           onClick={() => {
             userClickedAt(1)
           }}
         >
-          <ControlImage src="./svg/channel.svg" active={controlAt == 1 ? 1 : 0}/>
-          <ControlText active={controlAt == 1 ? 1 : 0}>Channels</ControlText>
+          <ControlImage src="./svg/share.svg" active={controlAt == 1 ? 1 : 0} />
+          <ControlText active={controlAt == 1 ? 1 : 0}>Gratitude Drop</ControlText>
         </ControlButton>
 
-        <ControlButton index={2} active={controlAt == 2 ? 1 : 0} border="#674c9f"
-          disabled={!adminStatusLoaded}
+
+        <ControlButton index={2} active={controlAt == 2 ? 1 : 0} border="#e20880"
           onClick={() => {
-            if (adminStatusLoaded) {
-              userClickedAt(2)
-            }
+            userClickedAt(2)
           }}
         >
-          {!adminStatusLoaded &&
-            <Loader
-               type="Oval"
-               color="#674c9f"
-               height={32}
-               width={32}
-            />
-          }
-          {channelAdmin && adminStatusLoaded &&
-            <ControlChannelContainer>
-              <ControlChannelImage src={`${channelJson.icon}`} active={controlAt == 2 ? 1 : 0}/>
-              <ControlChannelText active={controlAt == 2 ? 1 : 0}>{channelJson.name}</ControlChannelText>
-            </ControlChannelContainer>
-          }
-          {!channelAdmin && adminStatusLoaded &&
-            <>
-              <ControlImage src="./svg/channeladmin.svg" active={controlAt == 2 ? 1 : 0}/>
-              <ControlText active={controlAt == 2 ? 1 : 0}>Create Your Channel</ControlText>
-            </>
-          }
+          <ControlImage src="./svg/share.svg" active={controlAt == 2 ? 1 : 0} />
+          <ControlText active={controlAt == 2 ? 1 : 0}>$ROCKSTAR NFTs</ControlText>
         </ControlButton>
 
         <ControlButton index={3} active={controlAt == 3 ? 1 : 0} border="#e20880"
           onClick={() => {
-            userClickedAt(3)
+            window.open("https://app.epns.io", "_blank")
           }}
         >
           <ControlImage src="./svg/share.svg" active={controlAt == 3 ? 1 : 0} />
-          <ControlText active={controlAt == 3 ? 1 : 0}>Receive Notifs</ControlText>
-        </ControlButton>
-
-        <ControlButton index={4} active={controlAt == 4 ? 1 : 0} border="#e20880"
-          onClick={() => {
-            userClickedAt(4)
-          }}
-        >
-          <ControlImage src="./svg/share.svg" active={controlAt == 4 ? 1 : 0} />
-          <ControlText active={controlAt == 4 ? 1 : 0}>Yield Farming</ControlText>
-        </ControlButton>
-
-        <ControlButton index={5} active={controlAt == 5 ? 1 : 0} border="#e20880"
-          onClick={() => {
-            userClickedAt(5)
-          }}
-        >
-          <ControlImage src="./svg/share.svg" active={controlAt == 5 ? 1 : 0} />
-          <ControlText active={controlAt == 5 ? 1 : 0}>Airdrop</ControlText>
-        </ControlButton>
-      
-
-        <ControlButton index={6} active={controlAt == 6 ? 1 : 0} border="#e20880"
-          onClick={() => {
-            userClickedAt(6)
-          }}
-        >
-          <ControlImage src="./svg/share.svg" active={controlAt == 6 ? 1 : 0} />
-          <ControlText active={controlAt == 6 ? 1 : 0}>NFT</ControlText>
+          <ControlText active={controlAt == 3 ? 1 : 0}>#PushNotifs  </ControlText>
         </ControlButton>
 
       </Controls>
       <Interface>
         {controlAt == 0 &&
-          <Feedbox
-            epnsReadProvider={epnsReadProvider}
-          />
-        }
-        {controlAt == 1 &&
-          <ViewChannels
-            epnsReadProvider={epnsReadProvider}
-            epnsWriteProvide={epnsWriteProvider}
-          />
-        }
-        {controlAt == 2 && !channelAdmin && adminStatusLoaded &&
-          <ChannelCreationDashboard />
-        }
-        {controlAt == 2 && channelAdmin && adminStatusLoaded &&
-          <ChannelOwnerDashboard />
-        }
-        {controlAt == 3 &&
-          <Info/>
-        }
-        {controlAt == 4 &&
           <YieldFarming />
         }
-        {controlAt == 5 &&
+        {controlAt == 1 &&
           <Airdrop />
         }
-        {controlAt == 6 && 
+        {controlAt == 2 &&
           <NFT
             epnsReadProvider={epnsReadProvider}
             epnsWriteProvide={epnsWriteProvider}
           />
+        }
+        {controlAt == 3 &&
+          <Info/>
         }
       </Interface>
     </Container>

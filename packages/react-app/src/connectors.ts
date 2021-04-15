@@ -18,7 +18,7 @@ const RPC_URLS: { [chainId: number]: string } = {
   3: "https://ropsten.infura.io/v3/084ddf3da9e240c5b5dd9264f37c0526" as string
 }
 
-export const injected = new InjectedConnector({ supportedChainIds: [3] })
+export const injected = new InjectedConnector({ supportedChainIds: [1] })
 
 export const network = new NetworkConnector({
   urls: { 3: RPC_URLS[3] },

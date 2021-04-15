@@ -74,7 +74,7 @@ function YieldFarming() {
   }, [yieldFarmingLP]);
 
   const formatTokens = (tokens) => {
-    console.log(tokens)
+    console.log(tokens.toString())
     if (tokens) {
       return tokens.div(ethers.BigNumber.from(10).pow(18)).toString();
     }

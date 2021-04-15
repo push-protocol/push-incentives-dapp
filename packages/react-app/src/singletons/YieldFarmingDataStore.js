@@ -4,6 +4,16 @@ import { bigNumber } from "ethers/utils";
 
 import { addresses, abis } from "@project/contracts";
 
+const ONE_PUSH = ethers.BigNumber.from(1).mul(
+  ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
+);
+const GENESIS_EPOCH_AMOUNT_PUSH = 30000
+const GENESIS_EPOCH_AMOUNT_LP = 35000
+
+const tokenToBn = (token) => {
+  return token.mul(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18)))
+}
+
 export default class YieldFarmingDataStore {
   static instance =
     YieldFarmingDataStore.instance || new YieldFarmingDataStore();
@@ -14,20 +24,22 @@ export default class YieldFarmingDataStore {
     yieldFarmingPUSH: null,
     yieldFarmingLP: null,
     rewardForCurrentEpoch: null,
-    genesisEpochAmountPUSH: 30000,
+    genesisEpochAmountPUSH: GENESIS_EPOCH_AMOUNT_PUSH,
     deprecationPerEpochPUSH: 100,
-    genesisEpochAmountLP: 35000,
+    genesisEpochAmountLP: GENESIS_EPOCH_AMOUNT_LP,
     deprecationPerEpochLP: 100,
   };
 
   // init
-  init = (account, epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP) => {
+  init = (account, epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP, uniswapV2Router02) => {
     // set account
     this.state.account = account;
     this.state.epnsToken = epnsToken;
     this.state.staking = staking;
     this.state.yieldFarmingPUSH = yieldFarmingPUSH;
     this.state.yieldFarmingLP = yieldFarmingLP;
+    this.state.uniswapV2Router02 = uniswapV2Router02;
+    console.log(uniswapV2Router02)
   };
 
   // 1. Listen for Subscribe Async
@@ -48,7 +60,10 @@ export default class YieldFarmingDataStore {
 
       const nextPoolSize = pushNextPoolSize.add(lpNextPoolSize);
 
-      const pushPrice = 12;
+      const pushPriceAmounts = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.WETHAddress, addresses.USDTAddress]);
+      // const pushPrice = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.epnsToken, addresses.WETHAddress, addresses.USDTAddress]);
+      
+      const pushPrice = pushPriceAmounts[pushPriceAmounts.length -1];
 
       const epochDuration = await yieldFarmingPUSH.epochDuration();
 
@@ -85,12 +100,9 @@ export default class YieldFarmingDataStore {
 
       const currentEpochPUSH = await yieldFarmingPUSH.getCurrentEpoch();
       const totalEpochPUSH = (await yieldFarmingPUSH.NR_OF_EPOCHS()).toString();
-      const genesisEpochAmount = ethers.BigNumber.from(30000).mul(
-        ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
-      );
-      const deprecationPerEpoch = ethers.BigNumber.from(100).mul(
-        ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
-      );
+      
+      const genesisEpochAmount = tokenToBn(ethers.BigNumber.from(this.state.genesisEpochAmountPUSH));
+      const deprecationPerEpoch = tokenToBn(ethers.BigNumber.from(this.state.deprecationPerEpochPUSH));
 
       const rewardForCurrentEpoch = this.calcTotalAmountPerEpoch(
         genesisEpochAmount,
@@ -121,12 +133,8 @@ export default class YieldFarmingDataStore {
 
       const currentEpochPUSH = await yieldFarmingLP.getCurrentEpoch();
       const totalEpochPUSH = (await yieldFarmingLP.NR_OF_EPOCHS()).toString();
-      const genesisEpochAmount = ethers.BigNumber.from(35000).mul(
-        ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
-      );
-      const deprecationPerEpoch = ethers.BigNumber.from(100).mul(
-        ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
-      );
+      const genesisEpochAmount = tokenToBn(ethers.BigNumber.from(this.state.genesisEpochAmountLP));
+      const deprecationPerEpoch = tokenToBn(ethers.BigNumber.from(this.state.deprecationPerEpochLP));
 
       const rewardForCurrentEpoch = this.calcTotalAmountPerEpoch(
         genesisEpochAmount,
@@ -193,19 +201,11 @@ export default class YieldFarmingDataStore {
     const yieldFarmingLP = this.state.yieldFarmingLP;
 
     const currentEpochPUSH = await yieldFarmingPUSH.getCurrentEpoch();
-    const genesisEpochAmountPUSH = ethers.BigNumber.from(this.state.genesisEpochAmountPUSH).mul(
-      ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
-    );
-    const deprecationPerEpochPUSH = ethers.BigNumber.from(this.state.deprecationPerEpochPUSH).mul(
-      ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
-    );
+    const genesisEpochAmountPUSH = tokenToBn(ethers.BigNumber.from(this.state.genesisEpochAmountPUSH))
+    const deprecationPerEpochPUSH = tokenToBn(ethers.BigNumber.from(this.state.deprecationPerEpochPUSH))
     const currentEpochLP = await yieldFarmingLP.getCurrentEpoch();
-    const genesisEpochAmountLP = ethers.BigNumber.from(this.state.genesisEpochAmountLP).mul(
-      ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
-    );
-    const deprecationPerEpochLP = ethers.BigNumber.from(this.state.deprecationPerEpochLP).mul(
-      ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
-    );
+    const genesisEpochAmountLP = tokenToBn(ethers.BigNumber.from(this.state.genesisEpochAmountLP))
+    const deprecationPerEpochLP = tokenToBn(ethers.BigNumber.from(this.state.deprecationPerEpochLP))
 
     let pushPoolRewardsDistributed = ethers.BigNumber.from(0);
     let lpPoolRewardsDistributed = ethers.BigNumber.from(0);

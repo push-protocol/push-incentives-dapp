@@ -8,8 +8,16 @@ const addresses = {
   staking: "0xD4947328C14Ae7A4C03ba89cA87C8697b2333EeD",
   yieldFarmPUSH: "0x3BD750f3A248cd99B7Bf665b9dbED38D1D3B3856",
   yieldFarmLP: "0x57017e3089F7E720C8fF9D9fF780eCcF9C683b84",
-  epnsToken: "0x1e732fC9108B2C455e9b4444Dc04Fc1A27DD6548",
-  epnsLPToken: "0x02606ce88e2703cc3481a8beac64020c531ec301",
+  epnsToken: "0xf418588522d5dd018b425E472991E52EBBeEEEEE",
+  epnsLPToken: "0xbe78c34288137c401c868b33e0cb3e36ea7f893f",
+
+  uniswapV2Router02: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+
+  WETHAddress: "0xc778417e063141139fce010982780140aa0cd5ab", // ropsten address
+  USDTAddress: "0xad6d458402f60fd3bd25163575031acdce07538d", // ropsten address
+
+  // WETHAddress: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", // mainnet address
+  // USDTAddress: "0xdac17f958d2ee523a2206206994597c13d831ec7", // mainnet address
 
   rockstar: "0x4B02b9F92CE15498B5D49661002a80E1cb0644A8", //ropsten address
   batchMintNFT: "0xBC2d80b9e4C5Ca864FC5047bA138E8647Be11970", //ropsten address

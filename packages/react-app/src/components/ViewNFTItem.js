@@ -114,10 +114,15 @@ function ViewNFTItem({ NFTObject, nftReadProvider, nftWriteProvider, controlAt, 
             }
           </ChannelLogoInner>
         </ChannelLogoOuter>
+
+        {!!account && !!library && controlAt == 0 &&
+          <Item>Hello</Item>
+        }
+        <Item>Hello</Item>
       </ChannelLogo>
 
 
-      {!!account && !!library && controlAt == 0 &&
+      {!!account && !!library &&
         <>
           <LineBreak />
           <ChannelActions>

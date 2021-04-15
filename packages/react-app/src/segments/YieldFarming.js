@@ -32,6 +32,7 @@ function YieldFarming() {
   const [staking, setStaking] = React.useState(null);
   const [yieldFarmingPUSH, setYieldFarmingPUSH] = React.useState(null);
   const [yieldFarmingLP, setYieldFarmingLP] = React.useState(null);
+  const [uniswapV2Router02, setUniswapV2Router02] = React.useState(null);
 
   const [showAnswers, setShowAnswers] = React.useState([]);
 
@@ -46,19 +47,19 @@ function YieldFarming() {
     const poolStats = await YieldFarmingDataStore.instance.getPoolStats();
 
     setPoolStats({ ...poolStats });
-  }, [epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP]);
+  }, [epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP, uniswapV2Router02]);
 
   const getPUSHPoolStats = React.useCallback(async () => {
     const pushPoolStats = await YieldFarmingDataStore.instance.getPUSHPoolStats();
 
     setPushPoolStats({ ...pushPoolStats });
-  }, [epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP]);
+  }, [epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP, uniswapV2Router02]);
 
   const getLPPoolStats = React.useCallback(async () => {
     const lpPoolStats = await YieldFarmingDataStore.instance.getLPPoolStats();
 
     setLpPoolStats({ ...lpPoolStats });
-  }, [epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP]);
+  }, [epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP, uniswapV2Router02]);
 
   const getUserDataPUSH = React.useCallback(async () => {
     const userDataPUSH = await YieldFarmingDataStore.instance.getUserData(yieldFarmingPUSH);
@@ -73,6 +74,7 @@ function YieldFarming() {
   }, [yieldFarmingLP]);
 
   const formatTokens = (tokens) => {
+    console.log(tokens)
     if (tokens) {
       return tokens.div(ethers.BigNumber.from(10).pow(18)).toString();
     }
@@ -118,10 +120,17 @@ function YieldFarming() {
       library
     );
 
+    let uniswapV2Router02Instance = new ethers.Contract(
+      addresses.uniswapV2Router02,
+      abis.uniswapV2Router02,
+      library
+    );
+
     setEpnsToken(epnsToken);
     setStaking(staking);
     setYieldFarmingPUSH(yieldFarmingPUSH);
     setYieldFarmingLP(yieldFarmingLP);
+    setUniswapV2Router02(uniswapV2Router02Instance)
 
     if (!!(library && account)) {
       var signer = library.getSigner(account);
@@ -147,10 +156,17 @@ function YieldFarming() {
         signer
       );
 
+      let uniswapV2Router02Instance = new ethers.Contract(
+        addresses.uniswapV2Router02,
+        abis.uniswapV2Router02,
+        signer
+      );
+
       setEpnsToken(epnsToken);
       setStaking(staking);
       setYieldFarmingPUSH(yieldFarmingPUSH);
       setYieldFarmingLP(yieldFarmingLP);
+      setUniswapV2Router02(uniswapV2Router02Instance);
   }
   }, [account]);
 
@@ -162,7 +178,8 @@ function YieldFarming() {
         epnsToken,
         staking,
         yieldFarmingPUSH,
-        yieldFarmingLP
+        yieldFarmingLP,
+        uniswapV2Router02
       );
       getPoolStats();
       getPUSHPoolStats();
@@ -190,7 +207,7 @@ function YieldFarming() {
             </StatsCard>
             <StatsCard>
               <Heading>PUSH Price</Heading>
-              <SubHeading>{`$ ${poolStats.pushPrice}`}</SubHeading>
+              <SubHeading>{`$ ${formatTokens(poolStats.pushPrice)}`}</SubHeading>
               <a href="app.uniswap.org">
                 <p>Uniswap market</p>
               </a>
@@ -209,9 +226,9 @@ function YieldFarming() {
               poolAddress={addresses.yieldFarmLP}
               tokenAddress={addresses.epnsLPToken}
               getPoolStats={getPoolStats}
-              getPUSHPoolStats={getPUSHPoolStats}
+              getPUSHPoolStats={getLPPoolStats}
               getUserData={getUserDataLP}
-              pushPoolStats={pushPoolStats}
+              pushPoolStats={lpPoolStats}
               userData={userDataLP}
             />
             <PoolCard

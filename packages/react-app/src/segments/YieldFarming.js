@@ -74,7 +74,6 @@ function YieldFarming() {
   }, [yieldFarmingLP]);
 
   const formatTokens = (tokens) => {
-    console.log(tokens.toString())
     if (tokens) {
       return tokens.div(ethers.BigNumber.from(10).pow(18)).toString();
     }
@@ -207,7 +206,7 @@ function YieldFarming() {
             </StatsCard>
             <StatsCard>
               <Heading>PUSH Price</Heading>
-              <SubHeading>{`$ ${formatTokens(poolStats.pushPrice)}`}</SubHeading>
+              <SubHeading>{`$ ${poolStats.pushPrice}`}</SubHeading>
               <a href="app.uniswap.org">
                 <p>Uniswap market</p>
               </a>

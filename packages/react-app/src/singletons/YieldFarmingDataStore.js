@@ -61,9 +61,9 @@ export default class YieldFarmingDataStore {
       const nextPoolSize = pushNextPoolSize.add(lpNextPoolSize);
 
       const pushPriceAmounts = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.WETHAddress, addresses.USDTAddress]);
-      // const pushPrice = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.epnsToken, addresses.WETHAddress, addresses.USDTAddress]);
-      
-      const pushPrice = pushPriceAmounts[pushPriceAmounts.length -1];
+      const pushPrice = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.epnsToken, addresses.WETHAddress, addresses.USDTAddress]);
+
+      //const pushPrice = pushPriceAmounts[pushPriceAmounts.length -1];
 
       const epochDuration = await yieldFarmingPUSH.epochDuration();
 
@@ -100,7 +100,7 @@ export default class YieldFarmingDataStore {
 
       const currentEpochPUSH = await yieldFarmingPUSH.getCurrentEpoch();
       const totalEpochPUSH = (await yieldFarmingPUSH.NR_OF_EPOCHS()).toString();
-      
+
       const genesisEpochAmount = tokenToBn(ethers.BigNumber.from(this.state.genesisEpochAmountPUSH));
       const deprecationPerEpoch = tokenToBn(ethers.BigNumber.from(this.state.deprecationPerEpochPUSH));
 

@@ -1,5 +1,10 @@
 import React from "react";
+
 import styled, { css, keyframes } from "styled-components";
+import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField} from 'components/SharedStyling';
+
+import { BsChevronExpand } from 'react-icons/bs';
+
 import { AnimateOnChange } from "react-animation";
 import Loader from "react-loader-spinner";
 import { ToastContainer, toast } from "react-toastify";
@@ -27,7 +32,16 @@ function YieldFarming() {
   const [staking, setStaking] = React.useState(null);
   const [yieldFarmingPUSH, setYieldFarmingPUSH] = React.useState(null);
   const [yieldFarmingLP, setYieldFarmingLP] = React.useState(null);
-  
+
+  const [showAnswers, setShowAnswers] = React.useState([]);
+
+  const toggleShowAnswer = (id) => {
+    let newShowAnswers = [...showAnswers];
+    newShowAnswers[id] = !newShowAnswers[id];
+
+    setShowAnswers(newShowAnswers);
+  }
+
   const getPoolStats = React.useCallback(async () => {
     const poolStats = await YieldFarmingDataStore.instance.getPoolStats();
 
@@ -160,10 +174,10 @@ function YieldFarming() {
   }, [getPoolStats, getPUSHPoolStats, getLPPoolStats, getUserDataPUSH, getUserDataLP]);
 
   return (
-    <Container>
+    <Section>
       {poolStats ? (
-        <>
-          <StatsContainer>
+        <Content>
+          <ItemH>
             <StatsCard>
               <Heading>Total Value Locked</Heading>
               <SubHeading>{`$ ${parseInt(formatTokens(poolStats.nextPoolSize)) *
@@ -186,21 +200,12 @@ function YieldFarming() {
               <SubHeading>{formattedDuration}</SubHeading>
               <p>until next epoch</p>
             </StatsCard>
-          </StatsContainer>
+          </ItemH>
+
           <CenterHeading>Pools</CenterHeading>
           <PoolContainer>
             <PoolCard
-              poolName={'PUSH'}
-              poolAddress={addresses.yieldFarmPUSH}
-              tokenAddress={addresses.epnsToken}
-              getPoolStats={getPoolStats}
-              getPUSHPoolStats={getPUSHPoolStats}
-              getUserData={getUserDataPUSH}
-              pushPoolStats={pushPoolStats}
-              userData={userDataPUSH}
-            />
-            <PoolCard
-              poolName={'UNI-V2'}
+              poolName={'Uniswap LP Pool (UNI-V2)'}
               poolAddress={addresses.yieldFarmLP}
               tokenAddress={addresses.epnsLPToken}
               getPoolStats={getPoolStats}
@@ -209,14 +214,24 @@ function YieldFarming() {
               pushPoolStats={pushPoolStats}
               userData={userDataLP}
             />
+            <PoolCard
+              poolName={'Staking Pool (PUSH)'}
+              poolAddress={addresses.yieldFarmPUSH}
+              tokenAddress={addresses.epnsToken}
+              getPoolStats={getPoolStats}
+              getPUSHPoolStats={getPUSHPoolStats}
+              getUserData={getUserDataPUSH}
+              pushPoolStats={pushPoolStats}
+              userData={userDataPUSH}
+            />
           </PoolContainer>
-        </>
+        </Content>
       ) : (
-        <Container>
-          <Loader type="Oval" color="#000" height={24} width={24} />
-        </Container>
+        <Content align="center">
+          <Loader type="Oval" color="#e20880" height={40} width={40} />
+        </Content>
       )}
-    </Container>
+    </Section>
   );
 }
 
@@ -237,7 +252,7 @@ const StatsContainer = styled.div`
   justify-content: space-between;
 `;
 
-const StatsCard = styled.div`
+const StatsCard = styled(Item)`
   padding: 18px;
   min-width: 200px;
   background: #fff;

@@ -1,5 +1,8 @@
 import React from "react";
-import styled, { css } from 'styled-components';
+
+import styled, { css, keyframes } from "styled-components";
+import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField} from 'components/SharedStyling';
+
 import { Device } from 'assets/Device';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,6 +17,8 @@ import { useWeb3React } from '@web3-react/core';
 import { addresses, abis } from "@project/contracts";
 import { ethers } from "ethers";
 import { keccak256, arrayify, hashMessage, recoverPublicKey } from 'ethers/utils';
+
+import ReactPlayer from 'react-player'
 
 import NFTHelper from 'helpers/NFTHelper';
 
@@ -97,64 +102,21 @@ function ViewNFTItem({ NFTObject, nftReadProvider, nftWriteProvider, controlAt, 
 
   // render
   return (
-    <Container key={NFTObject.id}>
+    <ItemH key={NFTObject.id}>
       <ChannelLogo>
         <ChannelLogoOuter>
           <ChannelLogoInner>
-          {loading &&
-            <Skeleton color="#eee" width="100%" height="100%" />
-          }
-          {!loading &&
-              <ChannelLogoImg src= {`https://ipfs.io/ipfs/${NFTObject.metadata}`} onError={(e) => (e.target.onerror = null, e.target.src = "./image-not-available.jpeg")}/>
-          }
+            {loading &&
+              <Skeleton color="#eee" width="100%" height="100%" />
+            }
+            {!loading &&
+              <ReactPlayer url={`https://ipfs.io/ipfs/${NFTObject.metadata}`} controls={true} playing={false} loop={true}/>
+            }
           </ChannelLogoInner>
         </ChannelLogoOuter>
       </ChannelLogo>
 
-      <ChannelInfo>
-        <ChannelTitle>
-          {loading &&
-            <Skeleton color="#eee" width="50%" height={24} />
-          }
-          {!loading &&
-            <ChannelTitleLink>{NFTObject.id}</ChannelTitleLink>
-          }
-        </ChannelTitle>
-        {controlAt == 1 &&
-          <ChannelMeta>
-          {loading &&
-            <>
-              <SkeletonWrapper atH={10} atW={30} marginBottom="0">
-                <Skeleton />
-              </SkeletonWrapper>
-            </>
-          }
-          {!loading &&
-            <>
-              <Subscribers>
-                <IoMdPeople size={20} color="#ccc"/>
-                <SubscribersCount>
-                  {NFTObject.owner}
-                </SubscribersCount>
-              </Subscribers>
-              <Pool>
-                <GiTwoCoins size={20} color="#ccc"/>
-                {NFTObject.claimable &&
-                  <PoolShare>
-                  Claimable
-                </PoolShare>
-                }
-                {!NFTObject.claimable &&
-                  <PoolShare>
-                  Claimed
-                </PoolShare>
-                }
-              </Pool>
-            </>
-          }
-        </ChannelMeta>
-        }
-      </ChannelInfo>
+
       {!!account && !!library && controlAt == 0 &&
         <>
           <LineBreak />
@@ -164,16 +126,16 @@ function ViewNFTItem({ NFTObject, nftReadProvider, nftWriteProvider, controlAt, 
                 <Skeleton />
               </SkeletonButton>
             }
-            {!loading && 
+            {!loading &&
               <UnsubscribeButton >
                 <ActionTitle onClick={() => {
-                  setTokenId(NFTObject.id) 
+                  setTokenId(NFTObject.id)
                   setControlAt(2)
                 }}
                   >Transfer</ActionTitle>
               </UnsubscribeButton>
             }
-            {!loading && 
+            {!loading &&
                 <UnsubscribeButton disabled = {!NFTObject.claimable}>
                   {txInProgress &&
                     <ActionLoader>
@@ -196,7 +158,7 @@ function ViewNFTItem({ NFTObject, nftReadProvider, nftWriteProvider, controlAt, 
           </ChannelActions>
         </>
       }
-    </Container>
+    </ItemH>
   );
 }
 
@@ -226,8 +188,8 @@ const SkeletonWrapper = styled.div`
 `
 
 const ChannelLogo = styled.div`
-  max-width: 100px;
-  min-width: 32px;
+  max-width: 25%;
+  min-width: 200px;
   flex: 1;
   margin: 5px;
   padding: 10px;

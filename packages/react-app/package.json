@@ -57,6 +57,7 @@
     "react-loader-spinner": "3.1.14",
     "react-scripts": "^3.3.1",
     "react-spinners": "0.8.3",
+    "react-stack-grid": "0.7.1",
     "react-toastify": "6.0.9",
     "react-waypoint": "^9.0.3",
     "secp256k1-v4": "https://github.com/HarshRajat/secp256k1-node",

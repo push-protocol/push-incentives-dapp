@@ -16,7 +16,7 @@ export default class YieldFarmingDataStore {
     rewardForCurrentEpoch: null,
     genesisEpochAmountPUSH: 30000,
     deprecationPerEpochPUSH: 100,
-    genesisEpochAmountLP: 30000,
+    genesisEpochAmountLP: 35000,
     deprecationPerEpochLP: 100,
   };
 
@@ -44,7 +44,7 @@ export default class YieldFarmingDataStore {
 
       const lpNextPoolSize = await yieldFarmingLP.getPoolSize(
         currentEpochPUSH.add(1)
-      );  
+      );
 
       const nextPoolSize = pushNextPoolSize.add(lpNextPoolSize);
 
@@ -65,7 +65,7 @@ export default class YieldFarmingDataStore {
       );
 
       const pushRewardsDistributed = await this.getPushRewardsDistributed();
-      
+
       resolve({
         nextPoolSize,
         pushPrice,
@@ -121,7 +121,7 @@ export default class YieldFarmingDataStore {
 
       const currentEpochPUSH = await yieldFarmingLP.getCurrentEpoch();
       const totalEpochPUSH = (await yieldFarmingLP.NR_OF_EPOCHS()).toString();
-      const genesisEpochAmount = ethers.BigNumber.from(30000).mul(
+      const genesisEpochAmount = ethers.BigNumber.from(35000).mul(
         ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))
       );
       const deprecationPerEpoch = ethers.BigNumber.from(100).mul(
@@ -209,7 +209,7 @@ export default class YieldFarmingDataStore {
 
     let pushPoolRewardsDistributed = ethers.BigNumber.from(0);
     let lpPoolRewardsDistributed = ethers.BigNumber.from(0);
-    
+
     for(var i=0; i<currentEpochLP.toNumber(); i++){
       const rewardForCurrentEpochLP = this.calcTotalAmountPerEpoch(
         genesisEpochAmountLP,

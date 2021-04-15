@@ -2,6 +2,7 @@ import React from "react";
 import ReactGA from 'react-ga';
 
 import styled, { css } from 'styled-components';
+import {Section, Content, Item, ItemH, ItemBreak, A, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField} from 'components/SharedStyling';
 
 import { addresses, abis } from "@project/contracts";
 import { useWeb3React } from '@web3-react/core'
@@ -11,17 +12,12 @@ import Loader from 'react-loader-spinner'
 
 import EPNSCoreHelper from 'helpers/EPNSCoreHelper';
 
-import Feedbox from 'segments/Feedbox';
-import ViewChannels from 'segments/ViewChannels';
-import Info from "segments/Info";
-import ChannelOwnerDashboard from 'segments/ChannelOwnerDashboard';
-import ChannelCreationDashboard from 'segments/ChannelCreationDashboard';
+import Airdrop from "segments/Airdrop";
 import YieldFarming from 'segments/YieldFarming';
 import NFT from 'segments/NFT';
 
 import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
 import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
-import Airdrop from "segments/Airdrop";
 
 
 // Create Header
@@ -56,7 +52,7 @@ function Home({ setBadgeCount, bellPressed }) {
     // Reset when account refreshes
     setChannelAdmin(false);
     setAdminStatusLoaded(false);
-    userClickedAt(4);
+    userClickedAt(0);
     setChannelJson([]);
 
     // EPNS Read Provider Set
@@ -120,27 +116,27 @@ function Home({ setBadgeCount, bellPressed }) {
             userClickedAt(0)
           }}
         >
-          <ControlImage src="./svg/share.svg" active={controlAt == 0 ? 1 : 0} />
+          <ControlImage src="./svg/yield.svg" active={controlAt == 0 ? 1 : 0} />
           <ControlText active={controlAt == 0 ? 1 : 0}>Yield Farming</ControlText>
         </ControlButton>
 
-        <ControlButton index={1} active={controlAt == 1 ? 1 : 0} border="#e20880"
+        <ControlButton index={1} active={controlAt == 1 ? 1 : 0} border="#35c5f3"
           onClick={() => {
             userClickedAt(1)
           }}
         >
-          <ControlImage src="./svg/share.svg" active={controlAt == 1 ? 1 : 0} />
+          <ControlImage src="./svg/gratitude.svg" active={controlAt == 1 ? 1 : 0} />
           <ControlText active={controlAt == 1 ? 1 : 0}>Gratitude Drop</ControlText>
         </ControlButton>
 
 
-        <ControlButton index={2} active={controlAt == 2 ? 1 : 0} border="#e20880"
+        <ControlButton index={2} active={controlAt == 2 ? 1 : 0} border="#674c9f"
           onClick={() => {
             userClickedAt(2)
           }}
         >
-          <ControlImage src="./svg/share.svg" active={controlAt == 2 ? 1 : 0} />
-          <ControlText active={controlAt == 2 ? 1 : 0}>$ROCKSTAR NFTs</ControlText>
+          <ControlImage src="./svg/rockstars.svg" active={controlAt == 2 ? 1 : 0} />
+          <ControlText active={controlAt == 2 ? 1 : 0}>Rockstars of EPNS</ControlText>
         </ControlButton>
 
         <ControlButton index={3} active={controlAt == 3 ? 1 : 0} border="#e20880"
@@ -148,27 +144,30 @@ function Home({ setBadgeCount, bellPressed }) {
             window.open("https://app.epns.io", "_blank")
           }}
         >
-          <ControlImage src="./svg/share.svg" active={controlAt == 3 ? 1 : 0} />
+          <ControlImage src="./svg/epnslogo.svg" active={controlAt == 3 ? 1 : 0} />
           <ControlText active={controlAt == 3 ? 1 : 0}>#PushNotifs  </ControlText>
         </ControlButton>
 
       </Controls>
       <Interface>
-        {controlAt == 0 &&
-          <YieldFarming />
-        }
-        {controlAt == 1 &&
-          <Airdrop />
-        }
-        {controlAt == 2 &&
-          <NFT
-            epnsReadProvider={epnsReadProvider}
-            epnsWriteProvide={epnsWriteProvider}
-          />
-        }
-        {controlAt == 3 &&
-          <Info/>
-        }
+        <Section>
+          {controlAt == 0 &&
+            <YieldFarming />
+          }
+          {controlAt == 1 &&
+            <Airdrop />
+          }
+          {controlAt == 2 &&
+            <NFT
+              epnsReadProvider={epnsReadProvider}
+              epnsWriteProvide={epnsWriteProvider}
+            />
+          }
+          {controlAt == 3 &&
+            <></>
+          }
+        </Section>
+
       </Interface>
     </Container>
   );

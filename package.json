@@ -28,5 +28,8 @@
       "**/@graphprotocol/graph-ts",
       "**/@graphprotocol/graph-ts/**"
     ]
+  },
+  "dependencies": {
+    "react-player": "2.9.0"
   }
 }

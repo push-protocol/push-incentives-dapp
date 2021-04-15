@@ -60,10 +60,9 @@ export default class YieldFarmingDataStore {
 
       const nextPoolSize = pushNextPoolSize.add(lpNextPoolSize);
 
-      const pushPriceAmounts = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.WETHAddress, addresses.USDTAddress]);
-      const pushPrice = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.epnsToken, addresses.WETHAddress, addresses.USDTAddress]);
+      const pushPriceAmounts = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.epnsToken, addresses.WETHAddress, addresses.USDTAddress]);
 
-      //const pushPrice = pushPriceAmounts[pushPriceAmounts.length -1];
+      const pushPrice = pushPriceAmounts[pushPriceAmounts.length -1].toNumber()/1000000;
 
       const epochDuration = await yieldFarmingPUSH.epochDuration();
 

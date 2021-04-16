@@ -23,7 +23,8 @@ export default class YieldFarmingDataStore {
     staking: null,
     yieldFarmingPUSH: null,
     yieldFarmingLP: null,
-    rewardForCurrentEpoch: null,
+    rewardForCurrentEpochPush: null,
+    rewardForCurrentEpochLP: null,
     genesisEpochAmountPUSH: GENESIS_EPOCH_AMOUNT_PUSH,
     deprecationPerEpochPUSH: 100,
     genesisEpochAmountLP: GENESIS_EPOCH_AMOUNT_LP,
@@ -109,7 +110,7 @@ export default class YieldFarmingDataStore {
         deprecationPerEpoch
       );
 
-      this.state.rewardForCurrentEpoch = rewardForCurrentEpoch;
+      this.state.rewardForCurrentEpochPush = rewardForCurrentEpoch;
 
       const poolBalance = await yieldFarmingPUSH.getPoolSize(
         currentEpochPUSH.add(1)
@@ -141,7 +142,7 @@ export default class YieldFarmingDataStore {
         deprecationPerEpoch
       );
 
-      this.state.rewardForCurrentEpoch = rewardForCurrentEpoch;
+      this.state.rewardForCurrentEpochLP = rewardForCurrentEpoch;
 
       const poolBalance = await yieldFarmingLP.getPoolSize(
         currentEpochPUSH.add(1)
@@ -176,9 +177,18 @@ export default class YieldFarmingDataStore {
         const poolSize = await contract.getPoolSize(currentEpochPUSH);
         let potentialUserReward = 0;
         if (poolSize > 0) {
-          potentialUserReward = epochStake
-            .div(poolSize)
-            .mul(this.state.rewardForCurrentEpoch);
+
+          if (contract.address == addresses.yieldFarmLP) {
+            potentialUserReward = epochStake
+              .div(poolSize)
+              .mul(this.state.rewardForCurrentEpochLP);
+          }
+          else {
+            potentialUserReward = epochStake
+              .div(poolSize)
+              .mul(this.state.rewardForCurrentEpochPush);
+          }
+
         }
 
         const epochStakeNext = await contract.getEpochStake(

@@ -193,7 +193,7 @@ function YieldFarming() {
     <Section>
       {poolStats ? (
         <Content>
-          <ItemH>
+          <ItemH margin="0px 0px 15px 0px">
             <StatsCard>
               <Heading>Total Value Locked</Heading>
               <SubHeading>{`$ ${parseInt(formatTokens(poolStats.nextPoolSize)) *
@@ -218,8 +218,7 @@ function YieldFarming() {
             </StatsCard>
           </ItemH>
 
-          <CenterHeading>Pools</CenterHeading>
-          <PoolContainer>
+          <ItemH margin="15px 0px 0px 0px">
             <PoolCard
               poolName={'Uniswap LP Pool (UNI-V2)'}
               poolAddress={addresses.yieldFarmLP}
@@ -240,10 +239,10 @@ function YieldFarming() {
               pushPoolStats={pushPoolStats}
               userData={userDataPUSH}
             />
-          </PoolContainer>
+          </ItemH>
         </Content>
       ) : (
-        <Content align="center">
+        <Content self="center" align="center">
           <Loader type="Oval" color="#e20880" height={40} width={40} />
         </Content>
       )}

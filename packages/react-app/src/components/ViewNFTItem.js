@@ -110,7 +110,7 @@ function ViewNFTItem({ NFTObject, nftReadProvider, nftWriteProvider, controlAt, 
           !!account && !!library && account == NFTObject.owner ?
             "#e20880" :
             !!account && !!library && NFTObject.owner != 0xFbA7Df351ADD4E79099f63E33b2679EDFDD5e2aB ?
-              "#35c5f3" :
+              "#eee" :
               "#fff"
         }
       >

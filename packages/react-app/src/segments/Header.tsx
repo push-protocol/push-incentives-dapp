@@ -26,7 +26,7 @@ function Header({ badgeCount, bellPressedCB }) {
     if (error instanceof NoEthereumProviderError) {
       return 'Web3 not enabled, install MetaMask on desktop or visit from a dApp browser on mobile'
     } else if (error instanceof UnsupportedChainIdError) {
-      return "Unsupported Network, please connect to Ropsten"
+      return "Unsupported Network, please connect to Mainnet"
     } else if (
       error instanceof UserRejectedRequestErrorInjected
     ) {

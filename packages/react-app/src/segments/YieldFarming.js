@@ -196,8 +196,7 @@ function YieldFarming() {
           <ItemH margin="0px 0px 15px 0px">
             <StatsCard>
               <Heading>Total Value Locked</Heading>
-              <SubHeading>{`$ ${parseInt(formatTokens(poolStats.nextPoolSize)) *
-                poolStats.pushPrice}`}</SubHeading>
+              <SubHeading>{`$ ${poolStats.totalValueLocked.toFixed(2)}`}</SubHeading>
             </StatsCard>
             <StatsCard>
               <Heading>PUSH Rewards</Heading>
@@ -206,7 +205,7 @@ function YieldFarming() {
             </StatsCard>
             <StatsCard>
               <Heading>PUSH Price</Heading>
-              <SubHeading>{`$ ${poolStats.pushPrice}`}</SubHeading>
+              <SubHeading>{`$ ${poolStats.pushPrice.toFixed(2)}`}</SubHeading>
               <a href="app.uniswap.org">
                 <p>Uniswap market</p>
               </a>

@@ -207,7 +207,7 @@ function YieldFarming() {
             <StatsCard>
               <Heading>PUSH Price</Heading>
               <SubHeading>{`$ ${poolStats.pushPrice}`}</SubHeading>
-              <a href="app.uniswap.org">
+              <a target="_blank" href="https://app.uniswap.org/#/swap?inputCurrency=0xf418588522d5dd018b425e472991e52ebbeeeeee">
                 <p>Uniswap market</p>
               </a>
             </StatsCard>

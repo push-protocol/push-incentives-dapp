@@ -517,6 +517,12 @@ export default function PoolCard({
           <Item align="stretch" self="stretch">
             <ItemH margin="0px">
               <Item bg="#000" margin="5px 10px" radius="12px">
+                <PoolBoxTitle>Total Tokens Staked</PoolBoxTitle>
+                <PoolBoxMsg>{formatTokens(pushPoolStats.poolBalance)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
+              </Item>
+            </ItemH>
+            <ItemH margin="0px">
+              <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>EPOCH</PoolBoxTitle>
                 <PoolBoxMsg>{pushPoolStats.currentEpochPUSH.toString()}/
                 {pushPoolStats.totalEpochPUSH}</PoolBoxMsg>
@@ -527,15 +533,16 @@ export default function PoolCard({
                 <PoolBoxMsg>{formatTokens(pushPoolStats.rewardForCurrentEpoch)} PUSH</PoolBoxMsg>
               </Item>
             </ItemH>
+            
             <ItemH margin="0px">
               <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>User Expected Reward</PoolBoxTitle>
-                <PoolBoxMsg>{formatTokens(userData.potentialUserReward)} PUSH</PoolBoxMsg>
+                <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
               </Item>
 
               <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>User Pool Balance</PoolBoxTitle>
-                <PoolBoxMsg>{formatTokens(userData.epochStakeNext)}</PoolBoxMsg>
+                <PoolBoxMsg>{formatTokens(userData.epochStakeNext)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
               </Item>
             </ItemH>
           </Item>

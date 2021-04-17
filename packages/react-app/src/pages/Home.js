@@ -36,41 +36,41 @@ function Home({ setBadgeCount, bellPressed }) {
 
 
 
-  React.useEffect(() => {
-    const contractInstance = new ethers.Contract(addresses.epnscore, abis.epnscore, library);
-    setEpnsReadProvider(contractInstance);
+  // React.useEffect(() => {
+  //   const contractInstance = new ethers.Contract(addresses.epnscore, abis.epnscore, library);
+  //   setEpnsReadProvider(contractInstance);
 
-    if (!!(library && account)) {
-      let signer = library.getSigner(account);
-      const signerInstance = new ethers.Contract(addresses.epnscore, abis.epnscore, signer);
-      setEpnsWriteProvider(signerInstance);
-    }
+  //   if (!!(library && account)) {
+  //     let signer = library.getSigner(account);
+  //     const signerInstance = new ethers.Contract(addresses.epnscore, abis.epnscore, signer);
+  //     setEpnsWriteProvider(signerInstance);
+  //   }
 
-  }, [account]);
+  // }, [account]);
 
-  React.useEffect(() => {
-    // Reset when account refreshes
-    setChannelAdmin(false);
-    setAdminStatusLoaded(false);
-    userClickedAt(0);
-    setChannelJson([]);
+  // React.useEffect(() => {
+  //   // Reset when account refreshes
+  //   setChannelAdmin(false);
+  //   setAdminStatusLoaded(false);
+  //   userClickedAt(0);
+  //   setChannelJson([]);
 
-    // EPNS Read Provider Set
-    if (epnsReadProvider != null) {
-      // Instantiate Data Stores
-      UsersDataStore.instance.init(account, epnsReadProvider);
-      ChannelsDataStore.instance.init(account, epnsReadProvider);
+  //   // EPNS Read Provider Set
+  //   if (epnsReadProvider != null) {
+  //     // Instantiate Data Stores
+  //     UsersDataStore.instance.init(account, epnsReadProvider);
+  //     ChannelsDataStore.instance.init(account, epnsReadProvider);
 
-      checkUserForChannelRights();
-    }
+  //     checkUserForChannelRights();
+  //   }
 
-  }, [epnsReadProvider]);
+  // }, [epnsReadProvider]);
 
 
-  // Revert to Feedbox on bell pressed
-  React.useEffect(() => {
-    setControlAt(4);
-  }, [bellPressed]);
+  // // Revert to Feedbox on bell pressed
+  // React.useEffect(() => {
+  //   setControlAt(4);
+  // }, [bellPressed]);
 
   // handle user action at control center
   const userClickedAt = (controlIndex) => {

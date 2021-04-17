@@ -14,12 +14,17 @@ const tokenToBn = (token) => {
   return token.mul(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18)))
 }
 
+const tokenBNtoNumber = (tokenBn) => {
+  return tokenBn.div(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))).toNumber()
+}
+
 export default class YieldFarmingDataStore {
   static instance =
     YieldFarmingDataStore.instance || new YieldFarmingDataStore();
 
   state = {
     account: null,
+    signer: null,
     staking: null,
     yieldFarmingPUSH: null,
     yieldFarmingLP: null,
@@ -40,7 +45,6 @@ export default class YieldFarmingDataStore {
     this.state.yieldFarmingPUSH = yieldFarmingPUSH;
     this.state.yieldFarmingLP = yieldFarmingLP;
     this.state.uniswapV2Router02 = uniswapV2Router02;
-    console.log(uniswapV2Router02)
   };
 
   // 1. Listen for Subscribe Async
@@ -51,19 +55,23 @@ export default class YieldFarmingDataStore {
 
       const currentEpochPUSH = await yieldFarmingPUSH.getCurrentEpoch();
 
-      const pushNextPoolSize = await yieldFarmingPUSH.getPoolSize(
-        currentEpochPUSH.add(1)
-      );
-
-      const lpNextPoolSize = await yieldFarmingLP.getPoolSize(
-        currentEpochPUSH.add(1)
-      );
-
-      const nextPoolSize = pushNextPoolSize.add(lpNextPoolSize);
-
       const pushPriceAmounts = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.epnsToken, addresses.WETHAddress, addresses.USDTAddress]);
-
       const pushPrice = pushPriceAmounts[pushPriceAmounts.length -1].toNumber()/1000000;
+
+      const pushAmountReserve = tokenBNtoNumber(await this.state.epnsToken.balanceOf(addresses.epnsLPToken))
+      const wethAmountReserve = tokenBNtoNumber(await this.state.epnsToken.attach(addresses.WETHAddress).balanceOf(addresses.epnsLPToken)) // Using epnsToken instance for WETH instance
+
+      const ethPriceAmounts = await this.state.uniswapV2Router02.getAmountsOut(ONE_PUSH.toString(), [addresses.WETHAddress, addresses.USDTAddress]);
+      const ethPrice = ethPriceAmounts[ethPriceAmounts.length -1].toNumber()/1000000;
+
+      const uniTotalSupply = tokenBNtoNumber(await this.state.epnsToken.attach(addresses.epnsLPToken).totalSupply()) // Using epnsToken instance for Uni-V2 instance
+
+      const uniLpPrice = ((pushAmountReserve * pushPrice) + (wethAmountReserve * ethPrice)) / uniTotalSupply
+
+      const pushNextPoolSize = tokenBNtoNumber(await yieldFarmingPUSH.getPoolSize(currentEpochPUSH.add(1)));
+      const lpNextPoolSize = tokenBNtoNumber(await yieldFarmingLP.getPoolSize(currentEpochPUSH.add(1)));
+
+      const totalValueLocked = (pushNextPoolSize * pushPrice) + (lpNextPoolSize * uniLpPrice)
 
       const epochDuration = await yieldFarmingPUSH.epochDuration();
 
@@ -82,7 +90,7 @@ export default class YieldFarmingDataStore {
       const pushRewardsDistributed = await this.getPushRewardsDistributed();
 
       resolve({
-        nextPoolSize,
+        totalValueLocked,
         pushPrice,
         epochEndTimestamp,
         totalDistributedAmount,
@@ -170,26 +178,27 @@ export default class YieldFarmingDataStore {
           epnsToken.address
         );
 
-        const epochStake = await contract.getEpochStake(
+        const epochStake = tokenBNtoNumber(await contract.getEpochStake(
           this.state.account,
           currentEpochPUSH
-        );
-        const poolSize = await contract.getPoolSize(currentEpochPUSH);
+        ));
+
+        const poolSize = tokenBNtoNumber(await contract.getPoolSize(currentEpochPUSH));
+
         let potentialUserReward = 0;
         if (poolSize > 0) {
-
           if (contract.address == addresses.yieldFarmLP) {
-            potentialUserReward = epochStake
-              .div(poolSize)
-              .mul(this.state.rewardForCurrentEpochLP);
+            const rewardForCurrentEpoch = tokenBNtoNumber(this.state.rewardForCurrentEpochLP)
+            potentialUserReward = epochStake / poolSize * rewardForCurrentEpoch
           }
           else {
-            potentialUserReward = epochStake
-              .div(poolSize)
-              .mul(this.state.rewardForCurrentEpochPush);
+            const rewardForCurrentEpoch = tokenBNtoNumber(this.state.rewardForCurrentEpochLP)
+            potentialUserReward = epochStake / poolSize * rewardForCurrentEpoch
           }
 
         }
+
+        potentialUserReward = potentialUserReward.toFixed(2)
 
         const epochStakeNext = await contract.getEpochStake(
           this.state.account,

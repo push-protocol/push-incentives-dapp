@@ -556,7 +556,7 @@ export default function PoolCard({
                 padding="12px"
                 bg="#fff"
                 value={depositAmountToken}
-                onChange={(e) => {setDepositAmountToken(e.target.value)}}
+                onChange={(e) => {setDepositAmountToken(parseInt(e.target.value) || 0)}}
               />
               <ItemH>
                 <ButtonAlt

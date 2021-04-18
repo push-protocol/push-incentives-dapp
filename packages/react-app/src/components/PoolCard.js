@@ -38,17 +38,41 @@ export default function PoolCard({
 
   const [txInProgressDep, setTxInProgressDep] = React.useState(false);
 
-  // React.useEffect(() => {
-  //   setTxInProgressApprDep(true);
-  //
-  //   // Check if the account has approved deposit
-  //   var signer = library.getSigner(account);
-  //   let epnsToken = new ethers.Contract(tokenAddress, abis.epnsToken, signer);
-  //   let staking = new ethers.Contract(addresses.staking, abis.staking, signer);
-  //
-  //
-  //
-  // }, [account]);
+  React.useEffect(() => {
+  
+    // Check if the account has approved deposit
+    var signer = library.getSigner(account);
+    let epnsToken = new ethers.Contract(tokenAddress, abis.epnsToken, signer);
+    let staking = new ethers.Contract(addresses.staking, abis.staking, signer);
+    
+    const tx = epnsToken.allowance(
+      account,
+      staking.address 
+    );
+
+    tx.then(async (tx) => {
+  
+      const approvedAmount = parseInt(tx.toString().slice(0,-18), 0);
+
+      if (approvedAmount > 0) {
+        setDepositApprove(true);
+        setDepositAmountToken(approvedAmount)
+      }
+  
+    }).catch((err) => {
+      toast.dark("Transaction Cancelled!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    });
+  
+  }, [account]);
 
   const approveDeposit = async () => {
     if (depositApproved || txInProgressApprDep) {

@@ -1,7 +1,6 @@
 import React from "react";
 import { useWeb3React, UnsupportedChainIdError } from "@web3-react/core";
 
-
 import styled, { css, keyframes } from "styled-components";
 import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField} from 'components/SharedStyling';
 
@@ -11,8 +10,15 @@ import { ToastContainer, toast } from "react-toastify";
 import { AnimateOnChange } from "react-animation";
 import Loader from "react-loader-spinner";
 import Blockies from "components/BlockiesIdenticon";
+
 //   <Blockies opts={{seed: "foo", color: "#dfe", bgcolor: "#a71", size: 15, scale: 3, spotcolor: "#000"}}/>
 const ethers = require("ethers");
+
+const bn = function(number, defaultValue = null) { if (number == null) { if (defaultValue == null) { return null } number = defaultValue } return ethers.BigNumber.from(number) }
+
+const tokens = function (amount) { return (bn(amount).mul(bn(10).pow(18))).toString() }
+const tokensBN = function (amount) { return (bn(amount).mul(bn(10).pow(18))) }
+const bnToInt = function (bnAmount) { return bnAmount.div(bn(10).pow(18)) }
 
 // Create Header
 export default function PoolCard({
@@ -37,18 +43,48 @@ export default function PoolCard({
   const [txInProgressApprDep, setTxInProgressApprDep] = React.useState(false);
 
   const [txInProgressDep, setTxInProgressDep] = React.useState(false);
+  const [showDepSlip, setShowDepSlip] = React.useState(null);
 
-  // React.useEffect(() => {
-  //   setTxInProgressApprDep(true);
-  //
-  //   // Check if the account has approved deposit
-  //   var signer = library.getSigner(account);
-  //   let epnsToken = new ethers.Contract(tokenAddress, abis.epnsToken, signer);
-  //   let staking = new ethers.Contract(addresses.staking, abis.staking, signer);
-  //
-  //
-  //
-  // }, [account]);
+  const [txInProgressWithdraw, setTxInProgressWithdraw] = React.useState(false);
+
+  const [txInProgressMassHarvest, setTxInProgressMassHarvest] = React.useState(false);
+
+  React.useEffect(() => {
+    // Check if the account has approved deposit
+    checkApprDeposit();
+
+  }, [depositAmountToken]);
+
+  const checkApprDeposit = async () => {
+    if (depositAmountToken <= 0) {
+      setDepositApprove(false);
+      return;
+    }
+    setTxInProgressApprDep(true);
+
+    var signer = library.getSigner(account);
+    const tokenAddr = poolName == "Uniswap LP Pool (UNI-V2)" ? addresses.epnsLPToken : addresses.epnsToken;
+    let token = new ethers.Contract(tokenAddr, abis.epnsToken, signer);
+
+    const allowance = await token.allowance(account, addresses.staking);
+    if (allowance.gte(bn(depositAmountToken))) {
+      setDepositApprove(true);
+    }
+    else {
+      setDepositApprove(false);
+    }
+
+    setTxInProgressApprDep(false);
+  }
+
+  const fillMax = async() => {
+    var signer = library.getSigner(account);
+    const tokenAddr = poolName == "Uniswap LP Pool (UNI-V2)" ? addresses.epnsLPToken : addresses.epnsToken;
+    let token = new ethers.Contract(tokenAddr, abis.epnsToken, signer);
+
+    let balance = bnToInt(await token.balanceOf(account));
+    setDepositAmountToken(parseInt(balance.toString().replace(/\D/,'')) || 0)
+  }
 
   const approveDeposit = async () => {
     if (depositApproved || txInProgressApprDep) {
@@ -61,11 +97,11 @@ export default function PoolCard({
     let epnsToken = new ethers.Contract(tokenAddress, abis.epnsToken, signer);
     let staking = new ethers.Contract(addresses.staking, abis.staking, signer);
 
+    const uintMax = bn(2).pow(bn(256)).sub(1)
+
     const tx = epnsToken.approve(
       staking.address,
-      ethers.BigNumber.from(depositAmountToken).mul(
-        ethers.BigNumber.from(10).pow(18)
-      )
+      uintMax
     );
 
     tx.then(async (tx) => {
@@ -166,7 +202,8 @@ export default function PoolCard({
           getUserData();
 
           setTxInProgressDep(false);
-          window.location.reload();
+          setShowDepSlip(true);
+          // window.location.reload();
         } catch (e) {
           toast.update(txToast, {
             render: "Transaction Failed! (" + e.name + ")",
@@ -193,114 +230,16 @@ export default function PoolCard({
       });
   };
 
-  const depositAmountTokenFarm = async () => {
-    var signer = library.getSigner(account);
-    let epnsToken = new ethers.Contract(tokenAddress, abis.epnsToken, signer);
-    let staking = new ethers.Contract(addresses.staking, abis.staking, signer);
-    console.log(depositAmountToken);
-    const tx = epnsToken.approve(
-      staking.address,
-      ethers.BigNumber.from(depositAmountToken).mul(
-        ethers.BigNumber.from(10).pow(18)
-      )
-    );
+  const withdrawAmountTokenFarmAutomatic = async () => {
+    if (txInProgressWithdraw) {
+      return;
+    }
 
-    tx.then(async (tx) => {
-      let txToast = toast.dark(
-        <LoaderToast msg="Waiting for Confirmation..." color="#35c5f3" />,
-        {
-          position: "bottom-right",
-          autoClose: false,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        }
-      );
+    setTxInProgressWithdraw(true);
+    const withdrawAmount = formatTokens(userData.epochStakeNext);
 
-      try {
-        await library.waitForTransaction(tx.hash);
-
-        toast.update(txToast, {
-          render: "Transaction Completed!",
-          type: toast.TYPE.SUCCESS,
-          autoClose: 5000,
-        });
-
-        const tx2 = staking.deposit(
-          tokenAddress,
-          ethers.BigNumber.from(depositAmountToken).mul(
-            ethers.BigNumber.from(10).pow(18)
-          )
-        );
-
-        tx2
-          .then(async (tx) => {
-            let txToast = toast.dark(
-              <LoaderToast msg="Waiting for Confirmation..." color="#35c5f3" />,
-              {
-                position: "bottom-right",
-                autoClose: false,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-              }
-            );
-
-            try {
-              await library.waitForTransaction(tx.hash);
-
-              toast.update(txToast, {
-                render: "Transaction Completed!",
-                type: toast.TYPE.SUCCESS,
-                autoClose: 5000,
-              });
-
-              getPoolStats();
-              getPUSHPoolStats();
-              getUserData();
-
-              setTxInProgress(false);
-            } catch (e) {
-              toast.update(txToast, {
-                render: "Transaction Failed! (" + e.name + ")",
-                type: toast.TYPE.ERROR,
-                autoClose: 5000,
-              });
-
-              setTxInProgress(false);
-            }
-          })
-          .catch((err) => {
-            toast.dark("Transaction Cancelled!", {
-              position: "bottom-right",
-              type: toast.TYPE.ERROR,
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
-
-            setTxInProgress(false);
-          });
-
-        setTxInProgress(false);
-      } catch (e) {
-        toast.update(txToast, {
-          render: "Transaction Failed! (" + e.name + ")",
-          type: toast.TYPE.ERROR,
-          autoClose: 5000,
-        });
-
-        setTxInProgress(false);
-      }
-    }).catch((err) => {
-      toast.dark("Transaction Cancelled!", {
+    if (withdrawAmount == 0) {
+      toast.dark("Nothing to Withdraw!", {
         position: "bottom-right",
         type: toast.TYPE.ERROR,
         autoClose: 5000,
@@ -311,17 +250,16 @@ export default function PoolCard({
         progress: undefined,
       });
 
-      setTxInProgress(false);
-    });
-  };
+      setTxInProgressWithdraw(false);
+      return;
+    }
 
-  const withdrawAmountTokenFarm = async () => {
     var signer = library.getSigner(account);
     let staking = new ethers.Contract(addresses.staking, abis.staking, signer);
 
     const tx = staking.withdraw(
       tokenAddress,
-      ethers.BigNumber.from(withdrawAmountToken).mul(
+      ethers.BigNumber.from(withdrawAmount).mul(
         ethers.BigNumber.from(10).pow(18)
       )
     );
@@ -349,7 +287,11 @@ export default function PoolCard({
           autoClose: 5000,
         });
 
-        setTxInProgress(false);
+        setTxInProgressWithdraw(false);
+
+        getPoolStats();
+        getPUSHPoolStats();
+        getUserData();
       } catch (e) {
         toast.update(txToast, {
           render: "Transaction Failed! (" + e.name + ")",
@@ -357,7 +299,7 @@ export default function PoolCard({
           autoClose: 5000,
         });
 
-        setTxInProgress(false);
+        setTxInProgressWithdraw(false);
       }
     }).catch((err) => {
       toast.dark("Transaction Cancelled!", {
@@ -371,12 +313,8 @@ export default function PoolCard({
         progress: undefined,
       });
 
-      setTxInProgress(false);
+      setTxInProgressWithdraw(false);
     });
-
-    getPoolStats();
-    getPUSHPoolStats();
-    getUserData();
   };
 
   const harvestTokens = async () => {
@@ -386,6 +324,7 @@ export default function PoolCard({
       abis.yieldFarming,
       signer
     );
+
     if (harvestEpochValue) {
       const tx = yieldFarmingPUSH.harvest(harvestEpochValue);
       tx.then(async (tx) => {
@@ -438,7 +377,14 @@ export default function PoolCard({
     }
   };
 
-  const massHarvestTokens = async () => {
+  const massHarvestTokensAll = async () => {
+    if (txInProgressMassHarvest) {
+      return;
+    }
+    setTxInProgressMassHarvest(true);
+
+    console.log(poolAddress);
+
     var signer = library.getSigner(account);
     let yieldFarmingPUSH = new ethers.Contract(
       poolAddress,
@@ -446,6 +392,8 @@ export default function PoolCard({
       signer
     );
     const tx = yieldFarmingPUSH.massHarvest();
+
+
     tx.then(async (tx) => {
       let txToast = toast.dark(
         <LoaderToast msg="Waiting for Confirmation..." color="#35c5f3" />,
@@ -469,7 +417,7 @@ export default function PoolCard({
           autoClose: 5000,
         });
 
-        setTxInProgress(false);
+        setTxInProgressMassHarvest(false);
       } catch (e) {
         toast.update(txToast, {
           render: "Transaction Failed! (" + e.name + ")",
@@ -477,7 +425,7 @@ export default function PoolCard({
           autoClose: 5000,
         });
 
-        setTxInProgress(false);
+        setTxInProgressMassHarvest(false);
       }
     }).catch((err) => {
       toast.dark("Transaction Cancelled!", {
@@ -491,7 +439,7 @@ export default function PoolCard({
         progress: undefined,
       });
 
-      setTxInProgress(false);
+      setTxInProgressMassHarvest(false);
     });
   };
 
@@ -533,7 +481,7 @@ export default function PoolCard({
                 <PoolBoxMsg>{formatTokens(pushPoolStats.rewardForCurrentEpoch)} PUSH</PoolBoxMsg>
               </Item>
             </ItemH>
-            
+
             <ItemH margin="0px">
               <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>User Expected Reward</PoolBoxTitle>
@@ -549,54 +497,89 @@ export default function PoolCard({
 
           {showDepositItem &&
             <Item bg="#ddd" radius="12px" margin="20px 0px -10px 0px" padding="10px 20px" align="stretch" self="stretch">
-              <Input
-                placeholder="Number of Tokens"
-                disabled={depositApproved ? true : false}
-                radius="4px"
-                padding="12px"
-                bg="#fff"
-                value={depositAmountToken}
-                onChange={(e) => {setDepositAmountToken(parseInt(e.target.value) || 0)}}
-              />
-              <ItemH>
-                <ButtonAlt
-                  bg={depositApproved ? "#999" : "#e20880"}
-                  onClick={approveDeposit}
-                  disabled={depositApproved ? true : false}
-                >
-                  {!depositApproved && !txInProgressApprDep &&
-                    <Span color="#fff" weight="400">Approve</Span>
-                  }
-                  {txInProgressApprDep && !depositApproved &&
-                    <Loader
-                      type="Oval"
-                      color="#fff"
-                      height={12}
-                      width={12}
+
+              {!showDepSlip &&
+                <>
+                  <Item>
+                    <MaxButton
+                      bg="#000"
+                      onClick={fillMax}
+                      position="absolute"
+                    >
+                      Max
+                    </MaxButton>
+
+                    <Input
+                      placeholder="Number of Tokens"
+                      radius="4px"
+                      padding="12px"
+                      self="stretch"
+                      bg="#fff"
+                      value={depositAmountToken}
+                      onChange={(e) => {
+                        setDepositAmountToken(parseInt(e.target.value.replace(/\D/,'')) || 0)
+                      }}
                     />
-                  }
-                  {!txInProgress && depositApproved &&
-                    <Span color="#fff" weight="600">Approved</Span>
-                  }
-                </ButtonAlt>
-                <ButtonAlt
-                  bg={!depositApproved ? "#999" : "#e20880"}
-                  disabled={!depositApproved ? true : false}
-                  onClick={depositAmountTokenFarmSingleTx}
+                  </Item>
+
+                  <ItemH>
+                    <ButtonAlt
+                      bg={depositApproved ? "#999" : "#e20880"}
+                      onClick={approveDeposit}
+                      disabled={depositApproved ? true : false}
+                    >
+                      {!depositApproved && !txInProgressApprDep &&
+                        <Span color="#fff" weight="400">Approve</Span>
+                      }
+                      {txInProgressApprDep && !depositApproved &&
+                        <Loader
+                          type="Oval"
+                          color="#fff"
+                          height={12}
+                          width={12}
+                        />
+                      }
+                      {!txInProgress && depositApproved &&
+                        <Span color="#fff" weight="600">Approved</Span>
+                      }
+                    </ButtonAlt>
+                    <ButtonAlt
+                      bg={!depositApproved ? "#999" : "#e20880"}
+                      disabled={!depositApproved ? true : false}
+                      onClick={depositAmountTokenFarmSingleTx}
+                    >
+                      {!txInProgressDep &&
+                        <Span color="#fff" weight="400">Deposit</Span>
+                      }
+                      {txInProgressDep &&
+                        <Loader
+                          type="Oval"
+                          color="#fff"
+                          height={12}
+                          width={12}
+                        />
+                      }
+                    </ButtonAlt>
+                  </ItemH>
+                </>
+              }
+
+              {showDepSlip &&
+                <Span
+                  bg="#e20880"
+                  color="#fff"
+                  align="center"
+                  textTransform="uppercase"
+                  spacing="0.1em"
+                  size="14px"
+                  weight="600"
+                  padding="10px"
+                  self="stretch"
                 >
-                  {!txInProgressDep &&
-                    <Span color="#fff" weight="400">Deposit</Span>
-                  }
-                  {txInProgressDep &&
-                    <Loader
-                      type="Oval"
-                      color="#fff"
-                      height={12}
-                      width={12}
-                    />
-                  }
-                </ButtonAlt>
-              </ItemH>
+                  Deposit Successful!
+                </Span>
+              }
+
             </Item>
           }
 
@@ -622,16 +605,36 @@ export default function PoolCard({
 
             <ButtonAlt
               bg="#000"
-              onClick={() => setShowDepositItem(!withdrawAmountTokenFarm)}
+              onClick={() => withdrawAmountTokenFarmAutomatic()}
             >
-              <Span color="#fff" weight="400">Withdraw</Span>
+              {!txInProgressWithdraw &&
+                <Span color="#fff" weight="400">Withdraw</Span>
+              }
+              {txInProgressWithdraw &&
+                <Loader
+                  type="Oval"
+                  color="#fff"
+                  height={12}
+                  width={12}
+                />
+              }
             </ButtonAlt>
 
             <ButtonAlt
               bg="#000"
-              onClick={() => massHarvestTokens()}
+              onClick={() => massHarvestTokensAll()}
             >
-              <Span color="#fff" weight="400">Harvest</Span>
+              {!txInProgressMassHarvest &&
+                <Span color="#fff" weight="400">Harvest</Span>
+              }
+              {txInProgressMassHarvest &&
+                <Loader
+                  type="Oval"
+                  color="#fff"
+                  height={12}
+                  width={12}
+                />
+              }
             </ButtonAlt>
 
           </ItemH>
@@ -670,6 +673,19 @@ const LoaderToast = ({ msg, color }) => (
     <ToasterMsg>{msg}</ToasterMsg>
   </Toaster>
 );
+
+
+const MaxButton = styled(Button)`
+  position: absolute;
+  right: 0;
+  padding: 4px 8px;
+  margin: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+`
 
 const PoolBoxTitle = styled(Span)`
   color: #fff;

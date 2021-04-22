@@ -84,6 +84,11 @@ function YieldFarming() {
       const epochEndTimestamp = poolStats.epochEndTimestamp.toNumber();
 
       const duration = epochEndTimestamp - Math.floor(new Date() / 1000);
+
+      if(duration < 0) {
+        getPoolStats()
+      }
+
       const day = parseInt(duration / 86400);
       const hour = parseInt((duration - day * 86400) / 3600);
 
@@ -212,8 +217,8 @@ function YieldFarming() {
             </StatsCard>
             <StatsCard>
               <Heading>Time Left</Heading>
-              <SubHeading>{formattedDuration}</SubHeading>
-              <p>until next epoch</p>
+              <SubHeading>{formattedDuration} left</SubHeading>
+              <p>{poolStats.currentEpoch.toNumber()} / 100 Epochs</p>
             </StatsCard>
           </ItemH>
 

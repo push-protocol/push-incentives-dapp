@@ -15,7 +15,7 @@ const tokenToBn = (token) => {
 }
 
 const tokenBNtoNumber = (tokenBn) => {
-  return tokenBn.div(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18))).toNumber()
+  return tokenBn.div(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(10))).toNumber() / 100000000
 }
 
 export default class YieldFarmingDataStore {
@@ -30,6 +30,7 @@ export default class YieldFarmingDataStore {
     yieldFarmingLP: null,
     rewardForCurrentEpochPush: null,
     rewardForCurrentEpochLP: null,
+
     genesisEpochAmountPUSH: GENESIS_EPOCH_AMOUNT_PUSH,
     deprecationPerEpochPUSH: 100,
     genesisEpochAmountLP: GENESIS_EPOCH_AMOUNT_LP,
@@ -94,7 +95,8 @@ export default class YieldFarmingDataStore {
         pushPrice,
         epochEndTimestamp,
         totalDistributedAmount,
-        pushRewardsDistributed
+        pushRewardsDistributed,
+        currentEpoch: currentEpochPUSH
       });
     });
   };
@@ -178,37 +180,37 @@ export default class YieldFarmingDataStore {
           epnsToken.address
         );
 
-        const epochStake = tokenBNtoNumber(await contract.getEpochStake(
-          this.state.account,
-          currentEpochPUSH
-        ));
-
-        const poolSize = tokenBNtoNumber(await contract.getPoolSize(currentEpochPUSH));
-
-        let potentialUserReward = 0;
-        if (poolSize > 0) {
-          if (contract.address == addresses.yieldFarmLP) {
-            const rewardForCurrentEpoch = tokenBNtoNumber(this.state.rewardForCurrentEpochLP)
-            potentialUserReward = epochStake / poolSize * rewardForCurrentEpoch
-          }
-          else {
-            const rewardForCurrentEpoch = tokenBNtoNumber(this.state.rewardForCurrentEpochLP)
-            potentialUserReward = epochStake / poolSize * rewardForCurrentEpoch
-          }
-
-        }
-
-        potentialUserReward = potentialUserReward.toFixed(2)
+        const potentialUserReward = (await this.calculateUserEpochReward(currentEpochPUSH, contract)).toFixed(2)
 
         const epochStakeNext = await contract.getEpochStake(
           this.state.account,
           currentEpochPUSH.add(1)
         );
 
+        let totalAccumulatedReward = 0
+
+        for(var i=0; i<=currentEpochPUSH.sub(1).toNumber(); i++){
+          const epochReward = await this.calculateUserEpochReward(i, contract)
+          totalAccumulatedReward = totalAccumulatedReward + epochReward
+        }
+
+        totalAccumulatedReward = totalAccumulatedReward.toFixed(2)
+        const lastEpochIdHarvested = (await contract.lastEpochIdHarvested(this.state.account)).toNumber()
+
+        let totalAvailableReward = 0
+
+        for(var i = lastEpochIdHarvested + 1; i<=currentEpochPUSH.sub(1).toNumber(); i++){
+          const epochReward = await this.calculateUserEpochReward(i, contract)
+          totalAvailableReward = totalAvailableReward + epochReward
+        }
+        totalAvailableReward = totalAvailableReward.toFixed(2)
+
         resolve({
           userPUSHStakeBalance,
           potentialUserReward,
           epochStakeNext,
+          totalAccumulatedReward,
+          totalAvailableReward
         });
       }
     });
@@ -256,4 +258,31 @@ export default class YieldFarmingDataStore {
   ) => {
     return genesisEpochAmount.sub(epochId.mul(deprecationPerEpoch));
   };
+
+  calculateUserEpochReward = async (
+    epochId,
+    contract
+  ) => {
+      const epochStake = tokenBNtoNumber(await contract.getEpochStake(
+        this.state.account,
+        epochId
+      ));
+
+      const poolSize = tokenBNtoNumber(await contract.getPoolSize(epochId));
+
+      let potentialUserReward = 0;
+      if (poolSize > 0) {
+        if (contract.address == addresses.yieldFarmLP) {
+          const rewardForCurrentEpoch = tokenBNtoNumber(this.state.rewardForCurrentEpochLP)
+          potentialUserReward = epochStake / poolSize * rewardForCurrentEpoch
+        }
+        else {
+          const rewardForCurrentEpoch = tokenBNtoNumber(this.state.rewardForCurrentEpochLP)
+          potentialUserReward = epochStake / poolSize * rewardForCurrentEpoch
+        }
+
+      }
+
+      return potentialUserReward
+  }
 }

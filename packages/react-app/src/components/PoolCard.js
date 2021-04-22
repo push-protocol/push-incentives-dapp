@@ -457,9 +457,6 @@ export default function PoolCard({
             <H2 textTransform="uppercase" spacing="0.1em">
               <Span bg={poolName == "Uniswap LP Pool (UNI-V2)" ? "#35c5f3" : "#e20880"} size="0.8em" color="#fff" weight="600" padding="0px 8px">{poolName}</Span>
             </H2>
-            {userData.userPUSHStakeBalance != 0 &&
-              <H3>Your Stake Balance - <b>{formatTokens(userData.epochStakeNext)}</b></H3>
-            }
           </Item>
 
           <Item align="stretch" self="stretch">
@@ -471,12 +468,6 @@ export default function PoolCard({
             </ItemH>
             <ItemH margin="0px">
               <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>EPOCH</PoolBoxTitle>
-                <PoolBoxMsg>{pushPoolStats.currentEpochPUSH.toString()}/
-                {pushPoolStats.totalEpochPUSH}</PoolBoxMsg>
-              </Item>
-
-              <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>Current EPOCH Reward</PoolBoxTitle>
                 <PoolBoxMsg>{formatTokens(pushPoolStats.rewardForCurrentEpoch)} PUSH</PoolBoxMsg>
               </Item>
@@ -484,16 +475,53 @@ export default function PoolCard({
 
             <ItemH margin="0px">
               <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>User Expected Reward</PoolBoxTitle>
-                <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
-              </Item>
-
-              <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>User Pool Balance</PoolBoxTitle>
                 <PoolBoxMsg>{formatTokens(userData.epochStakeNext)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
               </Item>
             </ItemH>
+
+            <ItemH margin="0px">
+              <Item bg="#000" margin="5px 10px" radius="12px">
+                  <PoolBoxTitle>Total Accumulated Reward</PoolBoxTitle>
+                  <PoolBoxMsg>{userData.totalAccumulatedReward} PUSH</PoolBoxMsg>
+              </Item>
+              
+              <Item bg="#000" margin="5px 10px" radius="12px">
+                <PoolBoxTitle>User Expected Reward</PoolBoxTitle>
+                <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
+              </Item>
+            </ItemH>
+
+          {
+            !(userData?.totalAvailableReward <= 0) ? (
+              <ItemH margin="0px">
+                <Item bg="#000" margin="5px 10px" radius="12px">
+                  <PoolBoxTitle>Reward Available for Harvest</PoolBoxTitle>
+                  <PoolBoxMsg>{userData.totalAvailableReward} PUSH</PoolBoxMsg>
+                </Item>
+                <ButtonAlt
+                  bg="#e20880"
+                  onClick={() => massHarvestTokensAll()}
+                >
+                  {!txInProgressMassHarvest &&
+                    <Span color="#fff" weight="400">Harvest</Span>
+                  }
+                  {txInProgressMassHarvest &&
+                    <Loader
+                      type="Oval"
+                      color="#fff"
+                      height={12}
+                      width={12}
+                    />
+                  }
+                </ButtonAlt>
+              </ItemH>
+            ): null
+          }
+
           </Item>
+
+          
 
           {showDepositItem &&
             <Item bg="#ddd" radius="12px" margin="20px 0px -10px 0px" padding="10px 20px" align="stretch" self="stretch">
@@ -619,48 +647,8 @@ export default function PoolCard({
                 />
               }
             </ButtonAlt>
-
-            <ButtonAlt
-              bg="#000"
-              onClick={() => massHarvestTokensAll()}
-            >
-              {!txInProgressMassHarvest &&
-                <Span color="#fff" weight="400">Harvest</Span>
-              }
-              {txInProgressMassHarvest &&
-                <Loader
-                  type="Oval"
-                  color="#fff"
-                  height={12}
-                  width={12}
-                />
-              }
-            </ButtonAlt>
-
           </ItemH>
-
-          {/*}
-
-          <input
-            placeholder="Amount"
-            onChange={(e) => setDepositAmountToken(e.target.value)}
-          />
-          <ButtonAlt onClick={depositAmountTokenFarm}>Deposit</ButtonAlt>
-          <input
-            placeholder="Amount"
-            onChange={(e) => setWithdrawAmountToken(e.target.value)}
-          />
-          <ButtonAlt onClick={withdrawAmountTokenFarm}>Withdraw</ButtonAlt>
-            <input
-              placeholder="Enter Epoch Id"
-              onChange={(e) => setHarvestEpochValue(e.target.value)}
-            />
-            <ButtonAlt onClick={harvestTokens}>Harvest</ButtonAlt>
-            <ButtonAlt onClick={massHarvestTokens}>Mass Harvest</ButtonAlt>
-        */}
         </Item>
-
-
       </Content>
     </Section>
   );

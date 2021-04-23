@@ -3,6 +3,7 @@ import { useWeb3React, UnsupportedChainIdError } from "@web3-react/core";
 
 import styled, { css, keyframes } from "styled-components";
 import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField} from 'components/SharedStyling';
+import InfoTooltip from "components/InfoTooltip";
 
 import { addresses, abis } from "@project/contracts";
 import { ToastContainer, toast } from "react-toastify";
@@ -465,8 +466,7 @@ export default function PoolCard({
                 <PoolBoxTitle>Total Tokens Staked</PoolBoxTitle>
                 <PoolBoxMsg>{formatTokens(pushPoolStats.poolBalance)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
               </Item>
-            </ItemH>
-            <ItemH margin="0px">
+
               <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>Current EPOCH Reward</PoolBoxTitle>
                 <PoolBoxMsg>{formatTokens(pushPoolStats.rewardForCurrentEpoch)} PUSH</PoolBoxMsg>
@@ -482,21 +482,20 @@ export default function PoolCard({
 
             <ItemH margin="0px">
               <Item bg="#000" margin="5px 10px" radius="12px">
-                  <PoolBoxTitle>Total Accumulated Reward</PoolBoxTitle>
+                  <PoolBoxTitle>Total Accumulated Reward <InfoTooltip title={"The total rewards you have accumulated since staking into the pool. This includes all the rewards including the ones already harvested."} /></PoolBoxTitle>
                   <PoolBoxMsg>{userData.totalAccumulatedReward} PUSH</PoolBoxMsg>
               </Item>
               
               <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>User Expected Reward</PoolBoxTitle>
+                <PoolBoxTitle>User Expected Reward <InfoTooltip title={"This is only an estimation for the user's reward that they might get after the epoch. This might change depending upon deposits from other users."} /></PoolBoxTitle>
                 <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
               </Item>
             </ItemH>
-
           {
             !(userData?.totalAvailableReward <= 0) ? (
               <ItemH margin="0px">
                 <Item bg="#000" margin="5px 10px" radius="12px">
-                  <PoolBoxTitle>Reward Available for Harvest</PoolBoxTitle>
+                  <PoolBoxTitle>Reward Available for Harvest <InfoTooltip title={"The rewards that are currently available for harvesting and can be immediately transferred to your address."} /></PoolBoxTitle>
                   <PoolBoxMsg>{userData.totalAvailableReward} PUSH</PoolBoxMsg>
                 </Item>
                 <ButtonAlt

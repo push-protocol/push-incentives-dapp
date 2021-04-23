@@ -217,8 +217,8 @@ function YieldFarming() {
             </StatsCard>
             <StatsCard>
               <Heading>Time Left</Heading>
-              <SubHeading>{formattedDuration} left</SubHeading>
-              <p>{poolStats.currentEpoch.toNumber()} / 100 Epochs</p>
+              <SubHeading>{formattedDuration}</SubHeading>
+              <p>until next epoch</p>
             </StatsCard>
           </ItemH>
 

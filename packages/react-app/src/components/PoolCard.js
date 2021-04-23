@@ -458,13 +458,16 @@ export default function PoolCard({
             <H2 textTransform="uppercase" spacing="0.1em">
               <Span bg={poolName == "Uniswap LP Pool (UNI-V2)" ? "#35c5f3" : "#e20880"} size="0.8em" color="#fff" weight="600" padding="0px 8px">{poolName}</Span>
             </H2>
+            {userData.userPUSHStakeBalance != 0 &&
+              <H3>Your Stake Balance - <b>{formatTokens(userData.epochStakeNext)}</b></H3>
+            }
           </Item>
 
           <Item align="stretch" self="stretch">
             <ItemH margin="0px">
               <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>Total Tokens Staked</PoolBoxTitle>
-                <PoolBoxMsg>{formatTokens(pushPoolStats.poolBalance)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
+                <PoolBoxTitle>Ongoing Epoch</PoolBoxTitle>
+                <PoolBoxMsg>{pushPoolStats.currentEpochPUSH.toString()}/{pushPoolStats.totalEpochPUSH}</PoolBoxMsg>
               </Item>
 
               <Item bg="#000" margin="5px 10px" radius="12px">
@@ -474,6 +477,10 @@ export default function PoolCard({
             </ItemH>
 
             <ItemH margin="0px">
+              <Item bg="#000" margin="5px 10px" radius="12px">
+                <PoolBoxTitle>Total Tokens Staked</PoolBoxTitle>
+                <PoolBoxMsg>{formatTokens(pushPoolStats.poolBalance)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
+              </Item>
               <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>User Pool Balance</PoolBoxTitle>
                 <PoolBoxMsg>{formatTokens(userData.epochStakeNext)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
@@ -491,33 +498,12 @@ export default function PoolCard({
                 <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
               </Item>
             </ItemH>
-          {
-            !(userData?.totalAvailableReward <= 0) ? (
               <ItemH margin="0px">
                 <Item bg="#000" margin="5px 10px" radius="12px">
                   <PoolBoxTitle>Reward Available for Harvest <InfoTooltip title={"The rewards that are currently available for harvesting and can be immediately transferred to your address."} /></PoolBoxTitle>
                   <PoolBoxMsg>{userData.totalAvailableReward} PUSH</PoolBoxMsg>
                 </Item>
-                <ButtonAlt
-                  bg="#e20880"
-                  onClick={() => massHarvestTokensAll()}
-                >
-                  {!txInProgressMassHarvest &&
-                    <Span color="#fff" weight="400">Harvest</Span>
-                  }
-                  {txInProgressMassHarvest &&
-                    <Loader
-                      type="Oval"
-                      color="#fff"
-                      height={12}
-                      width={12}
-                    />
-                  }
-                </ButtonAlt>
               </ItemH>
-            ): null
-          }
-
           </Item>
 
           
@@ -638,6 +624,23 @@ export default function PoolCard({
                 <Span color="#fff" weight="400">Withdraw</Span>
               }
               {txInProgressWithdraw &&
+                <Loader
+                  type="Oval"
+                  color="#fff"
+                  height={12}
+                  width={12}
+                />
+              }
+            </ButtonAlt>
+
+            <ButtonAlt
+              bg="#000"
+              onClick={() => massHarvestTokensAll()}
+            >
+              {!txInProgressMassHarvest &&
+                <Span color="#fff" weight="400">Harvest</Span>
+              }
+              {txInProgressMassHarvest &&
                 <Loader
                   type="Oval"
                   color="#fff"

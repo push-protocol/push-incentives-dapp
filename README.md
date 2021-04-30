@@ -6,3 +6,12 @@ The dApp that powers EPNS
 
 ### Additional Info
 This project was bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app).
+
+### How to debug
+
+```
+yarn
+yarn run react-app:start
+```
+
+Open http://localhost:3000/

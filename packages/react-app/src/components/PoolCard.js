@@ -3,6 +3,7 @@ import { useWeb3React, UnsupportedChainIdError } from "@web3-react/core";
 
 import styled, { css, keyframes } from "styled-components";
 import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField} from 'components/SharedStyling';
+import InfoTooltip from "components/InfoTooltip";
 
 import { addresses, abis } from "@project/contracts";
 import { ToastContainer, toast } from "react-toastify";
@@ -479,15 +480,8 @@ export default function PoolCard({
           <Item align="stretch" self="stretch">
             <ItemH margin="0px">
               <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>Total Tokens Staked</PoolBoxTitle>
-                <PoolBoxMsg>{formatTokens(pushPoolStats.poolBalance)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
-              </Item>
-            </ItemH>
-            <ItemH margin="0px">
-              <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>EPOCH</PoolBoxTitle>
-                <PoolBoxMsg>{pushPoolStats.currentEpochPUSH.toString()}/
-                {pushPoolStats.totalEpochPUSH}</PoolBoxMsg>
+                <PoolBoxTitle>Ongoing Epoch</PoolBoxTitle>
+                <PoolBoxMsg>{pushPoolStats.currentEpochPUSH.toString()}/{pushPoolStats.totalEpochPUSH}</PoolBoxMsg>
               </Item>
 
               <Item bg="#000" margin="5px 10px" radius="12px">
@@ -498,16 +492,35 @@ export default function PoolCard({
 
             <ItemH margin="0px">
               <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>User Expected Reward</PoolBoxTitle>
-                <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
+                <PoolBoxTitle>Total Tokens Staked</PoolBoxTitle>
+                <PoolBoxMsg>{formatTokens(pushPoolStats.poolBalance)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
               </Item>
-
               <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>User Pool Balance</PoolBoxTitle>
                 <PoolBoxMsg>{formatTokens(userData.epochStakeNext)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
               </Item>
             </ItemH>
+
+            <ItemH margin="0px">
+              <Item bg="#000" margin="5px 10px" radius="12px">
+                  <PoolBoxTitle>Total Accumulated Reward <InfoTooltip title={"The total rewards you have accumulated since staking into the pool. This includes all the rewards including the ones already harvested."} /></PoolBoxTitle>
+                  <PoolBoxMsg>{userData.totalAccumulatedReward} PUSH</PoolBoxMsg>
+              </Item>
+              
+              <Item bg="#000" margin="5px 10px" radius="12px">
+                <PoolBoxTitle>User Expected Reward <InfoTooltip title={"This is only an estimation for the user's reward that they might get after the epoch. This might change depending upon deposits from other users."} /></PoolBoxTitle>
+                <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
+              </Item>
+            </ItemH>
+              <ItemH margin="0px">
+                <Item bg="#000" margin="5px 10px" radius="12px">
+                  <PoolBoxTitle>Reward Available for Harvest <InfoTooltip title={"The rewards that are currently available for harvesting and can be immediately transferred to your address."} /></PoolBoxTitle>
+                  <PoolBoxMsg>{userData.totalAvailableReward} PUSH</PoolBoxMsg>
+                </Item>
+              </ItemH>
           </Item>
+
+          
 
           {showDepositItem &&
             <Item bg="#ddd" radius="12px" margin="20px 0px -10px 0px" padding="10px 20px" align="stretch" self="stretch">
@@ -650,31 +663,8 @@ export default function PoolCard({
                 />
               }
             </ButtonAlt>
-
           </ItemH>
-
-          {/*}
-
-          <input
-            placeholder="Amount"
-            onChange={(e) => setDepositAmountToken(e.target.value)}
-          />
-          <ButtonAlt onClick={depositAmountTokenFarm}>Deposit</ButtonAlt>
-          <input
-            placeholder="Amount"
-            onChange={(e) => setWithdrawAmountToken(e.target.value)}
-          />
-          <ButtonAlt onClick={withdrawAmountTokenFarm}>Withdraw</ButtonAlt>
-            <input
-              placeholder="Enter Epoch Id"
-              onChange={(e) => setHarvestEpochValue(e.target.value)}
-            />
-            <ButtonAlt onClick={harvestTokens}>Harvest</ButtonAlt>
-            <ButtonAlt onClick={massHarvestTokens}>Mass Harvest</ButtonAlt>
-        */}
         </Item>
-
-
       </Content>
     </Section>
   );

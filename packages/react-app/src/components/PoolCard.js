@@ -381,6 +381,20 @@ export default function PoolCard({
     if (txInProgressMassHarvest) {
       return;
     }
+
+    if (!pushPoolStats.currentEpochPUSH || pushPoolStats.currentEpochPUSH == 1) {
+      toast.dark("Harvest unlocks from Epoch 2!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      return;
+    }
     setTxInProgressMassHarvest(true);
 
     console.log(poolAddress);

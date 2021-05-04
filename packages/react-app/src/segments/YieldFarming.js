@@ -223,26 +223,34 @@ function YieldFarming() {
           </ItemH>
 
           <ItemH margin="15px 0px 0px 0px">
-            <PoolCard
-              poolName={'Uniswap LP Pool (UNI-V2)'}
-              poolAddress={addresses.yieldFarmLP}
-              tokenAddress={addresses.epnsLPToken}
-              getPoolStats={getPoolStats}
-              getPUSHPoolStats={getLPPoolStats}
-              getUserData={getUserDataLP}
-              pushPoolStats={lpPoolStats}
-              userData={userDataLP}
-            />
-            <PoolCard
-              poolName={'Staking Pool (PUSH)'}
-              poolAddress={addresses.yieldFarmPUSH}
-              tokenAddress={addresses.epnsToken}
-              getPoolStats={getPoolStats}
-              getPUSHPoolStats={getPUSHPoolStats}
-              getUserData={getUserDataPUSH}
-              pushPoolStats={pushPoolStats}
-              userData={userDataPUSH}
-            />
+            {
+              lpPoolStats && userDataLP ? (
+                <PoolCard
+                  poolName={'Uniswap LP Pool (UNI-V2)'}
+                  poolAddress={addresses.yieldFarmLP}
+                  tokenAddress={addresses.epnsLPToken}
+                  getPoolStats={getPoolStats}
+                  getPUSHPoolStats={getLPPoolStats}
+                  getUserData={getUserDataLP}
+                  pushPoolStats={lpPoolStats}
+                  userData={userDataLP}
+                />
+              ) : null
+            }
+            {
+              pushPoolStats && userDataPUSH ? (
+                <PoolCard
+                  poolName={'Staking Pool (PUSH)'}
+                  poolAddress={addresses.yieldFarmPUSH}
+                  tokenAddress={addresses.epnsToken}
+                  getPoolStats={getPoolStats}
+                  getPUSHPoolStats={getPUSHPoolStats}
+                  getUserData={getUserDataPUSH}
+                  pushPoolStats={pushPoolStats}
+                  userData={userDataPUSH}
+                />
+              ) : null
+            }
           </ItemH>
         </Content>
       ) : (

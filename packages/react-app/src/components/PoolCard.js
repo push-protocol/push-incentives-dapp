@@ -472,7 +472,7 @@ export default function PoolCard({
             <H2 textTransform="uppercase" spacing="0.1em">
               <Span bg={poolName == "Uniswap LP Pool (UNI-V2)" ? "#35c5f3" : "#e20880"} size="0.8em" color="#fff" weight="600" padding="0px 8px">{poolName}</Span>
             </H2>
-            {userData.userPUSHStakeBalance != 0 &&
+            {userData.userPUSHStakeBalance != null && userData.userPUSHStakeBalance != 0 &&
               <H3>Your Stake Balance - <b>{formatTokens(userData.epochStakeNext)}</b></H3>
             }
           </Item>
@@ -506,7 +506,7 @@ export default function PoolCard({
                   <PoolBoxTitle>Total Accumulated Reward <InfoTooltip title={"The total rewards you have accumulated since staking into the pool. This includes all the rewards including the ones already harvested."} /></PoolBoxTitle>
                   <PoolBoxMsg>{userData.totalAccumulatedReward} PUSH</PoolBoxMsg>
               </Item>
-              
+
               <Item bg="#000" margin="5px 10px" radius="12px">
                 <PoolBoxTitle>User Expected Reward <InfoTooltip title={"This is only an estimation for the user's reward that they might get after the epoch. This might change depending upon deposits from other users."} /></PoolBoxTitle>
                 <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
@@ -520,7 +520,7 @@ export default function PoolCard({
               </ItemH>
           </Item>
 
-          
+
 
           {showDepositItem &&
             <Item bg="#ddd" radius="12px" margin="20px 0px -10px 0px" padding="10px 20px" align="stretch" self="stretch">

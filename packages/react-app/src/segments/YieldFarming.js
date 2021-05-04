@@ -198,25 +198,33 @@ function YieldFarming() {
     <Section>
       {poolStats ? (
         <Content>
-          <ItemH margin="0px 0px 15px 0px">
-            <StatsCard>
-              <Heading>Total Value Locked</Heading>
+          <ItemH margin="0px 0px 15px 0px" align="stretch">
+            <StatsCard
+              bg="#e20880"
+            >
+              <StatsHeading>Total Value Locked</StatsHeading>
               <SubHeading>{`$ ${poolStats.totalValueLocked.toFixed(2)}`}</SubHeading>
             </StatsCard>
-            <StatsCard>
-              <Heading>PUSH Rewards</Heading>
+            <StatsCard
+              bg="#e20880"
+            >
+              <Span>PUSH Rewards</Span>
               <SubHeading>{formatTokens(poolStats.pushRewardsDistributed)}</SubHeading>
               <p>out of {formatTokens(poolStats.totalDistributedAmount)}</p>
             </StatsCard>
-            <StatsCard>
-              <Heading>PUSH Price</Heading>
+            <StatsCard
+              bg="#e20880"
+            >
+              <StatsHeading>PUSH Price</StatsHeading>
               <SubHeading>{`$ ${poolStats.pushPrice.toFixed(2)}`}</SubHeading>
               <a target="_blank" href="https://app.uniswap.org/#/swap?inputCurrency=0xf418588522d5dd018b425e472991e52ebbeeeeee">
                 <p>Uniswap market</p>
               </a>
             </StatsCard>
-            <StatsCard>
-              <Heading>Time Left</Heading>
+            <StatsCard
+              bg="#e20880"
+            >
+              <StatsHeading>Time Left</StatsHeading>
               <SubHeading>{formattedDuration}</SubHeading>
               <p>until next epoch</p>
             </StatsCard>
@@ -260,27 +268,16 @@ const Container = styled.div`
   display: block;
   flex-direction: column;
   min-height: calc(100vh - 100px);
-`;
-
-const StatsContainer = styled.div`
-  flex: 0;
-  display: flex;
-  flex-direction: row;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-`;
+`
 
 const StatsCard = styled(Item)`
-  padding: 18px;
-  min-width: 200px;
-  background: #fff;
+  min-width: 180px;
 
   box-shadow: 0px 15px 20px -5px rgba(0, 0, 0, 0.1);
-  border-radius: 15px;
+  border-radius: 12px;
   border: 1px solid rgb(225, 225, 225);
 
-  margin: 10px;
+  margin: 0px 15px;
 
   &:hover {
     opacity: 0.9;
@@ -294,6 +291,10 @@ const CenterHeading = styled.h2`
 const PoolContainer = styled.div`
   display: flex;
 `;
+
+const StatsHeading = styled(Span)`
+  
+`
 
 const Heading = styled.h5`
   font-weight: 600;

@@ -111,6 +111,7 @@ function YieldFarming() {
       abis.epnsToken,
       library
     );
+
     let staking = new ethers.Contract(addresses.staking, abis.staking, library);
     let yieldFarmingPUSH = new ethers.Contract(
       addresses.yieldFarmPUSH,
@@ -194,77 +195,100 @@ function YieldFarming() {
     }
   }, [getPoolStats, getPUSHPoolStats, getLPPoolStats, getUserDataPUSH, getUserDataLP]);
 
+  function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
   return (
     <Section>
       {poolStats ? (
-        <Content>
-          <ItemH margin="0px 0px 15px 0px" align="stretch">
-            <StatsCard
-              bg="#e20880"
-            >
-              <StatsHeading>Total Value Locked</StatsHeading>
-              <SubHeading>{`$ ${poolStats.totalValueLocked.toFixed(2)}`}</SubHeading>
-            </StatsCard>
-            <StatsCard
-              bg="#e20880"
-            >
-              <Span>PUSH Rewards</Span>
-              <SubHeading>{formatTokens(poolStats.pushRewardsDistributed)}</SubHeading>
-              <p>out of {formatTokens(poolStats.totalDistributedAmount)}</p>
-            </StatsCard>
-            <StatsCard
-              bg="#e20880"
-            >
-              <StatsHeading>PUSH Price</StatsHeading>
-              <SubHeading>{`$ ${poolStats.pushPrice.toFixed(2)}`}</SubHeading>
-              <a target="_blank" href="https://app.uniswap.org/#/swap?inputCurrency=0xf418588522d5dd018b425e472991e52ebbeeeeee">
-                <p>Uniswap market</p>
-              </a>
-            </StatsCard>
-            <StatsCard
-              bg="#e20880"
-            >
-              <StatsHeading>Time Left</StatsHeading>
-              <SubHeading>{formattedDuration}</SubHeading>
-              <p>until next epoch</p>
-            </StatsCard>
-          </ItemH>
+        <>
+          <Content theme="#f3f3f3">
+            <ItemH margin="0px 15px 0px 15px" align="stretch">
+              <StatsCard
+                bg="#fff"
+              >
+                <StatsHeading bg="#e20880">Total Value Locked</StatsHeading>
+                <StatsContent>
+                  <StatsInnerTitle>{`$ ${numberWithCommas(poolStats.totalValueLocked.toFixed(2))}`}</StatsInnerTitle>
+                </StatsContent>
+                <StatsPreview color="#e20880">TVL</StatsPreview>
+              </StatsCard>
 
-          <ItemH margin="15px 0px 0px 0px">
-            {
-              lpPoolStats && userDataLP ? (
-                <PoolCard
-                  poolName={'Uniswap LP Pool (UNI-V2)'}
-                  poolAddress={addresses.yieldFarmLP}
-                  tokenAddress={addresses.epnsLPToken}
-                  getPoolStats={getPoolStats}
-                  getPUSHPoolStats={getLPPoolStats}
-                  getUserData={getUserDataLP}
-                  pushPoolStats={lpPoolStats}
-                  userData={userDataLP}
-                />
-              ) : null
-            }
-            {
-              pushPoolStats && userDataPUSH ? (
-                <PoolCard
-                  poolName={'Staking Pool (PUSH)'}
-                  poolAddress={addresses.yieldFarmPUSH}
-                  tokenAddress={addresses.epnsToken}
-                  getPoolStats={getPoolStats}
-                  getPUSHPoolStats={getPUSHPoolStats}
-                  getUserData={getUserDataPUSH}
-                  pushPoolStats={pushPoolStats}
-                  userData={userDataPUSH}
-                />
-              ) : null
-            }
-          </ItemH>
-        </Content>
+              <StatsCard
+                bg="#fff"
+              >
+                <StatsHeading bg="#35c5f3">PUSH Rewards Given</StatsHeading>
+                <StatsContent>
+                  <StatsInnerTitle>{numberWithCommas(formatTokens(poolStats.pushRewardsDistributed))}</StatsInnerTitle>
+                  <StatsInnerSub>out of {numberWithCommas(formatTokens(poolStats.totalDistributedAmount))}</StatsInnerSub>
+                </StatsContent>
+                <StatsPreview color="#35c5f3">Rewarded</StatsPreview>
+              </StatsCard>
+
+              <StatsCard
+                bg="#fff"
+              >
+                <StatsHeading bg="#674c9f">Time Left</StatsHeading>
+                <StatsContent>
+                  <StatsInnerTitle>{formattedDuration}</StatsInnerTitle>
+                  <StatsInnerSub>until next epoch</StatsInnerSub>
+                </StatsContent>
+                <StatsPreview color="#674c9f">time left</StatsPreview>
+              </StatsCard>
+
+              <StatsCard
+                bg="#fff"
+              >
+                <StatsHeading bg="#000">PUSH Price</StatsHeading>
+                <StatsContent>
+                  <StatsInnerTitle>{`$ ${poolStats.pushPrice.toFixed(2)}`}</StatsInnerTitle>
+                  <StatsInnerSub>
+                    <a target="_blank" href="https://app.uniswap.org/#/swap?inputCurrency=0xf418588522d5dd018b425e472991e52ebbeeeeee">Uniswap</a>
+                  </StatsInnerSub>
+                </StatsContent>
+                <StatsPreview color="#000">UNISWAP</StatsPreview>
+              </StatsCard>
+            </ItemH>
+          </Content>
+
+          <Content padding="25px 0px">
+            <ItemH margin="0px 10px 0px 10px" align="stretch">
+              {
+                lpPoolStats && userDataLP ? (
+                  <PoolCard
+                    poolName={'Uniswap LP Pool (UNI-V2)'}
+                    poolAddress={addresses.yieldFarmLP}
+                    tokenAddress={addresses.epnsLPToken}
+                    getPoolStats={getPoolStats}
+                    getPUSHPoolStats={getLPPoolStats}
+                    getUserData={getUserDataLP}
+                    pushPoolStats={lpPoolStats}
+                    userData={userDataLP}
+                  />
+                ) : null
+              }
+              {
+                pushPoolStats && userDataPUSH ? (
+                  <PoolCard
+                    poolName={'Staking Pool (PUSH)'}
+                    poolAddress={addresses.yieldFarmPUSH}
+                    tokenAddress={addresses.epnsToken}
+                    getPoolStats={getPoolStats}
+                    getPUSHPoolStats={getPUSHPoolStats}
+                    getUserData={getUserDataPUSH}
+                    pushPoolStats={pushPoolStats}
+                    userData={userDataPUSH}
+                  />
+                ) : null
+              }
+            </ItemH>
+          </Content>
+        </>
       ) : (
-        <Content self="center" align="center">
+        <Item padding="20px">
           <Loader type="Oval" color="#e20880" height={40} width={40} />
-        </Content>
+        </Item>
       )}
     </Section>
   );
@@ -279,9 +303,9 @@ const Container = styled.div`
 `
 
 const StatsCard = styled(Item)`
+  overflow: hidden;
   min-width: 180px;
 
-  box-shadow: 0px 15px 20px -5px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   border: 1px solid rgb(225, 225, 225);
 
@@ -300,19 +324,49 @@ const PoolContainer = styled.div`
   display: flex;
 `;
 
-const StatsHeading = styled(Span)`
-  
+const StatsHeading = styled(Item)`
+  flex: 0;
+  align-self: stretch;
+  color: #fff;
+  top: 0px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 15px;
+  text-align: center;
+  padding: 10px 5px;
+  right: 0;
+  left: 0;
 `
 
-const Heading = styled.h5`
+const StatsContent = styled(Item)`
+  padding: 20px 20px;
+`
+
+const StatsPreview = styled(Span)`
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
   font-weight: 600;
-  color: #e20880;
+  font-size: 12px;
+  opacity: 0.25;
+  letter-spacing:0.1em;
   text-transform: uppercase;
+  color: ${props => props.color || '#000'};
+  z-index: -1;
+`
+
+const StatsInnerTitle = styled.span`
+  font-weight: bold;
+  font-size: 22px;
+  letter-spacing: 0.1em;
 `;
 
-const SubHeading = styled.p`
-  font-weight: bold;
-  font-size: 20px;
+const StatsInnerSub = styled.span`
+  font-size: 12px;
+  color: #999;
+  font-weight: 600;
+  align-self: flex-end;
 `;
 
 // Export Default

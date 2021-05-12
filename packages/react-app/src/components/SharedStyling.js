@@ -34,6 +34,8 @@ export const Content = styled.div`
   display: flex;
   flex-direction: column;
   padding: ${props => props.padding || "40px 0px"};
+  background: ${props => props.theme || 'transparent'};
+  background: ${props => props.gradient || 'undefined'};
   position: relative;
 `
 
@@ -65,6 +67,7 @@ export const Item = styled.div`
   height: ${props => props.height || "auto" };
 
   border: ${props => props.border || "none"};
+
   border-radius: ${props => props.radius || "0px"};
   overflow: ${props => props.overflow || "initial"};
 

@@ -464,209 +464,218 @@ export default function PoolCard({
     }
   };
 
+  function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
   return (
-    <Section>
-      <Content>
-        <Item margin="20px" padding="0px 20px 0px 10px" border="1px solid #e1e1e1" radius="12px">
-          <Item align="flex-start">
-            <H2 textTransform="uppercase" spacing="0.1em">
-              <Span bg={poolName == "Uniswap LP Pool (UNI-V2)" ? "#35c5f3" : "#e20880"} size="0.8em" color="#fff" weight="600" padding="0px 8px">{poolName}</Span>
-            </H2>
-            {userData.userPUSHStakeBalance != null && userData.userPUSHStakeBalance != 0 &&
-              <H3>Your Stake Balance - <b>{formatTokens(userData.epochStakeNext)}</b></H3>
-            }
+    <>
+    <Item margin="20px" align="stretch" self="stretch" border="1px solid #e1e1e1" radius="12px">
+      <Item>
+        <Item>
+          <H2 textTransform="uppercase" spacing="0.1em">
+            <Span bg={poolName == "Uniswap LP Pool (UNI-V2)" ? "#35c5f3" : "#e20880"} size="0.8em" color="#fff" weight="600" padding="0px 8px">{poolName}</Span>
+          </H2>
+          <H3>Current Epoch - <b>{pushPoolStats.currentEpochPUSH.toString()}/{pushPoolStats.totalEpochPUSH}</b></H3>
+        </Item>
+
+        <ItemH margin="0px 15px 10px 15px" self="stretch" items="stretch" bg="#fff">
+          <PoolContainer bg="#fff" margin="5px 15px" radius="12px" border="1px solid #ddd" borderBottom="8px solid #e1e1e1">
+            <PoolBoxTitle margin="15px 10px" fg="#999" textTransform="uppercase" size="10px" spacing="0.2em">Current Reward</PoolBoxTitle>
+            <PoolBoxMsg
+              bg="transparent"
+              fg={poolName == "Uniswap LP Pool (UNI-V2)" ? "#35c5f3" : "#e20880"}
+              size="16px"
+              margin="-15px 5px 10px 5px"
+            >
+              {numberWithCommas(formatTokens(pushPoolStats.rewardForCurrentEpoch))} PUSH
+            </PoolBoxMsg>
+          </PoolContainer>
+
+          <PoolContainer bg="#fff" margin="5px 15px" radius="12px" border="1px solid #ddd" borderBottom="8px solid #e1e1e1">
+            <PoolBoxTitle margin="15px 10px" fg="#999" textTransform="uppercase" size="10px" spacing="0.2em">Total Staked</PoolBoxTitle>
+            <PoolBoxMsg
+              bg="transparent"
+              fg={poolName == "Uniswap LP Pool (UNI-V2)" ? "#35c5f3" : "#e20880"}
+              size="16px"
+              margin="-15px 5px 10px 5px"
+            >
+              {numberWithCommas(formatTokens(pushPoolStats.poolBalance))} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}
+            </PoolBoxMsg>
+          </PoolContainer>
+        </ItemH>
+      </Item>
+
+      <Item padding="10px 20px 0px 20px" align="stretch" self="stretch">
+        <ItemH margin="0px">
+          <Item bg="#000" margin="5px 10px" radius="12px">
+            <PoolBoxTitle>User Deposit</PoolBoxTitle>
+            <PoolBoxMsg>{formatTokens(userData.epochStakeNext)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
           </Item>
 
-          <Item align="stretch" self="stretch">
-            <ItemH margin="0px">
-              <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>Ongoing Epoch</PoolBoxTitle>
-                <PoolBoxMsg>{pushPoolStats.currentEpochPUSH.toString()}/{pushPoolStats.totalEpochPUSH}</PoolBoxMsg>
-              </Item>
+          <Item bg="#000" margin="5px 10px" radius="12px">
+              <PoolBoxTitle>Rewards Claimed <InfoTooltip title={"The total rewards you have already claimed from the pool. This includes all the rewards including the ones already harvested."} /></PoolBoxTitle>
+              <PoolBoxMsg>{(userData.totalAccumulatedReward - userData.totalAvailableReward).toFixed(2)} PUSH</PoolBoxMsg>
+          </Item>
+        </ItemH>
 
-              <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>Current EPOCH Reward</PoolBoxTitle>
-                <PoolBoxMsg>{formatTokens(pushPoolStats.rewardForCurrentEpoch)} PUSH</PoolBoxMsg>
-              </Item>
-            </ItemH>
-
-            <ItemH margin="0px">
-              <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>Total Tokens Staked</PoolBoxTitle>
-                <PoolBoxMsg>{formatTokens(pushPoolStats.poolBalance)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
-              </Item>
-              <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>User Pool Balance</PoolBoxTitle>
-                <PoolBoxMsg>{formatTokens(userData.epochStakeNext)} {poolName == "Uniswap LP Pool (UNI-V2)" ? "UNI-V2" : "PUSH"}</PoolBoxMsg>
-              </Item>
-            </ItemH>
-
-            <ItemH margin="0px">
-              <Item bg="#000" margin="5px 10px" radius="12px">
-                  <PoolBoxTitle>Total Accumulated Reward <InfoTooltip title={"The total rewards you have accumulated since staking into the pool. This includes all the rewards including the ones already harvested."} /></PoolBoxTitle>
-                  <PoolBoxMsg>{userData.totalAccumulatedReward} PUSH</PoolBoxMsg>
-              </Item>
-
-              <Item bg="#000" margin="5px 10px" radius="12px">
-                <PoolBoxTitle>User Expected Reward <InfoTooltip title={"This is only an estimation for the user's reward that they might get after the epoch. This might change depending upon deposits from other users."} /></PoolBoxTitle>
-                <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
-              </Item>
-            </ItemH>
-              <ItemH margin="0px">
-                <Item bg="#000" margin="5px 10px" radius="12px">
-                  <PoolBoxTitle>Reward Available for Harvest <InfoTooltip title={"The rewards that are currently available for harvesting and can be immediately transferred to your address."} /></PoolBoxTitle>
-                  <PoolBoxMsg>{userData.totalAvailableReward} PUSH</PoolBoxMsg>
-                </Item>
-              </ItemH>
+        <ItemH margin="0px">
+          <Item bg="#000" margin="5px 10px" radius="12px">
+            <PoolBoxTitle>Current Epoch Reward <InfoTooltip title={"This is only an estimation for the user's reward that they might get after the epoch. This might change depending upon deposits from other users."} /></PoolBoxTitle>
+            <PoolBoxMsg>{userData.potentialUserReward} PUSH</PoolBoxMsg>
           </Item>
 
+          <Item bg="#000" margin="5px 10px" radius="12px">
+            <PoolBoxTitle>Available for Harvest <InfoTooltip title={"The rewards that are currently available for harvesting and can be immediately transferred to your address."} /></PoolBoxTitle>
+            <PoolBoxMsg>{userData.totalAvailableReward} PUSH</PoolBoxMsg>
+          </Item>
+        </ItemH>
+      </Item>
 
+      {showDepositItem &&
+        <Item bg="#ddd" radius="12px" margin="20px 0px -10px 0px" padding="10px 20px" align="stretch" self="stretch">
 
-          {showDepositItem &&
-            <Item bg="#ddd" radius="12px" margin="20px 0px -10px 0px" padding="10px 20px" align="stretch" self="stretch">
-
-              {!showDepSlip &&
-                <>
-                  <Item>
-                    <MaxButton
-                      bg="#000"
-                      onClick={fillMax}
-                      position="absolute"
-                    >
-                      Max
-                    </MaxButton>
-
-                    <Input
-                      placeholder="Number of Tokens"
-                      radius="4px"
-                      padding="12px"
-                      self="stretch"
-                      bg="#fff"
-                      value={depositAmountToken}
-                      onChange={(e) => {
-                        setDepositAmountToken(parseInt(e.target.value.replace(/\D/,'')) || 0)
-                      }}
-                    />
-                  </Item>
-
-                  <ItemH>
-                    <ButtonAlt
-                      bg={depositApproved ? "#999" : "#e20880"}
-                      onClick={approveDeposit}
-                      disabled={depositApproved ? true : false}
-                    >
-                      {!depositApproved && !txInProgressApprDep &&
-                        <Span color="#fff" weight="400">Approve</Span>
-                      }
-                      {txInProgressApprDep && !depositApproved &&
-                        <Loader
-                          type="Oval"
-                          color="#fff"
-                          height={12}
-                          width={12}
-                        />
-                      }
-                      {!txInProgress && depositApproved &&
-                        <Span color="#fff" weight="600">Approved</Span>
-                      }
-                    </ButtonAlt>
-                    <ButtonAlt
-                      bg={!depositApproved ? "#999" : "#e20880"}
-                      disabled={!depositApproved ? true : false}
-                      onClick={depositAmountTokenFarmSingleTx}
-                    >
-                      {!txInProgressDep &&
-                        <Span color="#fff" weight="400">Deposit</Span>
-                      }
-                      {txInProgressDep &&
-                        <Loader
-                          type="Oval"
-                          color="#fff"
-                          height={12}
-                          width={12}
-                        />
-                      }
-                    </ButtonAlt>
-                  </ItemH>
-                </>
-              }
-
-              {showDepSlip &&
-                <Span
-                  bg="#e20880"
-                  color="#fff"
-                  align="center"
-                  textTransform="uppercase"
-                  spacing="0.1em"
-                  size="14px"
-                  weight="600"
-                  padding="10px"
-                  self="stretch"
+          {!showDepSlip &&
+            <>
+              <Item>
+                <MaxButton
+                  bg="#000"
+                  onClick={fillMax}
+                  position="absolute"
                 >
-                  Deposit Successful!
-                </Span>
-              }
+                  Max
+                </MaxButton>
 
-            </Item>
+                <Input
+                  placeholder="Number of Tokens"
+                  radius="4px"
+                  padding="12px"
+                  self="stretch"
+                  bg="#fff"
+                  value={depositAmountToken}
+                  onChange={(e) => {
+                    setDepositAmountToken(parseInt(e.target.value.replace(/\D/,'')) || 0)
+                  }}
+                />
+              </Item>
+
+              <ItemH>
+                <ButtonAlt
+                  bg={depositApproved ? "#999" : "#e20880"}
+                  onClick={approveDeposit}
+                  disabled={depositApproved ? true : false}
+                >
+                  {!depositApproved && !txInProgressApprDep &&
+                    <Span color="#fff" weight="400">Approve</Span>
+                  }
+                  {txInProgressApprDep && !depositApproved &&
+                    <Loader
+                      type="Oval"
+                      color="#fff"
+                      height={12}
+                      width={12}
+                    />
+                  }
+                  {!txInProgress && depositApproved &&
+                    <Span color="#fff" weight="600">Approved</Span>
+                  }
+                </ButtonAlt>
+                <ButtonAlt
+                  bg={!depositApproved ? "#999" : "#e20880"}
+                  disabled={!depositApproved ? true : false}
+                  onClick={depositAmountTokenFarmSingleTx}
+                >
+                  {!txInProgressDep &&
+                    <Span color="#fff" weight="400">Deposit</Span>
+                  }
+                  {txInProgressDep &&
+                    <Loader
+                      type="Oval"
+                      color="#fff"
+                      height={12}
+                      width={12}
+                    />
+                  }
+                </ButtonAlt>
+              </ItemH>
+            </>
           }
 
-          <ItemH margin="20px 0px 20px 0px" align="stretch" self="stretch">
-            {!showDepositItem &&
-              <ButtonAlt
-                bg="#e20880"
-                onClick={() => setShowDepositItem(!showDepositItem)}
-              >
-                {!txInProgressDep &&
-                  <Span color="#fff" weight="400">Deposit</Span>
-                }
-                {txInProgressApprDep &&
-                  <Loader
-                    type="Oval"
-                    color="#fff"
-                    height={12}
-                    width={12}
-                  />
-                }
-              </ButtonAlt>
-            }
-
-            <ButtonAlt
-              bg="#000"
-              onClick={() => withdrawAmountTokenFarmAutomatic()}
+          {showDepSlip &&
+            <Span
+              bg="#e20880"
+              color="#fff"
+              align="center"
+              textTransform="uppercase"
+              spacing="0.1em"
+              size="14px"
+              weight="600"
+              padding="10px"
+              self="stretch"
             >
-              {!txInProgressWithdraw &&
-                <Span color="#fff" weight="400">Withdraw</Span>
-              }
-              {txInProgressWithdraw &&
-                <Loader
-                  type="Oval"
-                  color="#fff"
-                  height={12}
-                  width={12}
-                />
-              }
-            </ButtonAlt>
+              Deposit Successful!
+            </Span>
+          }
 
-            <ButtonAlt
-              bg="#000"
-              onClick={() => massHarvestTokensAll()}
-            >
-              {!txInProgressMassHarvest &&
-                <Span color="#fff" weight="400">Harvest</Span>
-              }
-              {txInProgressMassHarvest &&
-                <Loader
-                  type="Oval"
-                  color="#fff"
-                  height={12}
-                  width={12}
-                />
-              }
-            </ButtonAlt>
-          </ItemH>
         </Item>
-      </Content>
-    </Section>
+      }
+
+      <ItemH padding="0px 20px 0px 20px" margin="20px 0px 20px 0px" align="center" self="stretch">
+        {!showDepositItem &&
+          <ButtonAlt
+            bg="#e20880"
+            onClick={() => setShowDepositItem(!showDepositItem)}
+          >
+            {!txInProgressDep &&
+              <Span color="#fff" weight="400">Deposit</Span>
+            }
+            {txInProgressApprDep &&
+              <Loader
+                type="Oval"
+                color="#fff"
+                height={12}
+                width={12}
+              />
+            }
+          </ButtonAlt>
+        }
+
+        <ButtonAlt
+          bg="#000"
+          onClick={() => withdrawAmountTokenFarmAutomatic()}
+        >
+          {!txInProgressWithdraw &&
+            <Span color="#fff" weight="400">Withdraw</Span>
+          }
+          {txInProgressWithdraw &&
+            <Loader
+              type="Oval"
+              color="#fff"
+              height={12}
+              width={12}
+            />
+          }
+        </ButtonAlt>
+
+        <ButtonAlt
+          bg="#000"
+          onClick={() => massHarvestTokensAll()}
+        >
+          {!txInProgressMassHarvest &&
+            <Span color="#fff" weight="400">Harvest</Span>
+          }
+          {txInProgressMassHarvest &&
+            <Loader
+              type="Oval"
+              color="#fff"
+              height={12}
+              width={12}
+            />
+          }
+        </ButtonAlt>
+      </ItemH>
+    </Item>
+    </>
   );
 }
 
@@ -691,23 +700,28 @@ const MaxButton = styled(Button)`
   letter-spacing: 0.1em;
 `
 
+const PoolContainer = styled(Item)`
+  border-bottom: ${props => props.borderBottom || "none"};
+`
+
 const PoolBoxTitle = styled(Span)`
-  color: #fff;
+  background: ${props => props.bg || 'transparent'};
+  color: ${props => props.fg || '#fff'};
   font-weight: 600;
-  font-size: 12px;
-  margin: 10px 5px;
+  font-size: ${props => props.size || '12px'};
+  margin: ${props => props.margin || '10px 5px'};
   letter-spacing: 0.1em;
 `
 
 const PoolBoxMsg = styled(Span)`
-  background: #fff;
+  background: ${props => props.bg || '#fff'};
+  color: ${props => props.fg || '#000'};
   font-weight: 600;
-  font-size: 12px;
-  margin: 10px 5px;
+  font-size: ${props => props.size || '12px'};
+  margin: ${props => props.margin || '5px 5px 10px 5px'};
   letter-spacing: 0.1em;
   padding: 4px 15px;
   border-radius: 10px;
-  color: #000;
 `
 
 const Container = styled.div`

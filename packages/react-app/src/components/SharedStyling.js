@@ -47,7 +47,7 @@ export const Item = styled.div`
   display: flex;
   flex-direction: column;
   flex-wrap: ${props => props.wrap || 'wrap'};
-  position: relative;
+  position: ${props => props.position || 'relative'};
   justify-content: center;
   background: ${props => props.bg || 'transparent'};
   flex: ${props => props.flex || '1'};
@@ -320,8 +320,10 @@ export const Button = styled.button`
   background: ${props => props.bg || "tranparent"};
   margin: ${props => props.margin || "0"};
   padding: ${props => props.padding || "10px 15px"};
+  letter-spacing: ${props => props.spacing || "initial"};
   border: ${props => props.border || "none"};
   border-radius: ${props => props.radius || "0px"};
+  text-transform: ${props => props.textTransform || "initial"};
 
   position: relative;
   text-decoration: none;

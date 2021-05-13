@@ -2,7 +2,7 @@ import React from "react";
 import ReactGA from 'react-ga';
 
 import styled from 'styled-components';
-import {Section, Content, Item, ItemH, Span, H2, H3, B} from 'components/SharedStyling';
+import {Section, Content, Item, ItemH, Span, H2, H3, B, A} from 'components/SharedStyling';
 
 import Loader from 'react-loader-spinner'
 
@@ -183,12 +183,15 @@ function App() {
                       >
                         {title}
                       </Span>
-
                     </ProviderButton>
                   )
                 })}
               </ItemH>
             </Item>
+
+            <Span margin="10px" size="14px">
+              By unlocking your wallet, <B>You agree</B> to our <A href="https://epns.io/tos" target="_blank">Terms of Service</A> and our <A href="https://epns.io/privacy" target="_blank">Privacy Policy</A>.
+            </Span>
           </Item>
         }
         </ParentContainer>

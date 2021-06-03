@@ -34,14 +34,6 @@ import Header from 'segments/Header';
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const connectorsByName: { [name: string]: AbstractConnector } = {
-  Injected: injected,
-  WalletConnect: walletconnect,
-  Portis: portis,
-  Trezor: trezor,
-  Ledger: ledger
-}
-
 const web3Connectors = {
   Injected: {obj: injected, logo: './svg/login/metamask.svg', title: 'MetaMask'},
   WalletConnect: {obj: walletconnect, logo: './svg/login/walletconnect.svg', title: 'Wallet Connect'},

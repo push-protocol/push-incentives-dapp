@@ -40,14 +40,17 @@ export const walletconnect = new WalletConnectConnector({
 // })
 //
 export const ledger = new LedgerConnector({ chainId: 1, url: RPC_URLS[1], pollingInterval: POLLING_INTERVAL })
-console.log(RPC_URLS[1])
+
+console.log(RPC_URLS[1]);
+
 export const trezor = new TrezorConnector({
   chainId: 1,
   url: RPC_URLS[1],
   pollingInterval: POLLING_INTERVAL,
-  manifestEmail: 'dummy@abc.xyz',
-  manifestAppUrl: 'http://localhost:1234'
+  manifestEmail: 'support@epns.io',
+  manifestAppUrl: 'https://incentives.epns.io'
 })
+
 //
 // export const frame = new FrameConnector({ supportedChainIds: [1] })
 //

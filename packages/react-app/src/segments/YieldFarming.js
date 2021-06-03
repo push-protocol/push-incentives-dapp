@@ -36,6 +36,8 @@ function YieldFarming() {
 
   const [showAnswers, setShowAnswers] = React.useState([]);
 
+  const [loadingUserData, setLoadingUserData] = React.useState(false);
+
   const toggleShowAnswer = (id) => {
     let newShowAnswers = [...showAnswers];
     newShowAnswers[id] = !newShowAnswers[id];
@@ -55,8 +57,8 @@ function YieldFarming() {
     setPushPoolStats({ ...pushPoolStats });
   }, [epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP, uniswapV2Router02]);
 
-  const getLPPoolStats = React.useCallback(async () => {
-    const lpPoolStats = await YieldFarmingDataStore.instance.getLPPoolStats();
+  const getLPPoolStats = React.useCallback(async (poolStats) => {
+    const lpPoolStats = await YieldFarmingDataStore.instance.getLPPoolStats(poolStats);
 
     setLpPoolStats({ ...lpPoolStats });
   }, [epnsToken, staking, yieldFarmingPUSH, yieldFarmingLP, uniswapV2Router02]);
@@ -186,14 +188,27 @@ function YieldFarming() {
         yieldFarmingLP,
         uniswapV2Router02
       );
+
       getPoolStats();
-      getPUSHPoolStats();
-      getLPPoolStats();
-      getUserDataPUSH();
-      getUserDataLP();
+
       // setpoolStats(YieldFarmingDataStore.instance.state);
     }
-  }, [getPoolStats, getPUSHPoolStats, getLPPoolStats, getUserDataPUSH, getUserDataLP]);
+  }, [getPoolStats]);
+
+  React.useEffect(() => {
+    if (poolStats) {
+      syncData(poolStats);
+    }
+
+  }, [poolStats]);
+
+  const syncData = async (poolStats) => {
+    getPUSHPoolStats();
+    getLPPoolStats(poolStats);
+
+    getUserDataPUSH();
+    getUserDataLP();
+  }
 
   function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -252,38 +267,43 @@ function YieldFarming() {
             </ItemH>
           </Content>
 
-          <Content padding="25px 0px">
-            <ItemH margin="0px 10px 0px 10px" align="stretch">
-              {
-                lpPoolStats && userDataLP ? (
-                  <PoolCard
-                    poolName={'Uniswap LP Pool (UNI-V2)'}
-                    poolAddress={addresses.yieldFarmLP}
-                    tokenAddress={addresses.epnsLPToken}
-                    getPoolStats={getPoolStats}
-                    getPUSHPoolStats={getLPPoolStats}
-                    getUserData={getUserDataLP}
-                    pushPoolStats={lpPoolStats}
-                    userData={userDataLP}
-                  />
-                ) : null
-              }
-              {
-                pushPoolStats && userDataPUSH ? (
-                  <PoolCard
-                    poolName={'Staking Pool (PUSH)'}
-                    poolAddress={addresses.yieldFarmPUSH}
-                    tokenAddress={addresses.epnsToken}
-                    getPoolStats={getPoolStats}
-                    getPUSHPoolStats={getPUSHPoolStats}
-                    getUserData={getUserDataPUSH}
-                    pushPoolStats={pushPoolStats}
-                    userData={userDataPUSH}
-                  />
-                ) : null
-              }
-            </ItemH>
-          </Content>
+          {!(lpPoolStats && userDataLP) && !(pushPoolStats && userDataPUSH)
+            ? <Item padding="20px">
+                <Loader type="Oval" color="#35c5f3" height={40} width={40} />
+              </Item>
+            : <Content padding="25px 0px">
+              <ItemH margin="0px 10px 0px 10px" align="stretch">
+                {
+                  lpPoolStats && userDataLP ? (
+                    <PoolCard
+                      poolName={'Uniswap LP Pool (UNI-V2)'}
+                      poolAddress={addresses.yieldFarmLP}
+                      tokenAddress={addresses.epnsLPToken}
+                      getPoolStats={getPoolStats}
+                      getPUSHPoolStats={getLPPoolStats}
+                      getUserData={getUserDataLP}
+                      pushPoolStats={lpPoolStats}
+                      userData={userDataLP}
+                    />
+                  ) : null
+                }
+                {
+                  pushPoolStats && userDataPUSH ? (
+                    <PoolCard
+                      poolName={'Staking Pool (PUSH)'}
+                      poolAddress={addresses.yieldFarmPUSH}
+                      tokenAddress={addresses.epnsToken}
+                      getPoolStats={getPoolStats}
+                      getPUSHPoolStats={getPUSHPoolStats}
+                      getUserData={getUserDataPUSH}
+                      pushPoolStats={pushPoolStats}
+                      userData={userDataPUSH}
+                    />
+                  ) : null
+                }
+              </ItemH>
+            </Content>
+          }
         </>
       ) : (
         <Item padding="20px">

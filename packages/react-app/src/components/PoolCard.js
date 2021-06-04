@@ -476,10 +476,17 @@ export default function PoolCard({
           <H2 textTransform="uppercase" spacing="0.1em">
             <Span bg={poolName == "Uniswap LP Pool (UNI-V2)" ? "#35c5f3" : "#e20880"} size="0.8em" color="#fff" weight="600" padding="0px 8px">{poolName}</Span>
           </H2>
-          <H3>Current Epoch - <b>{pushPoolStats.currentEpochPUSH.toString()}/{pushPoolStats.totalEpochPUSH}</b></H3>
+          <Item
+            align="flex-end"
+            self="stretch"
+          >
+            <H3>
+              <Span>Current APR </Span><Span bg={poolName == "Uniswap LP Pool (UNI-V2)" ? "#35c5f3" : "#e20880"} padding="2px 8px" weight="600" color="#fff"><b>{pushPoolStats.stakingAPR}%</b></Span>
+            </H3>
+          </Item>
         </Item>
 
-        <ItemH margin="0px 15px 10px 15px" self="stretch" items="stretch" bg="#fff">
+        <ItemH margin="10px 0px 0px 0px" self="stretch" items="stretch" bg="#f1f1f1">
           <PoolContainer bg="#fff" margin="5px 15px" radius="12px" border="1px solid #ddd" borderBottom="8px solid #e1e1e1">
             <PoolBoxTitle margin="15px 10px" fg="#999" textTransform="uppercase" size="10px" spacing="0.2em">Current Reward</PoolBoxTitle>
             <PoolBoxMsg
@@ -504,6 +511,16 @@ export default function PoolCard({
             </PoolBoxMsg>
           </PoolContainer>
         </ItemH>
+
+        <Item
+          self="stretch"
+          align="flex-end"
+          margin="0px 0px 10px 0px"
+        >
+          <EpochDisplayer>
+            <Span padding="0px 5px 0px 0px">Current Epoch</Span><B>{pushPoolStats.currentEpochPUSH.toString()}/{pushPoolStats.totalEpochPUSH}</B>
+          </EpochDisplayer>
+        </Item>
       </Item>
 
       <Item padding="10px 20px 0px 20px" align="stretch" self="stretch">
@@ -749,6 +766,30 @@ const Heading = styled.h5`
   color: #e20880;
   text-transform: uppercase;
 `;
+
+const EpochDisplayer = styled(Span)`
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 12px;
+  background: #f1f1f1;
+  padding: 0px 10px 0px 10px;
+  position: relative;
+  height: 23px;
+  align-items: center;
+  text-align: center;
+  display: flex;
+
+  &:after {
+    width: 0;
+    height: 0;
+    border-top: 0px solid transparent;
+    border-bottom: 25px solid transparent;
+    border-right: 10px solid #f1f1f1;
+    left: -10px;
+    content: '';
+    position: absolute;
+  }
+`
 
 const ButtonAlt = styled(Button)`
   border: 0;

@@ -10,6 +10,8 @@ const ONE_PUSH = ethers.BigNumber.from(1).mul(
 const GENESIS_EPOCH_AMOUNT_PUSH = 30000
 const GENESIS_EPOCH_AMOUNT_LP = 35000
 
+const bn = function(number, defaultValue = null) { if (number == null) { if (defaultValue == null) { return null } number = defaultValue } return ethers.BigNumber.from(number) }
+
 const tokenToBn = (token) => {
   return token.mul(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18)))
 }
@@ -17,6 +19,8 @@ const tokenToBn = (token) => {
 const tokenBNtoNumber = (tokenBn) => {
   return tokenBn.div(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(10))).toNumber() / 100000000
 }
+
+const bnToInt = function (bnAmount) { return parseInt(bnAmount.div(bn(10).pow(18))) }
 
 export default class YieldFarmingDataStore {
   static instance =
@@ -68,6 +72,7 @@ export default class YieldFarmingDataStore {
       const uniTotalSupply = tokenBNtoNumber(await this.state.epnsToken.attach(addresses.epnsLPToken).totalSupply()) // Using epnsToken instance for Uni-V2 instance
 
       const uniLpPrice = ((pushAmountReserve * pushPrice) + (wethAmountReserve * ethPrice)) / uniTotalSupply
+      const lpToPushRatio = uniLpPrice / pushPrice
 
       const pushNextPoolSize = tokenBNtoNumber(await yieldFarmingPUSH.getPoolSize(currentEpochPUSH.add(1)));
       const lpNextPoolSize = tokenBNtoNumber(await yieldFarmingLP.getPoolSize(currentEpochPUSH.add(1)));
@@ -96,7 +101,8 @@ export default class YieldFarmingDataStore {
         epochEndTimestamp,
         totalDistributedAmount,
         pushRewardsDistributed,
-        currentEpoch: currentEpochPUSH
+        currentEpoch: currentEpochPUSH,
+        lpToPushRatio
       });
     });
   };
@@ -126,16 +132,24 @@ export default class YieldFarmingDataStore {
         currentEpochPUSH.add(1)
       );
 
+      const stakingAPR = this.calcStakingAPR(
+        genesisEpochAmount,
+        currentEpochPUSH,
+        deprecationPerEpoch,
+        poolBalance,
+      );
+
       resolve({
         currentEpochPUSH,
         totalEpochPUSH,
         rewardForCurrentEpoch,
         poolBalance,
+        stakingAPR
       });
     });
   };
 
-  getLPPoolStats = async () => {
+  getLPPoolStats = async (poolStats) => {
     return new Promise(async (resolve, reject) => {
       const epnsToken = this.state.epnsToken;
       const staking = this.state.staking;
@@ -158,11 +172,20 @@ export default class YieldFarmingDataStore {
         currentEpochPUSH.add(1)
       );
 
+      const stakingAPR = await this.calcLPPoolAPR(
+        genesisEpochAmount,
+        currentEpochPUSH,
+        deprecationPerEpoch,
+        poolBalance,
+        poolStats
+      );
+
       resolve({
         currentEpochPUSH,
         totalEpochPUSH,
         rewardForCurrentEpoch,
         poolBalance,
+        stakingAPR
       });
     });
   };
@@ -250,6 +273,60 @@ export default class YieldFarmingDataStore {
   ) => {
     return genesisEpochAmount.sub(epochId.mul(deprecationPerEpoch));
   };
+
+  calcAnnualEpochReward = (
+    genesisEpochAmount,
+    epochId,
+    deprecationPerEpoch
+  ) => {
+    // get current epoch reward
+    const currentEpochReward = this.calcTotalAmountPerEpoch(genesisEpochAmount, epochId, deprecationPerEpoch)
+
+    const weeks = 52
+    const depreciate = deprecationPerEpoch.mul(weeks * (weeks - 1)).div(2)
+
+    const annualEpochReward = (currentEpochReward.mul(weeks)).sub(depreciate)
+
+    return annualEpochReward
+  }
+
+  calcStakingAPR = (
+    genesisEpochAmount,
+    epochId,
+    deprecationPerEpoch,
+    totalStaked
+  ) => {
+    // get annual rewards
+    const annualRewards = this.calcAnnualEpochReward(genesisEpochAmount, epochId, deprecationPerEpoch)
+
+    const apr = annualRewards.mul(1000000).div(totalStaked)
+    const aprFormatted = (parseInt(apr.toString())/10000).toFixed(2)
+
+    return aprFormatted
+  }
+
+  calcLPPoolAPR = async (
+    genesisEpochAmount,
+    epochId,
+    deprecationPerEpoch,
+    totalStaked,
+    poolStats
+  ) => {
+    // get annual rewards
+    const annualRewards = this.calcAnnualEpochReward(genesisEpochAmount, epochId, deprecationPerEpoch)
+
+    const apr = annualRewards.mul(1000000).div(totalStaked)
+    const aprFormatted = (parseInt(apr.toString())/(10000 * poolStats.lpToPushRatio)).toFixed(2)
+
+    // console.log(annualRewards.toString(), genesisEpochAmount.toString())
+    // if (poolStats) {
+    //   console.log(poolStats.totalValueLocked)
+    //   console.log(poolStats["lpToPushRatio"])
+    // }
+
+    return aprFormatted
+
+  }
 
   calculateUserEpochReward = async (
     epochId,

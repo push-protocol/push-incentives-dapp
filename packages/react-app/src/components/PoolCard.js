@@ -199,7 +199,7 @@ export default function PoolCard({
           });
 
           getPoolStats();
-          getPUSHPoolStats();
+          getPUSHPoolStats(pushPoolStats);
           getUserData();
 
           setTxInProgressDep(false);
@@ -291,7 +291,7 @@ export default function PoolCard({
         setTxInProgressWithdraw(false);
 
         getPoolStats();
-        getPUSHPoolStats();
+        getPUSHPoolStats(pushPoolStats);
         getUserData();
       } catch (e) {
         toast.update(txToast, {

@@ -15,6 +15,7 @@ import EPNSCoreHelper from 'helpers/EPNSCoreHelper';
 import Airdrop from "segments/Airdrop";
 import YieldFarming from 'segments/YieldFarming';
 import NFT from 'segments/NFT';
+import Delegate from 'segments/Delegate';
 
 import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
 import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
@@ -139,13 +140,22 @@ function Home({ setBadgeCount, bellPressed }) {
           <ControlText active={controlAt == 2 ? 1 : 0}>Rockstars of EPNS</ControlText>
         </ControlButton>
 
-        <ControlButton index={3} active={controlAt == 3 ? 1 : 0} border="#e20880"
+        <ControlButton index={3} active={controlAt == 3 ? 1 : 0} border="#674c9f"
+          onClick={() => {
+            userClickedAt(3)
+          }}
+        >
+          <ControlImage src="./svg/rockstars.svg" active={controlAt == 3 ? 1 : 0} />
+          <ControlText active={controlAt == 3 ? 1 : 0}>Delegate</ControlText>
+        </ControlButton>
+
+        <ControlButton index={4} active={controlAt == 4 ? 1 : 0} border="#e20880"
           onClick={() => {
             window.open("https://app.epns.io", "_blank")
           }}
         >
-          <ControlImage src="./svg/epnslogo.svg" active={controlAt == 3 ? 1 : 0} />
-          <ControlText active={controlAt == 3 ? 1 : 0}>#PushNotifs  </ControlText>
+          <ControlImage src="./svg/epnslogo.svg" active={controlAt == 4 ? 1 : 0} />
+          <ControlText active={controlAt == 4 ? 1 : 0}>#PushNotifs  </ControlText>
         </ControlButton>
 
       </Controls>
@@ -164,6 +174,12 @@ function Home({ setBadgeCount, bellPressed }) {
             />
           }
           {controlAt == 3 &&
+            <Delegate 
+              epnsReadProvider={epnsReadProvider}
+              epnsWriteProvide={epnsWriteProvider}
+            />
+          }
+          {controlAt == 4 &&
             <></>
           }
         </Section>

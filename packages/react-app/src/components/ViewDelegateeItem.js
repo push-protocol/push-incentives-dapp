@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import Loader from 'react-loader-spinner';
 
 import Skeleton from '@yisheng90/react-loading';
+import { FiTwitter } from 'react-icons/fi';
 import { IoIosGift } from 'react-icons/io';
 import { IoMdPeople } from 'react-icons/io';
 import { GiTwoCoins } from 'react-icons/gi';
@@ -36,106 +37,7 @@ function ViewDelegateeItem({ delegateeObject, epnsReadProvider, epnsWriteProvide
     setLoading(false);
   }, [account, delegateeObject]);
 
-  
-
-  // to subscribe
-  const subscribe = async () => {
-    // Check if public key is broadcasted or not
-    const userMeta = await UsersDataStore.instance.getUserMetaAsync();
-    if (!userMeta.publicKeyRegistered) {
-      const msg = "Sign to enable Secrets! (Encrypted Messages)\n Read more: https://epns.io/secret-messages";
-
-      // Sign a message and extract public key
-      library
-        .getSigner(account)
-        .signMessage(msg)
-        .then(async signature => {
-          const publicKey = recoverPublicKey(arrayify(hashMessage(msg)), signature);
-          const formattedPubKey = publicKey.slice(0, 2) + publicKey.slice(4);
-
-          subscribeAction(formattedPubKey);
-        })
-        .catch(error => {
-          // Show toast as well
-          toast.dark('Skipped for now... Encrypted messages will require this!', {
-            position: "bottom-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-
-          subscribeAction(false);
-        })
-    }
-    else {
-      subscribeAction(false);
-    }
-  }
-
-  const subscribeAction = async (withPublicKey) => {
-    setTxInProgress(true);
-
-    let sendWithTxPromise;
-
-    if (withPublicKey) {
-      sendWithTxPromise = epnsWriteProvide.subscribeWithPublicKey(delegateeObject.wallet, withPublicKey);
-    }
-    else {
-      sendWithTxPromise = epnsWriteProvide.subscribe(delegateeObject.wallet);
-    }
-
-    sendWithTxPromise
-      .then(async tx => {
-
-        let txToast = toast.dark(<LoaderToast msg="Waiting for Confirmation..." color="#35c5f3"/>, {
-          position: "bottom-right",
-          autoClose: false,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-
-        try {
-          await library.waitForTransaction(tx.hash);
-
-          toast.update(txToast, {
-            render: "Transaction Completed!",
-            type: toast.TYPE.SUCCESS,
-            autoClose: 5000
-          });
-
-          setTxInProgress(false);
-        }
-        catch(e) {
-          toast.update(txToast, {
-            render: "Transaction Failed! (" + e.name + ")",
-            type: toast.TYPE.ERROR,
-            autoClose: 5000
-          });
-
-          setTxInProgress(false);
-        }
-      })
-      .catch(err => {
-        toast.dark('Transaction Cancelled!', {
-          position: "bottom-right",
-          type: toast.TYPE.ERROR,
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-
-        setTxInProgress(false);
-      })
-  }
+ 
 
   // toast customize
   const LoaderToast = ({ msg, color }) => (
@@ -153,18 +55,6 @@ function ViewDelegateeItem({ delegateeObject, epnsReadProvider, epnsWriteProvide
   // render
   return (
     <>
-    <Anchor
-      href= {delegateeObject.url }
-      disabled={true}
-      target="_blank"
-      title= {delegateeObject.name}
-      bg="#fff"
-      hoverBG="transparent"
-      radius="12px"
-      align="stretch"
-      margin="10px"
-      padding="10px"
-    >
     <Item
     key={delegateeObject.wallet}
     >
@@ -197,6 +87,15 @@ function ViewDelegateeItem({ delegateeObject, epnsReadProvider, epnsWriteProvide
 
     {!!account && !!library &&
       <ItemH>
+        <Anchor
+                href={delegateeObject.url}
+                target="_blank"
+                title={"Visit Twitter profile of " + delegateeObject.name}
+                bg="transparent"
+                radius="4px"
+              >
+                <FiTwitter size={12} color="#e20880"/>
+              </Anchor>
         <Span size="0.85em" color="#233234" spacing="0.2em" weight="400" textAlign="center">{delegateeObject.name}</Span>
           <Span size="0.5em" color="#233234" spacing="0.2em" weight="600" textAlign="center">Wallet Address: {delegateeObject.wallet}</Span>
 
@@ -218,7 +117,6 @@ function ViewDelegateeItem({ delegateeObject, epnsReadProvider, epnsWriteProvide
     }
     </ChannelLogo>
   </Item>
-  </Anchor>
   </>
   );
 }

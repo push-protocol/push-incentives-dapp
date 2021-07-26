@@ -9,35 +9,103 @@ import Loader from 'react-loader-spinner';
 
 import Skeleton from '@yisheng90/react-loading';
 import { FiTwitter } from 'react-icons/fi';
-import { IoIosGift } from 'react-icons/io';
-import { IoMdPeople } from 'react-icons/io';
-import { GiTwoCoins } from 'react-icons/gi';
-import Blockies from "components/BlockiesIdenticon";
 
+import { addresses, abis } from "@project/contracts";
 import { useWeb3React } from '@web3-react/core';
 import { ethers } from "ethers";
 import { keccak256, arrayify, hashMessage, recoverPublicKey } from 'ethers/utils';
 
-import EPNSCoreHelper from 'helpers/EPNSCoreHelper';
-import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
-import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
-
-// Create Header
-function ViewDelegateeItem({ delegateeObject, epnsReadProvider, epnsWriteProvide }) {
+function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
   const { account, library } = useWeb3React();
 
-  const [ channelJson, setChannelJson ] = React.useState({});
-  const [ subscribed, setSubscribed ] = React.useState(false);
+  
   const [ loading, setLoading ] = React.useState(true);
-
   const [ txInProgress, setTxInProgress ] = React.useState(false);
+
+  const [ isBalance, setIsBalance ] = React.useState(false);
 
 
   React.useEffect(() => {
     setLoading(false);
+    if(pushBalance>1){
+      setIsBalance(true)
+    }
+
   }, [account, delegateeObject]);
 
- 
+  const delegateAction = async (delegateeAddress) => {
+
+    setTxInProgress(true);
+    if (!isBalance) {
+      toast.dark("Minimum 1 PUSH required to Delegate!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      setTxInProgress(false);
+      return;
+    }
+    let sendWithTxPromise;
+
+      sendWithTxPromise = epnsToken.delegate(delegateeAddress);
+
+    sendWithTxPromise
+      .then(async tx => {
+
+        let txToast = toast.dark(<LoaderToast msg="Waiting for Confirmation..." color="#35c5f3"/>, {
+          position: "bottom-right",
+          autoClose: false,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
+        try {
+          await library.waitForTransaction(tx.hash);
+
+          toast.update(txToast, {
+            render: "Transaction Completed!",
+            type: toast.TYPE.SUCCESS,
+            autoClose: 5000
+          });
+
+          setTxInProgress(false);
+        }
+        catch(e) {
+          toast.update(txToast, {
+            render: "Transaction Failed! (" + e.name + ")",
+            type: toast.TYPE.ERROR,
+            autoClose: 5000
+          });
+
+          setTxInProgress(false);
+        }
+      })
+      .catch(err => {
+        toast.dark('Transaction Cancelled!', {
+          position: "bottom-right",
+          type: toast.TYPE.ERROR,
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
+        setTxInProgress(false);
+      })
+  }
+
+  
 
   // toast customize
   const LoaderToast = ({ msg, color }) => (
@@ -105,9 +173,9 @@ function ViewDelegateeItem({ delegateeObject, epnsReadProvider, epnsWriteProvide
               <Skeleton />
             </SkeletonButton>
           }
-          {!!account && !!library && !loading &&
+          {!!account && !!library && !loading && 
             <UnsubscribeButton >
-              <ActionTitle onClick={() => {
+              <ActionTitle onClick={() => {delegateAction(delegateeObject.wallet)
               }}
                 >Delegate</ActionTitle>
             </UnsubscribeButton>
@@ -353,6 +421,9 @@ const UnsubscribeButton = styled(ChannelActionButton)`
   background: #674c9f;
 `
 
+const DisabledDelegate = styled(ChannelActionButton)`
+  background: #ccc;
+`
 const OwnerButton = styled(ChannelActionButton)`
   background: #35c5f3;
 `

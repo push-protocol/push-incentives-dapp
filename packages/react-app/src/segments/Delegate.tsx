@@ -26,6 +26,9 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const [user, setUser] = React.useState(null);
   const [owner, setOwner] = React.useState(null);
   const [delegateesObject, setDelegateesObject] = React.useState({});
+  const [epnsToken, setEpnsToken] = React.useState(null);
+  const [tokenBalance, setTokenBalance] = React.useState(null);
+  const [prettyTokenBalance, setPrettyTokenBalance] = React.useState(null);
   const [showAnswers, setShowAnswers] = React.useState([]);
 
   const toggleShowAnswer = (id) => {
@@ -36,9 +39,35 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   }
 
   React.useEffect(() => {
+    console.log(account)
+    if (!!(library && account)) {
+      let signer = library.getSigner(account);
+      const epnsTokenContract = new ethers.Contract(addresses.epnsToken, abis.epnsToken, signer);
+      setEpnsToken(epnsTokenContract);
+    }
+  }, [account,library]);
+
+  React.useEffect(() => {
+    if(epnsToken){
+      getPushBalance(epnsToken)
+    }
+  }, [epnsToken,account,library, prettyTokenBalance, tokenBalance]);
+
+  React.useEffect(() => {
     setDelegateesObject(delegateesJSON)
     setLoading(false);
   }, [account]);
+
+  const getPushBalance = async (epnsToken) => {
+    let bal = await epnsToken.balanceOf(account)
+    let decimals =  await epnsToken.decimals()
+    let tokenBalance = await Number(bal/Math.pow(10, decimals))
+    let newBal = parseFloat(tokenBalance.toLocaleString()).toFixed(3);
+    setTokenBalance(tokenBalance)
+    setPrettyTokenBalance(newBal)
+  }
+
+  
 
   // handle user action at control center
   const userClickedAt = (controlIndex) => {
@@ -51,6 +80,15 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       <H2 textTransform="uppercase" spacing="0.1em">
         <Span bg="#e20880" color="#fff" weight="600" padding="0px 8px">Delegate</Span><Span weight="200"> to PUSHers</Span>
       </H2> 
+      {prettyTokenBalance &&
+        <Item
+            align='left'
+            self="stretch"
+          >
+            <H2>
+              <Span bg="#35c5f3" padding="2px 8px" weight="600" color="#fff"><b>{prettyTokenBalance} PUSH</b></Span>
+            </H2>
+        </Item>}
       {loading &&
         <ContainerInfo>
           <Loader
@@ -69,8 +107,8 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                 <ViewDelegateeItem
                   key={delegateesObject[index].wallet}
                   delegateeObject={delegateesObject[index]}
-                  epnsReadProvider={epnsReadProvider}
-                  epnsWriteProvide={epnsWriteProvide}
+                  epnsToken={epnsToken}
+                  pushBalance={tokenBalance}
                 />
                 </>
               );

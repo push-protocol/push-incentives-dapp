@@ -23,15 +23,29 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
   const [ txInProgress, setTxInProgress ] = React.useState(false);
 
   const [ isBalance, setIsBalance ] = React.useState(false);
+  const [ delegateeVotingPower, setDelegateeVotingPower ] = React.useState(null);
 
 
   React.useEffect(() => {
     setLoading(false);
-    if(pushBalance>1){
+    if(delegateeObject) getVotingPower(delegateeObject.address)
+    if(pushBalance !== 0){
       setIsBalance(true)
     }
 
   }, [account, delegateeObject]);
+
+  const getVotingPower = async (delegateeAddress) => {
+    let decimals =  await epnsToken.decimals()
+    let votes = await epnsToken.getCurrentVotes(account)
+
+    //uncomment this when delegateeAddress are filled correctly in json file
+    // let votes = await epnsToken.getCurrentVotes(delegateeAddress)
+    
+    let votingPower = await Number(votes/Math.pow(10, decimals))
+    let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
+    setDelegateeVotingPower(prettyVotingPower)
+  }
 
   const delegateAction = async (delegateeAddress) => {
 
@@ -166,7 +180,9 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
               </Anchor>
         <Span size="0.85em" color="#233234" spacing="0.2em" weight="400" textAlign="center">{delegateeObject.name}</Span>
           <Span size="0.5em" color="#233234" spacing="0.2em" weight="600" textAlign="center">Wallet Address: {delegateeObject.wallet}</Span>
+          <Span size="0.5em" color="#233234" spacing="0.2em" weight="600" textAlign="center">Voting Power: {delegateeVotingPower}</Span>
 
+          <ItemBreak></ItemBreak>
         <ChannelActions>
           {loading &&
             <SkeletonButton>

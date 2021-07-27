@@ -4,6 +4,7 @@ import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Sp
 import Loader from 'react-loader-spinner'
 import { Waypoint } from "react-waypoint";
 import { BsChevronExpand } from 'react-icons/bs';
+import { ToastContainer, toast } from 'react-toastify';
 
 import { useWeb3React } from '@web3-react/core'
 import { addresses, abis } from "@project/contracts";
@@ -21,6 +22,7 @@ const delegateesJSON = require("config/delegatees.json")
 function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const { account, library } = useWeb3React();
 
+  const [ txInProgress, setTxInProgress ] = React.useState(false);
   const [controlAt, setControlAt] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
   const [user, setUser] = React.useState(null);
@@ -29,7 +31,9 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const [epnsToken, setEpnsToken] = React.useState(null);
   const [tokenBalance, setTokenBalance] = React.useState(null);
   const [prettyTokenBalance, setPrettyTokenBalance] = React.useState(null);
+  const [delegatee, setDelegatee] = React.useState(null);
   const [showAnswers, setShowAnswers] = React.useState([]);
+  const [ selfVotingPower, setSelfVotingPower ] = React.useState(null);
 
   const toggleShowAnswer = (id) => {
     let newShowAnswers = [...showAnswers];
@@ -49,7 +53,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
   React.useEffect(() => {
     if(epnsToken){
-      getPushBalance(epnsToken)
+      getPushBalance()
     }
   }, [epnsToken,account,library, prettyTokenBalance, tokenBalance]);
 
@@ -58,13 +62,106 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     setLoading(false);
   }, [account]);
 
-  const getPushBalance = async (epnsToken) => {
+  const getPushBalance = async () => {
     let bal = await epnsToken.balanceOf(account)
     let decimals =  await epnsToken.decimals()
     let tokenBalance = await Number(bal/Math.pow(10, decimals))
     let newBal = parseFloat(tokenBalance.toLocaleString()).toFixed(3);
+    let delegatee = await epnsToken.delegates(account)
+    let votes = await epnsToken.getCurrentVotes(account)
+    let votingPower = await Number(votes/Math.pow(10, decimals))
+    let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
     setTokenBalance(tokenBalance)
     setPrettyTokenBalance(newBal)
+    setDelegatee(delegatee)
+    setSelfVotingPower(prettyVotingPower)
+  }
+
+  const selfDelegateAction = async () => {
+
+    setTxInProgress(true);
+    if (tokenBalance == 0) {
+      toast.dark("No PUSH to Delegate!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      setTxInProgress(false);
+      return;
+    }
+    if (delegatee == account) {
+      toast.dark("Already delegated to your address!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      setTxInProgress(false);
+      return;
+    }
+    let sendWithTxPromise;
+
+      sendWithTxPromise = epnsToken.delegate(account);
+
+    sendWithTxPromise
+      .then(async tx => {
+
+        let txToast = toast.dark(<LoaderToast msg="Waiting for Confirmation..." color="#35c5f3"/>, {
+          position: "bottom-right",
+          autoClose: false,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
+        try {
+          await library.waitForTransaction(tx.hash);
+
+          toast.update(txToast, {
+            render: "Transaction Completed!",
+            type: toast.TYPE.SUCCESS,
+            autoClose: 5000
+          });
+
+          setTxInProgress(false);
+        }
+        catch(e) {
+          toast.update(txToast, {
+            render: "Transaction Failed! (" + e.name + ")",
+            type: toast.TYPE.ERROR,
+            autoClose: 5000
+          });
+
+          setTxInProgress(false);
+        }
+      })
+      .catch(err => {
+        toast.dark('Transaction Cancelled!', {
+          position: "bottom-right",
+          type: toast.TYPE.ERROR,
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
+        setTxInProgress(false);
+      })
   }
 
   
@@ -74,21 +171,55 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     setControlAt(controlIndex);
   }
 
+  // toast customize
+  const LoaderToast = ({ msg, color }) => (
+    <Toaster>
+      <Loader
+       type="Oval"
+       color={color}
+       height={30}
+       width={30}
+      />
+      <ToasterMsg>{msg}</ToasterMsg>
+    </Toaster>
+  )
+
   return (
     <>
     <Section align="center">
       <H2 textTransform="uppercase" spacing="0.1em">
         <Span bg="#e20880" color="#fff" weight="600" padding="0px 8px">Delegate</Span><Span weight="200"> to PUSHers</Span>
       </H2> 
-      {prettyTokenBalance &&
-        <Item
+      <br></br>
+      {!loading && prettyTokenBalance && selfVotingPower &&
+        <ItemH
             align='left'
-            self="stretch"
+            // self="stretch"
           >
-            <H2>
-              <Span bg="#35c5f3" padding="2px 8px" weight="600" color="#fff"><b>{prettyTokenBalance} PUSH</b></Span>
-            </H2>
+            <H3>
+              <Span bg="#35c5f3" padding="2px 8px" weight="600" color="#fff"><b>PUSH BALANCE: {prettyTokenBalance} </b></Span>
+            </H3>
+            <ItemBreak></ItemBreak>
+            <H3>
+              <Span bg="#35c5f3" padding="2px 8px" weight="600" color="#fff"><b>VOTING POWER: {selfVotingPower} </b></Span>
+            </H3>
+            <ItemBreak></ItemBreak>
+            { delegatee !== "0x0000000000000000000000000000000000000000" &&
+              <H3>
+              <Span bg="#35c5f3" padding="2px 8px" weight="600" color="#fff"><b>Delegated to: {delegatee} </b></Span>
+            </H3>}
+            
+            
+        </ItemH>}
+        {!loading && controlAt == 0 && 
+          <Item align='left'>
+        <UnsubscribeButton >
+            <ActionTitle onClick={() => { selfDelegateAction()
+            }}
+              >Delegate to myself</ActionTitle>
+          </UnsubscribeButton>
         </Item>}
+        <br></br>
       {loading &&
         <ContainerInfo>
           <Loader
@@ -303,11 +434,69 @@ const AMod = styled(A)`
 
 const EpicButton = styled(A)`
   padding: 15px 15px;
+  margin-left: 25px;
   color: #fff;
   font-weight: 600;
   border-radius: 8px;
   background: linear-gradient(273deg, #674c9f 0%, rgba(226,8,128,1) 100%);
   `
+  const ChannelActionButton = styled.button`
+  border: 0;
+  outline: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 15px;
+  margin: 10px;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 800;
+  // font-weight: 400;
+  position: relative;
+  &:hover {
+    opacity: 0.9;
+    cursor: pointer;
+    pointer: hand;
+  }
+  &:active {
+    opacity: 0.75;
+    cursor: pointer;
+    pointer: hand;
+  }
+  ${ props => props.disabled && css`
+    &:hover {
+      opacity: 1;
+      cursor: default;
+      pointer: default;
+    }
+    &:active {
+      opacity: 1;
+      cursor: default;
+      pointer: default;
+    }
+  `}
+`
+  const UnsubscribeButton = styled(ChannelActionButton)`
+  // background: #674c9f;
+  background: linear-gradient(273deg, #674c9f 0%, rgba(226,8,128,1) 100%);
+  `
+  const ActionTitle = styled.span`
+  ${ props => props.hideit && css`
+    visibility: hidden;
+  `};
+`
+const Toaster = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0px 10px;
+`
+
+const ToasterMsg = styled.div`
+  margin: 0px 10px;
+`
+
 
 // Export Default
 export default Delegate;

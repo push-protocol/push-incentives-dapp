@@ -53,7 +53,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
   React.useEffect(() => {
     if(epnsToken){
-      getPushBalance()
+      getMyInfo()
     }
   }, [epnsToken,account,library, prettyTokenBalance, tokenBalance]);
 
@@ -62,7 +62,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     setLoading(false);
   }, [account]);
 
-  const getPushBalance = async () => {
+  const getMyInfo = async () => {
     let bal = await epnsToken.balanceOf(account)
     let decimals =  await epnsToken.decimals()
     let tokenBalance = await Number(bal/Math.pow(10, decimals))
@@ -187,38 +187,35 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   return (
     <>
     <Section align="center">
-      <H2 textTransform="uppercase" spacing="0.1em">
-        <Span bg="#e20880" color="#fff" weight="600" padding="0px 8px">Delegate</Span><Span weight="200"> to PUSHers</Span>
-      </H2> 
-      <br></br>
-      {!loading && prettyTokenBalance && selfVotingPower &&
-        <ItemH
-            align='left'
-            // self="stretch"
-          >
-            <H3>
-              <Span bg="#35c5f3" padding="2px 8px" weight="600" color="#fff"><b>PUSH BALANCE: {prettyTokenBalance} </b></Span>
-            </H3>
-            <ItemBreak></ItemBreak>
-            <H3>
-              <Span bg="#35c5f3" padding="2px 8px" weight="600" color="#fff"><b>VOTING POWER: {selfVotingPower} </b></Span>
-            </H3>
-            <ItemBreak></ItemBreak>
-            { delegatee !== "0x0000000000000000000000000000000000000000" &&
-              <H3>
-              <Span bg="#35c5f3" padding="2px 8px" weight="600" color="#fff"><b>Delegated to: {delegatee} </b></Span>
-            </H3>}
-            
-            
-        </ItemH>}
-        {!loading && controlAt == 0 && 
-          <Item align='left'>
+    <H2 textTransform="uppercase" spacing="0.1em">
+      <Span bg="#35c5f3" color="#fff" weight="600" padding="0px 8px">Delegate</Span><Span weight="200"> to PUSHers</Span>
+    </H2> 
+    {!loading && prettyTokenBalance && selfVotingPower &&
+      <ItemH margin="0px 15px 0px 15px" align="left">
+        <StatsCard
+        align = 'left'
+          bg="#fff"
+        >
+          <StatsHeading bg="#e20880">My Info</StatsHeading>
+          <StatsContent>
+            <StatsInnerTitle>Push Balance: {prettyTokenBalance}</StatsInnerTitle>
+            <StatsInnerTitle>Voting Power: {selfVotingPower}</StatsInnerTitle>
+            {delegatee !== "0x0000000000000000000000000000000000000000" &&
+              <StatsInnerTitle>Delegated to: {delegatee}</StatsInnerTitle>
+            }
+            <Item align='left'>
         <UnsubscribeButton >
             <ActionTitle onClick={() => { selfDelegateAction()
             }}
               >Delegate to myself</ActionTitle>
           </UnsubscribeButton>
-        </Item>}
+        </Item>
+          </StatsContent>
+          <StatsPreview color="#e20880">MY INFO</StatsPreview>
+        </StatsCard>
+      </ItemH>
+    }
+      
         <br></br>
       {loading &&
         <ContainerInfo>
@@ -325,12 +322,50 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                   hover="#e20880"
                 >
                   <Span>
-                    How can I keep up with EPNS Governance?
+                    What happens to the delegated voting power when I sell my PUSH tokens?
                   </Span>
                   <BsChevronExpand size={20} color={"#ddd"}/>
                 </Question>
 
                 {showAnswers[4] &&
+                  <Answer>
+                    <Span>If you have delegated your voting power to someone/yourself and later you sold your
+                      PUSH tokens, then the voting power gets delegated to the new owner of PUSH tokens. </Span>
+
+                  </Answer>
+                }
+              </QnAItem>
+
+              <QnAItem>
+                <Question
+                  onClick={() => {toggleShowAnswer(5)}}
+                  hover="#e20880"
+                >
+                  <Span>
+                    How can I cast my vote?
+                  </Span>
+                  <BsChevronExpand size={20} color={"#ddd"}/>
+                </Question>
+
+                {showAnswers[5] &&
+                  <Answer>
+                    <Span>Please visit <AMod href="https://snapshot.org/#/epns.eth" target="_blank" title="EPNS Governance - Snapshot Portal">EPNS Governance - Snapshot Portal</AMod> to view the ongoing on-chain proposals and cast your vote.</Span>
+                  </Answer>
+                }
+              </QnAItem>
+
+              <QnAItem>
+                <Question
+                  onClick={() => {toggleShowAnswer(6)}}
+                  hover="#e20880"
+                >
+                  <Span>
+                    How can I keep up with EPNS Governance?
+                  </Span>
+                  <BsChevronExpand size={20} color={"#ddd"}/>
+                </Question>
+
+                {showAnswers[6] &&
                   <Answer>
                     <Span>Join our <AMod href="https://t.me/epnsproject" target="_blank" title="Join our EPNS's Telegram channel">Telegram</AMod>, follow us on <AMod href="https://twitter.com/epnsproject" target="_blank" title="Join our EPNS's Twitter channel">Twitter</AMod>, and sign up for our 5 minute <AMod href="https://epns.substack.com/" target="_blank" title="Join our EPNS's Twitter channel">weekly product updates</AMod>.</Span>
                   </Answer>
@@ -496,6 +531,74 @@ const Toaster = styled.div`
 const ToasterMsg = styled.div`
   margin: 0px 10px;
 `
+const StatsCard = styled(Item)`
+  overflow: hidden;
+  min-width: 180px;
+
+  border-radius: 12px;
+  border: 1px solid rgb(225, 225, 225);
+
+  margin: 0px 15px;
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+const CenterHeading = styled.h2`
+  text-align: center;
+`;
+
+const PoolContainer = styled.div`
+  display: flex;
+`;
+
+const StatsHeading = styled(Item)`
+  flex: 0;
+  align-self: stretch;
+  color: #fff;
+  top: 0px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 15px;
+  text-align: center;
+  padding: 10px 5px;
+  right: 0;
+  left: 0;
+`
+
+const StatsContent = styled(Item)`
+  padding: 20px 20px;
+`
+
+const StatsPreview = styled(Span)`
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  font-weight: 600;
+  font-size: 12px;
+  opacity: 0.25;
+  letter-spacing:0.1em;
+  text-transform: uppercase;
+  color: ${props => props.color || '#000'};
+  z-index: -1;
+`
+
+const StatsInnerTitle = styled.span`
+  // font-weight: bold;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  align-items: left;
+`;
+
+
+const StatsInnerSub = styled.span`
+  font-size: 12px;
+  color: #999;
+  font-weight: 600;
+  align-self: flex-end;
+`;
 
 
 // Export Default

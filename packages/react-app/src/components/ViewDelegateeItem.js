@@ -17,41 +17,40 @@ import { keccak256, arrayify, hashMessage, recoverPublicKey } from 'ethers/utils
 
 function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
   const { account, library } = useWeb3React();
-
-  
   const [ loading, setLoading ] = React.useState(true);
   const [ txInProgress, setTxInProgress ] = React.useState(false);
-
   const [ isBalance, setIsBalance ] = React.useState(false);
-  const [ delegateeVotingPower, setDelegateeVotingPower ] = React.useState(null);
-
+  const [ delegateeVotingPower, setDelegateeVotingPower ] = React.useState(0);
 
   React.useEffect(() => {
     setLoading(false);
-    if(delegateeObject) getVotingPower(delegateeObject.address)
+    if(delegateeObject) getVotingPower(delegateeObject.wallet)
     if(pushBalance !== 0){
       setIsBalance(true)
     }
-
   }, [account, delegateeObject]);
 
   const getVotingPower = async (delegateeAddress) => {
-    let decimals =  await epnsToken.decimals()
-    let votes = await epnsToken.getCurrentVotes(account)
-
-    //uncomment this when delegateeAddress are filled correctly in json file
-    // let votes = await epnsToken.getCurrentVotes(delegateeAddress)
-    
-    let votingPower = await Number(votes/Math.pow(10, decimals))
-    let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
-    setDelegateeVotingPower(prettyVotingPower)
+    let isAddress = await ethers.utils.isAddress(delegateeAddress)
+    if(isAddress){
+      try{
+        let decimals =  await epnsToken.decimals()
+        let votes = await epnsToken.getCurrentVotes(delegateeAddress)
+        let votingPower = await Number(votes/Math.pow(10, decimals))
+        let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
+        console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 41 ~ getVotingPower ~ prettyVotingPower", prettyVotingPower)
+        setDelegateeVotingPower(prettyVotingPower)
+      }
+      catch(err){
+      console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 47 ~ getVotingPower ~ err", err)
+      }
+    }
   }
 
   const delegateAction = async (delegateeAddress) => {
-
     setTxInProgress(true);
     if (!isBalance) {
-      toast.dark("Minimum 1 PUSH required to Delegate!", {
+      toast.dark("No PUSH to Delegate!", {
         position: "bottom-right",
         type: toast.TYPE.ERROR,
         autoClose: 5000,
@@ -66,12 +65,9 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
       return;
     }
     let sendWithTxPromise;
-
-      sendWithTxPromise = epnsToken.delegate(delegateeAddress);
-
+    sendWithTxPromise = epnsToken.delegate(delegateeAddress);
     sendWithTxPromise
       .then(async tx => {
-
         let txToast = toast.dark(<LoaderToast msg="Waiting for Confirmation..." color="#35c5f3"/>, {
           position: "bottom-right",
           autoClose: false,
@@ -81,16 +77,13 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
           draggable: true,
           progress: undefined,
         });
-
         try {
           await library.waitForTransaction(tx.hash);
-
           toast.update(txToast, {
             render: "Transaction Completed!",
             type: toast.TYPE.SUCCESS,
             autoClose: 5000
           });
-
           setTxInProgress(false);
         }
         catch(e) {
@@ -99,7 +92,6 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
             type: toast.TYPE.ERROR,
             autoClose: 5000
           });
-
           setTxInProgress(false);
         }
       })
@@ -114,7 +106,6 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
           draggable: true,
           progress: undefined,
         });
-
         setTxInProgress(false);
       })
   }

@@ -21,7 +21,6 @@ const delegateesJSON = require("config/delegatees.json")
 // Create Header
 function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const { account, library } = useWeb3React();
-
   const [ txInProgress, setTxInProgress ] = React.useState(false);
   const [controlAt, setControlAt] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
@@ -33,12 +32,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const [prettyTokenBalance, setPrettyTokenBalance] = React.useState(null);
   const [delegatee, setDelegatee] = React.useState(null);
   const [showAnswers, setShowAnswers] = React.useState([]);
-  const [ selfVotingPower, setSelfVotingPower ] = React.useState(null);
+  const [selfVotingPower, setSelfVotingPower ] = React.useState(null);
+  const [newDelegateeAddress, setNewDelegateeAddress ] = React.useState(0);
+  const [newDelegateeVotingPower, setNewDelegateeVotingPower ] = React.useState(null);
 
   const toggleShowAnswer = (id) => {
     let newShowAnswers = [...showAnswers];
     newShowAnswers[id] = !newShowAnswers[id];
-
     setShowAnswers(newShowAnswers);
   }
 
@@ -62,6 +62,41 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     setLoading(false);
   }, [account]);
 
+  const isValidAddress = async (address) => {
+    if(address){
+      return await ethers.utils.isAddress(address)
+    }
+    else{
+      toast.dark("Invalid address!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return;
+    }
+  }
+
+  const getVotingPower = async (address) => {
+    try{
+      const isAddress = await isValidAddress(address)
+      if(isAddress){
+        let decimals =  await epnsToken.decimals()
+        let votes = await epnsToken.getCurrentVotes(address)
+        let votingPower = await Number(votes/Math.pow(10, decimals))
+        let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
+        setNewDelegateeVotingPower(votingPower)
+      }
+    }
+    catch(err){
+    console.log("🚀 ~ file: Delegate.tsx ~ line 86 ~ getVotingPower ~ err", err)
+    }
+  }
+
   const getMyInfo = async () => {
     let bal = await epnsToken.balanceOf(account)
     let decimals =  await epnsToken.decimals()
@@ -77,9 +112,23 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     setSelfVotingPower(prettyVotingPower)
   }
 
-  const selfDelegateAction = async () => {
-
+  const delegateAction = async (newDelegatee) => {
     setTxInProgress(true);
+    const isAddress = await isValidAddress(newDelegatee)
+    if(!isAddress){
+      toast.dark("Invalid address!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setTxInProgress(false);
+      return;
+    }
     if (tokenBalance == 0) {
       toast.dark("No PUSH to Delegate!", {
         position: "bottom-right",
@@ -91,29 +140,12 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
         draggable: true,
         progress: undefined,
       });
-
       setTxInProgress(false);
       return;
     }
-    if (delegatee == account) {
-      toast.dark("Already delegated to your address!", {
-        position: "bottom-right",
-        type: toast.TYPE.ERROR,
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-
-      setTxInProgress(false);
-      return;
-    }
+    
     let sendWithTxPromise;
-
-      sendWithTxPromise = epnsToken.delegate(account);
-
+    sendWithTxPromise = epnsToken.delegate(newDelegatee);
     sendWithTxPromise
       .then(async tx => {
 
@@ -191,9 +223,10 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       <Span bg="#35c5f3" color="#fff" weight="600" padding="0px 8px">Delegate</Span><Span weight="200"> to PUSHers</Span>
     </H2> 
     {!loading && prettyTokenBalance && selfVotingPower &&
+    <>
       <ItemH margin="0px 15px 0px 15px" align="left">
         <StatsCard
-        align = 'left'
+          align = 'left'
           bg="#fff"
         >
           <StatsHeading bg="#e20880">My Info</StatsHeading>
@@ -204,46 +237,95 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
               <StatsInnerTitle>Delegated to: {delegatee}</StatsInnerTitle>
             }
             <Item align='left'>
-        <UnsubscribeButton >
-            <ActionTitle onClick={() => { selfDelegateAction()
+            <UnsubscribeButton >
+            <ActionTitle onClick={() => { delegateAction(account)
             }}
               >Delegate to myself</ActionTitle>
-          </UnsubscribeButton>
-        </Item>
+            </UnsubscribeButton>
+            </Item>
           </StatsContent>
           <StatsPreview color="#e20880">MY INFO</StatsPreview>
         </StatsCard>
+
+        <StatsCard
+          align = 'left'
+          bg="#fff"
+        >
+          <StatsHeading bg="#e20880">DELEGATE</StatsHeading>
+          <StatsContent>
+            <Item bg="#ddd" radius="12px" margin="20px 0px -10px 0px" padding="10px 20px" align="stretch" self="stretch">
+              <Span color="#e20880" weight="400">Enter delegatee address</Span><br></br>
+              <Input
+                placeholder="Enter delegatee address"
+                radius="4px"
+                padding="12px"
+                self="stretch"
+                bg="#fff"
+                value={newDelegateeAddress}
+                onChange={async(e) => {
+                  setNewDelegateeAddress(e.target.value)
+                  setNewDelegateeVotingPower(null)
+                  console.log("🚀 ~ file: Delegate.tsx ~ line 247 ~ Delegate ~ e.target.value", e.target.value)
+                }}
+              />
+              {newDelegateeVotingPower && newDelegateeAddress &&
+                <>
+                {/* <StatsInnerTitle>Address: {newDelegateeAddress}</StatsInnerTitle> */}
+                <StatsInnerTitle>Voting Power: {newDelegateeVotingPower}</StatsInnerTitle>
+                </>
+              }
+              <ItemH>
+                <ButtonAlt
+                  bg={"#e20880"}
+                  onClick={() => { getVotingPower(newDelegateeAddress)
+                  }}
+                >
+                <Span color="#fff" weight="400">Get Voting Power</Span>
+                </ButtonAlt>
+                <ButtonAlt
+                  bg={txInProgress ? "#999" : "#e20880"}
+                  disabled={txInProgress ? true : false}
+                  onClick={() => { delegateAction(newDelegateeAddress)
+                  }}
+                  >
+                  <Span color="#fff" weight="400">Delegate</Span>
+                </ButtonAlt>
+              </ItemH>
+            </Item>
+          </StatsContent>
+        </StatsCard>
       </ItemH>
+      </>
     }
       
-        <br></br>
-      {loading &&
-        <ContainerInfo>
-          <Loader
-           type="Oval"
-           color="#35c5f3"
-           height={40}
-           width={40}
-          />
-        </ContainerInfo>
-      }
-      {!loading && controlAt == 0 && 
-        <ItemH id="scrollstyle-secondary">
-          {Object.keys(delegateesObject).map(index => {
-              return (
-                <>
-                <ViewDelegateeItem
-                  key={delegateesObject[index].wallet}
-                  delegateeObject={delegateesObject[index]}
-                  epnsToken={epnsToken}
-                  pushBalance={tokenBalance}
-                />
-                </>
-              );
-           
-          })}
-        </ItemH>
-      }
+    <br></br>
+    {loading &&
+      <ContainerInfo>
+        <Loader
+          type="Oval"
+          color="#35c5f3"
+          height={40}
+          width={40}
+        />
+      </ContainerInfo>
+    }
+    {!loading && controlAt == 0 && 
+      <ItemH id="scrollstyle-secondary">
+        {Object.keys(delegateesObject).map(index => {
+            return (
+              <>
+              <ViewDelegateeItem
+                key={delegateesObject[index].wallet}
+                delegateeObject={delegateesObject[index]}
+                epnsToken={epnsToken}
+                pushBalance={tokenBalance}
+              />
+              </>
+            );
+          
+        })}
+      </ItemH>
+    }
     </Section>
     {/* FAQs */}
     <Section theme="#fcfcfc" padding="0px 0px 0px 0px">
@@ -598,6 +680,45 @@ const StatsInnerSub = styled.span`
   color: #999;
   font-weight: 600;
   align-self: flex-end;
+`;
+
+const ButtonAlt = styled(Button)`
+  border: 0;
+  outline: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 15px;
+  margin: 10px;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 400;
+  position: relative;
+  &:hover {
+    opacity: 0.9;
+    cursor: pointer;
+    pointer: hand;
+  }
+  &:active {
+    opacity: 0.75;
+    cursor: pointer;
+    pointer: hand;
+  }
+  ${(props) =>
+    props.disabled &&
+    css`
+      &:hover {
+        opacity: 1;
+        cursor: default;
+        pointer: default;
+      }
+      &:active {
+        opacity: 1;
+        cursor: default;
+        pointer: default;
+      }
+    `}
 `;
 
 

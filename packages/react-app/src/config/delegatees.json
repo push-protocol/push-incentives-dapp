@@ -1,14 +1,14 @@
 {
     "delegatee01":{
         "name": "Balaji S. Srinivansan",
-        "wallet": "0x1234567890h46fj",
+        "wallet": "0x73133bcD1f0Bf04FFc15aC75e9Ac6047d87984f7",
         "url": "https://balajis.com/",
         "src": "./delegatees/balaji.png",
         "srcSet": "./delegatees/balaji@2x.png 2x, ./delegatees/balaji@3x.png 3x"
     },
     "delegatee02":{
         "name": "Kenneth Ng",
-        "wallet": "0x1234567890h46fj",
+        "wallet": "0x276B820E8382f17ECB9FA77B0952ca4E67287601",
         "url": "https://twitter.com/nkennethk",
         "src": "./delegatees/ken.png",
         "srcSet": "./delegatees/ken@2x.png 2x, ./delegatees/ken@3x.png 3x"
@@ -28,6 +28,13 @@
         "srcSet": "./delegatees/scott@2x.png 2x, ./delegatees/scott@3x.png 3x"
     },
     "delegatee05":{
+        "name": "Preethi Kasireddy",
+        "wallet": "0x1234567890h46fj",
+        "url": "https://twitter.com/iam_preethi",
+        "src": "./delegatees/preethi.png",
+        "srcSet": "./delegatees/preethi@2x.png 2x, ./delegatees/preethi@3x.png 3x"
+    },
+    "delegatee06":{
         "name": "Preethi Kasireddy",
         "wallet": "0x1234567890h46fj",
         "url": "https://twitter.com/iam_preethi",

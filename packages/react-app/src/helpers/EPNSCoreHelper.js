@@ -23,6 +23,23 @@ const EPNSCoreHelper = {
         });
     })
   },
+  getVotingPower : async (delegateeAddress, contract) => {
+    let isAddress = await ethers.utils.isAddress(delegateeAddress)
+    if(isAddress){
+      try{
+        let decimals =  await contract.decimals()
+        let votes = await contract.getCurrentVotes(delegateeAddress)
+        let votingPower = await Number(votes/Math.pow(10, decimals))
+        let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
+        console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 41 ~ getVotingPower ~ prettyVotingPower", prettyVotingPower)
+        return prettyVotingPower;
+      }
+      catch(err){
+      console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 47 ~ getVotingPower ~ err", err)
+      }
+    }
+    return "0.000"
+  },
   // To get user info
   getUserInfo: async (user, contract) => {
     const enableLogs = 0;

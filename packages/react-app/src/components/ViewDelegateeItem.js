@@ -1,9 +1,11 @@
 import React from "react";
 import styled, { css } from 'styled-components';
+import Blockies from "components/BlockiesIdenticon";
 import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField} from 'components/SharedStyling';
 import { Device } from 'assets/Device';
 
 import { ToastContainer, toast } from 'react-toastify';
+import EPNSCoreHelper from "helpers/EPNSCoreHelper";
 import 'react-toastify/dist/ReactToastify.min.css';
 import Loader from 'react-loader-spinner';
 
@@ -24,28 +26,16 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
 
   React.useEffect(() => {
     setLoading(false);
-    if(delegateeObject) getVotingPower(delegateeObject.wallet)
+    if(delegateeObject){
+      EPNSCoreHelper.getVotingPower(delegateeObject.wallet, epnsToken)
+      .then((votingPower) => {
+        setDelegateeVotingPower(votingPower)
+      })
+    }
     if(pushBalance !== 0){
       setIsBalance(true)
     }
   }, [account, delegateeObject]);
-
-  const getVotingPower = async (delegateeAddress) => {
-    let isAddress = await ethers.utils.isAddress(delegateeAddress)
-    if(isAddress){
-      try{
-        let decimals =  await epnsToken.decimals()
-        let votes = await epnsToken.getCurrentVotes(delegateeAddress)
-        let votingPower = await Number(votes/Math.pow(10, decimals))
-        let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
-        console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 41 ~ getVotingPower ~ prettyVotingPower", prettyVotingPower)
-        setDelegateeVotingPower(prettyVotingPower)
-      }
-      catch(err){
-      console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 47 ~ getVotingPower ~ err", err)
-      }
-    }
-  }
 
   const delegateAction = async (delegateeAddress) => {
     setTxInProgress(true);
@@ -144,15 +134,17 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
           }
           {!loading &&
           <>
-          <Image
-            src={delegateeObject.src}
-            srcSet={delegateeObject.srcSet}
-            alt= {delegateeObject.name}
-          />
-          
-           {/* <Blocky>
-                 <Blockies seed={account.toLowerCase()} opts={{seed: account.toLowerCase(), size: 100, scale: 7}}/>
-          </Blocky> */}
+          {
+            delegateeObject.src ? (
+              <Image
+                src={delegateeObject.src}
+                srcSet={delegateeObject.srcSet}
+                alt= {delegateeObject.name}
+              />
+            ) : (
+              <Blockies seed={delegateeObject.wallet.toLowerCase()} opts={{seed: delegateeObject.wallet.toLowerCase(), size: 30, scale: 10}}/>
+            )
+          }
           </>
           }
         </ChannelLogoInner>

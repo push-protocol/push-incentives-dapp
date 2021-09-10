@@ -19,7 +19,7 @@ import ViewDelegateeItem from "components/ViewDelegateeItem";
 import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
 import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
 const delegateesJSON = require("config/delegatees.json")
-
+const VOTING_TRESHOLD = 75000; //the treshold for delegates
 // Create Header
 function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const { account, library } = useWeb3React();
@@ -36,6 +36,8 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const [user, setUser] = React.useState(null);
   const [owner, setOwner] = React.useState(null);
   const [delegateesObject, setDelegateesObject] = React.useState({});
+  const [pushDelegatees, setPushDelegatees] = React.useState([]);
+  const [pushNominees, setPushNominees] = React.useState([]);
   const [epnsToken, setEpnsToken] = React.useState(null);
   const [tokenBalance, setTokenBalance] = React.useState(null);
   const [prettyTokenBalance, setPrettyTokenBalance] = React.useState(null);
@@ -95,8 +97,35 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
   React.useEffect(() => {
     setDashboardLoading(false);
-    setDelegateesObject(delegateesJSON)
   }, [account]);
+
+  React.useEffect(() => {
+    if(!epnsToken) return;
+    const delegateesList = Object.values(delegateesJSON);
+    // go through all the delegates json and get their voting power
+    const allDelegateesPromise = delegateesList.map(async (oneDelegate:any) => {
+      const { wallet } = oneDelegate;
+      const votingPower = await EPNSCoreHelper.getVotingPower(wallet, epnsToken);
+      return {...oneDelegate, votingPower};
+    });
+    Promise.all(allDelegateesPromise).then((allDelegatees) => {
+      // filter for delegates (i.e) Those who have above 75000 power,
+      // use the parameter votingPowerSimulate parameter to simulate voting power above the treshold
+      const delegateesAbove75k = allDelegatees.filter(({votingPower, votingPowerSimulate}) => {
+        return (Number(votingPower) >=  VOTING_TRESHOLD) || votingPowerSimulate
+      });
+      setPushDelegatees(delegateesAbove75k);
+
+      // calculate for  the nominees (i.e peoplw who have voting power less than 75k)
+      const delegateesBelow75k = allDelegatees.filter(({votingPower}) => {
+        return Number(votingPower) <  VOTING_TRESHOLD
+      });
+      setDelegateesLoading(false);
+      setPushNominees(delegateesBelow75k);
+    })
+    setDelegateesObject(delegateesJSON)
+    // in order to
+  }, [epnsToken])
 
   const isValidAddress = (address) => {
     if(ethers.utils.isAddress(address)){
@@ -411,18 +440,36 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
             bg="#fff"
           >
             <StatsHeading bg="#35c5f3">Meet the PUSH Delegatee Nominees</StatsHeading>
-            <StatsContent>
-              {delegateesLoading &&
-                <ContainerInfo>
-                  <Loader
-                    type="Oval"
-                    color="#35c5f3"
-                    height={40}
-                    width={40}
-                  />
-                </ContainerInfo>
+            <NomineeContainer>
+              {delegateesLoading ? (
+                  <ContainerInfo>
+                    <Loader
+                      type="Oval"
+                      color="#35c5f3"
+                      height={40}
+                      width={40}
+                    />
+                  </ContainerInfo>
+                ) : (
+                  <AbsoluteWrapper>
+                    {
+                      pushNominees.map((onePushNominee) => {
+                        return (
+                          <FloatContainer>
+                            <ViewDelegateeItem
+                              key={onePushNominee.wallet}
+                              delegateeObject={onePushNominee}
+                              epnsToken={epnsToken}
+                              pushBalance={tokenBalance}
+                          />
+                          </FloatContainer>
+                        )
+                      })
+                    }
+                  </AbsoluteWrapper>
+                )
               }
-            </StatsContent>
+            </NomineeContainer>
           </StatsCard>
         </Item>
       </Content>
@@ -449,12 +496,12 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
           {!dashboardLoading && controlAt == 0 &&
             <ItemH id="scrollstyle-secondary">
-              {Object.keys(delegateesObject).map(index => {
+              {pushDelegatees.map((oneDelegatee) => {
                   return (
                     <>
                     <ViewDelegateeItem
-                      key={delegateesObject[index].wallet}
-                      delegateeObject={delegateesObject[index]}
+                      key={oneDelegatee.wallet}
+                      delegateeObject={oneDelegatee}
                       epnsToken={epnsToken}
                       pushBalance={tokenBalance}
                     />
@@ -785,8 +832,40 @@ const StatsHeading = styled(Item)`
   left: 0;
 `
 
+const NomineeContainer = styled.div`
+  padding: 20px 20px;
+  position: relative;
+  height: 370px;
+  overflow-y: hidden;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* width */
+  ::-webkit-scrollbar {
+    height: 5px;
+  }
+  /* Track */
+  ::-webkit-scrollbar-track {
+    border-radius: 10px;
+  }
+`;
+
 const StatsContent = styled(Item)`
   padding: 20px 20px;
+`
+
+const FloatContainer = styled.div`
+  float: left;
+`
+
+const AbsoluteWrapper = styled.div`
+  position: absolute;
+    top: 0;
+    left: 0;
+    width: max-content;
+    overflow: scroll;
+}
 `
 
 const StatsPreview = styled(Span)`

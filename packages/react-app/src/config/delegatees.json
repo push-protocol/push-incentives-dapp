@@ -4,42 +4,50 @@
         "wallet": "0x73133bcD1f0Bf04FFc15aC75e9Ac6047d87984f7",
         "url": "https://balajis.com/",
         "src": "./delegatees/balaji.png",
-        "srcSet": "./delegatees/balaji@2x.png 2x, ./delegatees/balaji@3x.png 3x"
+        "srcSet": "./delegatees/balaji@2x.png 2x, ./delegatees/balaji@3x.png 3x",
+        "votingPowerSimulate": true
     },
     "delegatee02":{
         "name": "Kenneth Ng",
         "wallet": "0x276B820E8382f17ECB9FA77B0952ca4E67287601",
         "url": "https://twitter.com/nkennethk",
         "src": "./delegatees/ken.png",
-        "srcSet": "./delegatees/ken@2x.png 2x, ./delegatees/ken@3x.png 3x"
+        "srcSet": "./delegatees/ken@2x.png 2x, ./delegatees/ken@3x.png 3x",
+        "votingPowerSimulate": true
     },
     "delegatee03":{
         "name": "Mariano Conti",
-        "wallet": "0x1234567890h46fj",
+        "wallet": "0x12345679890h46fj",
         "url": "https://twitter.com/nanexcool",
         "src": "./delegatees/mariano.png",
-        "srcSet": "./delegatees/mariano@2x.png 2x, ./delegatees/mariano@3x.png 3x"
+        "srcSet": "./delegatees/mariano@2x.png 2x, ./delegatees/mariano@3x.png 3x",
+        "votingPowerSimulate": true
     },
     "delegatee04":{
         "name": "Scott Moore",
-        "wallet": "0x1234567890h46fj",
+        "wallet": "0x12347567890h46fj",
         "url": "https://twitter.com/notscottmoore",
         "src": "./delegatees/scott.png",
-        "srcSet": "./delegatees/scott@2x.png 2x, ./delegatees/scott@3x.png 3x"
+        "srcSet": "./delegatees/scott@2x.png 2x, ./delegatees/scott@3x.png 3x",
+        "votingPowerSimulate": true
     },
     "delegatee05":{
         "name": "Preethi Kasireddy",
-        "wallet": "0x1234567890h46fj",
+        "wallet": "0x12345697890h46fj",
         "url": "https://twitter.com/iam_preethi",
         "src": "./delegatees/preethi.png",
-        "srcSet": "./delegatees/preethi@2x.png 2x, ./delegatees/preethi@3x.png 3x"
+        "srcSet": "./delegatees/preethi@2x.png 2x, ./delegatees/preethi@3x.png 3x",
+        "votingPowerSimulate": true
     },
     "delegatee06":{
-        "name": "Preethi Kasireddy",
-        "wallet": "0x1234567890h46fj",
-        "url": "https://twitter.com/iam_preethi",
-        "src": "./delegatees/preethi.png",
-        "srcSet": "./delegatees/preethi@2x.png 2x, ./delegatees/preethi@3x.png 3x"
+        "name": "Amar Ananya",
+        "wallet": "0x123456872890h46fj",
+        "url": "https://twitter.com/iam_amar"
+    },
+    "delegatee07":{
+        "name": "Ishaan Shyla",
+        "wallet": "0x12734567890h46fj",
+        "url": "https://twitter.com/iam_preethi"
     }
 
 }

@@ -383,6 +383,7 @@ const Answer = styled(Item)`
 const QnAItem = styled(Item)`
   align-items: stretch;
   align-self: stretch;
+  flex: auto;
   margin: 15px 0px;
   border: 1px solid #fafafa;
   border-radius: 10px;

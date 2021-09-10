@@ -262,7 +262,7 @@ const ChannelLogo = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-self: flex-start;
+  align-self: center;
 `
 
 const ChannelLogoOuter = styled.div`

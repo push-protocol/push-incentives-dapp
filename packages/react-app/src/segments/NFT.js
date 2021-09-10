@@ -105,34 +105,36 @@ function NFT({ epnsReadProvider, epnsWriteProvide }) {
         </Content>
 
         <Content padding="0px 20px 20px" bg="#eee">
-          {/*}
-          <Controls>
-            <SubscribeButton index={0} active={controlAt == 0 ? 1 : 0} onClick={() => {userClickedAt(0)}} >
-              <ActionTitle >My NFTs</ActionTitle>
-            </SubscribeButton>
-            <SubscribeButton index={1} active={controlAt == 1 ? 1 : 0} onClick={() => {userClickedAt(1)}}>
-              <ActionTitle >All NFTs</ActionTitle>
-            </SubscribeButton>
-          </Controls>
-          */}
+          <Item align="flex-start" margin="0px 20px 0px 20px">
+            {/*}
+            <Controls>
+              <SubscribeButton index={0} active={controlAt == 0 ? 1 : 0} onClick={() => {userClickedAt(0)}} >
+                <ActionTitle >My NFTs</ActionTitle>
+              </SubscribeButton>
+              <SubscribeButton index={1} active={controlAt == 1 ? 1 : 0} onClick={() => {userClickedAt(1)}}>
+                <ActionTitle >All NFTs</ActionTitle>
+              </SubscribeButton>
+            </Controls>
+            */}
 
-          {controlAt == 0 &&
-            <MyNFTs
-              controlAt={controlAt}
-              setControlAt={setControlAt}
-              setTokenId={setTokenId}
-            />
-          }
-          {controlAt == 1 &&
-            <AllNFTs
-              controlAt={controlAt}
-              setControlAt={setControlAt}
-              setTokenId={setTokenId}
-            />
-          }
-          {controlAt == 2 && tokenId &&
-            <TransferNFT tokenId={tokenId}/>
-          }
+            {controlAt == 0 &&
+              <MyNFTs
+                controlAt={controlAt}
+                setControlAt={setControlAt}
+                setTokenId={setTokenId}
+              />
+            }
+            {controlAt == 1 &&
+              <AllNFTs
+                controlAt={controlAt}
+                setControlAt={setControlAt}
+                setTokenId={setTokenId}
+              />
+            }
+            {controlAt == 2 && tokenId &&
+              <TransferNFT tokenId={tokenId}/>
+            }
+          </Item>
         </Content>
       </Section>
     </>
@@ -236,6 +238,7 @@ const Answer = styled(Item)`
 const QnAItem = styled(Item)`
   align-items: stretch;
   align-self: stretch;
+  flex: auto;
   margin: 15px 0px;
   border: 1px solid #fafafa;
   border-radius: 10px;

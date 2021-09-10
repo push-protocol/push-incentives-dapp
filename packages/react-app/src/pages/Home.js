@@ -15,7 +15,7 @@ import EPNSCoreHelper from 'helpers/EPNSCoreHelper';
 import Airdrop from "segments/Airdrop";
 import YieldFarming from 'segments/YieldFarming';
 import NFT from 'segments/NFT';
-import Delegate from 'segments/Delegate';
+import PushGovernance from 'segments/PushGovernance';
 
 import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
 import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
@@ -30,7 +30,7 @@ function Home({ setBadgeCount, bellPressed }) {
   const [epnsReadProvider, setEpnsReadProvider] = React.useState(null);
   const [epnsWriteProvider, setEpnsWriteProvider] = React.useState(null);
 
-  const [controlAt, setControlAt] = React.useState(0);
+  const [controlAt, setControlAt] = React.useState(1);
   const [adminStatusLoaded, setAdminStatusLoaded] = React.useState(false);
   const [channelAdmin, setChannelAdmin] = React.useState(false);
   const [channelJson, setChannelJson] = React.useState([]);
@@ -121,6 +121,7 @@ function Home({ setBadgeCount, bellPressed }) {
           <ControlText active={controlAt == 0 ? 1 : 0}>Yield Farming</ControlText>
         </ControlButton>
 
+        {/*
         <ControlButton index={1} active={controlAt == 1 ? 1 : 0} border="#35c5f3"
           onClick={() => {
             userClickedAt(1)
@@ -129,7 +130,16 @@ function Home({ setBadgeCount, bellPressed }) {
           <ControlImage src="./svg/gratitude.svg" active={controlAt == 1 ? 1 : 0} />
           <ControlText active={controlAt == 1 ? 1 : 0}>Gratitude Drop</ControlText>
         </ControlButton>
+        */}
 
+        <ControlButton index={1} active={controlAt == 1 ? 1 : 0} border="#35c5f3"
+          onClick={() => {
+            userClickedAt(1)
+          }}
+        >
+          <ControlImage src="./svg/delegate.svg" active={controlAt == 1 ? 1 : 0} />
+          <ControlText active={controlAt == 1 ? 1 : 0}>Push Governance</ControlText>
+        </ControlButton>
 
         <ControlButton index={2} active={controlAt == 2 ? 1 : 0} border="#674c9f"
           onClick={() => {
@@ -138,15 +148,6 @@ function Home({ setBadgeCount, bellPressed }) {
         >
           <ControlImage src="./svg/rockstars.svg" active={controlAt == 2 ? 1 : 0} />
           <ControlText active={controlAt == 2 ? 1 : 0}>Rockstars of EPNS</ControlText>
-        </ControlButton>
-
-        <ControlButton index={3} active={controlAt == 3 ? 1 : 0} border="#674c9f"
-          onClick={() => {
-            userClickedAt(3)
-          }}
-        >
-          <ControlImage src="./svg/rockstars.svg" active={controlAt == 3 ? 1 : 0} />
-          <ControlText active={controlAt == 3 ? 1 : 0}>Delegate</ControlText>
         </ControlButton>
 
         <ControlButton index={4} active={controlAt == 4 ? 1 : 0} border="#e20880"
@@ -164,8 +165,14 @@ function Home({ setBadgeCount, bellPressed }) {
           {controlAt == 0 &&
             <YieldFarming />
           }
-          {controlAt == 1 &&
+          {/*{controlAt == 1 &&
             <Airdrop />
+          }*/}
+          {controlAt == 1 &&
+            <PushGovernance
+              epnsReadProvider={epnsReadProvider}
+              epnsWriteProvide={epnsWriteProvider}
+            />
           }
           {controlAt == 2 &&
             <NFT
@@ -174,12 +181,6 @@ function Home({ setBadgeCount, bellPressed }) {
             />
           }
           {controlAt == 3 &&
-            <Delegate 
-              epnsReadProvider={epnsReadProvider}
-              epnsWriteProvide={epnsWriteProvider}
-            />
-          }
-          {controlAt == 4 &&
             <></>
           }
         </Section>

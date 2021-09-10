@@ -63,6 +63,11 @@ export const Item = styled.div`
   text-align: ${props => props.textAlign || "inherit"};
   filter: ${props => props.filter || "none"};
 
+  right: ${props => props.right || 'auto'};
+  left: ${props => props.left || 'auto'};
+  bottom: ${props => props.bottom || 'auto'};
+  top: ${props => props.top || 'auto'};
+
   width: ${props => props.width || "auto" };
   height: ${props => props.height || "auto" };
 

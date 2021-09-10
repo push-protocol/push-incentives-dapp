@@ -102,26 +102,39 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   React.useEffect(() => {
     if(!epnsToken) return;
     const delegateesList = Object.values(delegateesJSON);
+    // write helper function to sort by voting power
+    const votingPowerSorter = (a, b) => {
+      return  b.votingPower - a.votingPower 
+    };
+  
+
     // go through all the delegates json and get their voting power
     const allDelegateesPromise = delegateesList.map(async (oneDelegate:any) => {
       const { wallet } = oneDelegate;
       const votingPower = await EPNSCoreHelper.getVotingPower(wallet, epnsToken);
-      return {...oneDelegate, votingPower};
+      return {...oneDelegate, votingPower: Number(votingPower)};
     });
+
+
     Promise.all(allDelegateesPromise).then((allDelegatees) => {
       // filter for delegates (i.e) Those who have above 75000 power,
       // use the parameter votingPowerSimulate parameter to simulate voting power above the treshold
       const delegateesAbove75k = allDelegatees.filter(({votingPower, votingPowerSimulate}) => {
-        return (Number(votingPower) >=  VOTING_TRESHOLD) || votingPowerSimulate
+        return (votingPower >=  VOTING_TRESHOLD) || votingPowerSimulate
       });
-      setPushDelegatees(delegateesAbove75k);
+      // sort by voting power
+      const sortedDelegatees = [...delegateesAbove75k].sort(votingPowerSorter);
+      setPushDelegatees(sortedDelegatees);
 
       // calculate for  the nominees (i.e peoplw who have voting power less than 75k)
       const delegateesBelow75k = allDelegatees.filter(({votingPower}) => {
-        return Number(votingPower) <  VOTING_TRESHOLD
+        return votingPower <  VOTING_TRESHOLD
       });
+      const sortedNominees = [...delegateesBelow75k].sort(votingPowerSorter);
+      // sort by voting power
+      setPushNominees(sortedNominees);
+
       setDelegateesLoading(false);
-      setPushNominees(delegateesBelow75k);
     })
     setDelegateesObject(delegateesJSON)
     // in order to
@@ -148,14 +161,8 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
   const getVotingPower = async (address) => {
     try{
-      const isAddress = isValidAddress(address)
-      if(isAddress){
-        let decimals =  await epnsToken.decimals()
-        let votes = await epnsToken.getCurrentVotes(address)
-        let votingPower = await Number(votes/Math.pow(10, decimals))
-        let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
-        setNewDelegateeVotingPower(votingPower)
-      }
+      const votingPower = await EPNSCoreHelper.getVotingPower(address, epnsToken, true)
+      setNewDelegateeVotingPower(votingPower)
     }
     catch(err){
     console.log("🚀 ~ file: Delegate.tsx ~ line 86 ~ getVotingPower ~ err", err)
@@ -886,6 +893,7 @@ const StatsInnerTitle = styled.span`
   font-size: 15px;
   letter-spacing: 0.1em;
   align-items: left;
+  margin-top: 10px;
 `;
 
 

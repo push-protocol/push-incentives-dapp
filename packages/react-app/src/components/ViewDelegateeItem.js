@@ -22,16 +22,9 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
   const [ loading, setLoading ] = React.useState(true);
   const [ txInProgress, setTxInProgress ] = React.useState(false);
   const [ isBalance, setIsBalance ] = React.useState(false);
-  const [ delegateeVotingPower, setDelegateeVotingPower ] = React.useState(0);
 
   React.useEffect(() => {
     setLoading(false);
-    if(delegateeObject){
-      EPNSCoreHelper.getVotingPower(delegateeObject.wallet, epnsToken)
-      .then((votingPower) => {
-        setDelegateeVotingPower(votingPower)
-      })
-    }
     if(pushBalance !== 0){
       setIsBalance(true)
     }
@@ -163,7 +156,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
               </Anchor>
         <Span size="0.85em" color="#233234" spacing="0.2em" weight="400" textAlign="center">{delegateeObject.name}</Span>
           <Span size="0.5em" color="#233234" spacing="0.2em" weight="600" textAlign="center">Wallet Address: {delegateeObject.wallet}</Span>
-          <Span size="0.5em" color="#233234" spacing="0.2em" weight="600" textAlign="center">Voting Power: {delegateeVotingPower}</Span>
+          <Span size="0.5em" color="#233234" spacing="0.2em" weight="600" textAlign="center">Voting Power: {delegateeObject.votingPower.toLocaleString()}</Span>
 
           <ItemBreak></ItemBreak>
         <ChannelActions>

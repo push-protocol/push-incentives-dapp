@@ -23,7 +23,7 @@ const EPNSCoreHelper = {
         });
     })
   },
-  getVotingPower : async (delegateeAddress, contract) => {
+  getVotingPower : async (delegateeAddress, contract, rawFormat = false) => {
     let isAddress = await ethers.utils.isAddress(delegateeAddress)
     if(isAddress){
       try{
@@ -32,7 +32,7 @@ const EPNSCoreHelper = {
         let votingPower = await Number(votes/Math.pow(10, decimals))
         let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
         console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 41 ~ getVotingPower ~ prettyVotingPower", prettyVotingPower)
-        return prettyVotingPower;
+        return rawFormat ? votingPower :prettyVotingPower;
       }
       catch(err){
       console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 47 ~ getVotingPower ~ err", err)

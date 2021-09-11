@@ -93,7 +93,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
       })
   }
 
-  
+
 
   // toast customize
   const LoaderToast = ({ msg, color }) => (
@@ -128,10 +128,10 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
           {!loading &&
           <>
           {
-            delegateeObject.src ? (
+            delegateeObject.pic ? (
               <Image
-                src={delegateeObject.src}
-                srcSet={delegateeObject.srcSet}
+                src={`./delegatees/${delegateeObject.pic}.png`}
+                srcSet={`./delegatees/${delegateeObject.pic}@2x.png 2x, ./delegatees/${delegateeObject.pic}@3x.png 3x`}
                 alt= {delegateeObject.name}
               />
             ) : (
@@ -165,7 +165,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
               <Skeleton />
             </SkeletonButton>
           }
-          {!!account && !!library && !loading && 
+          {!!account && !!library && !loading &&
             <UnsubscribeButton >
               <ActionTitle onClick={() => {delegateAction(delegateeObject.wallet)
               }}

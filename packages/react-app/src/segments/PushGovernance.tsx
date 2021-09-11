@@ -19,7 +19,7 @@ import ViewDelegateeItem from "components/ViewDelegateeItem";
 import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
 import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
 const delegateesJSON = require("config/delegatees.json")
-const VOTING_TRESHOLD = 75000; //the treshold for delegates
+const VOTING_TRESHOLD = 100; //the treshold for delegates
 // Create Header
 function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const { account, library } = useWeb3React();
@@ -104,9 +104,9 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     const delegateesList = Object.values(delegateesJSON);
     // write helper function to sort by voting power
     const votingPowerSorter = (a, b) => {
-      return  b.votingPower - a.votingPower 
+      return  b.votingPower - a.votingPower
     };
-  
+
 
     // go through all the delegates json and get their voting power
     const allDelegateesPromise = delegateesList.map(async (oneDelegate:any) => {
@@ -120,8 +120,9 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       // filter for delegates (i.e) Those who have above 75000 power,
       // use the parameter votingPowerSimulate parameter to simulate voting power above the treshold
       const delegateesAbove75k = allDelegatees.filter(({votingPower, votingPowerSimulate}) => {
-        return (votingPower >=  VOTING_TRESHOLD) || votingPowerSimulate
+        return (votingPower >=  VOTING_TRESHOLD)
       });
+
       // sort by voting power
       const sortedDelegatees = [...delegateesAbove75k].sort(votingPowerSorter);
       setPushDelegatees(sortedDelegatees);
@@ -130,7 +131,9 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       const delegateesBelow75k = allDelegatees.filter(({votingPower}) => {
         return votingPower <  VOTING_TRESHOLD
       });
+
       const sortedNominees = [...delegateesBelow75k].sort(votingPowerSorter);
+
       // sort by voting power
       setPushNominees(sortedNominees);
 

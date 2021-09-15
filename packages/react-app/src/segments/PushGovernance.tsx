@@ -19,7 +19,7 @@ import ViewDelegateeItem from "components/ViewDelegateeItem";
 import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
 import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
 const delegateesJSON = require("config/delegatees.json")
-const VOTING_TRESHOLD = 100; //the treshold for delegates
+const VOTING_TRESHOLD = 75000; //the treshold for delegates
 // Create Header
 function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const { account, library } = useWeb3React();

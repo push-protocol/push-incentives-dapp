@@ -1,6 +1,6 @@
 import React from "react";
 import styled, { css } from 'styled-components';
-import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, FormSubmision, Input, TextField} from 'components/SharedStyling';
+import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3,LI, Image, P, Span, Anchor, Button, FormSubmision, Input, TextField, UL} from 'components/SharedStyling';
 import Loader from 'react-loader-spinner'
 import { Waypoint } from "react-waypoint";
 import { BsChevronExpand } from 'react-icons/bs';
@@ -19,7 +19,7 @@ import ViewDelegateeItem from "components/ViewDelegateeItem";
 import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
 import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
 const delegateesJSON = require("config/delegatees.json")
-const VOTING_TRESHOLD = 100; //the treshold for delegates
+const VOTING_TRESHOLD = 75000; //the treshold for delegates
 // Create Header
 function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const { account, library } = useWeb3React();
@@ -332,13 +332,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
                     <Item align="flex-start" self="stretch" padding="10px" size="16px">
                       <ItemH flex="initial" padding="5px">
-                        <Span padding="0px 8px 0px 0px">$PUSH Balance: </Span>
-                        <Span bg="#e20880" color="#fff" weight="600" padding="0px 8px" textTransform="uppercase">{prettyTokenBalance}</Span>
+                        <Span weight="500" padding="0px 8px 0px 0px">$PUSH Balance: </Span>
+                        <CurvedSpan bg="#e20880" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{prettyTokenBalance}</CurvedSpan>
                       </ItemH>
 
                       <ItemH flex="initial" padding="5px">
-                        <Span padding="0px 8px 0px 0px">Voting Power: </Span>
-                        <Span bg="#35c5f3" color="#fff" weight="600" padding="0px 8px" textTransform="uppercase">{selfVotingPower}</Span>
+                        <Span weight="500"  padding="0px 8px 0px 0px">Voting Power: </Span>
+                        <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{selfVotingPower}</CurvedSpan>
                       </ItemH>
 
                       {delegatee !== "0x0000000000000000000000000000000000000000" &&
@@ -401,7 +401,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
                       {!showDelegateePrompt &&
                         <ButtonAlt
-                          bg={txInProgress ? "#999" : "#000"}
+                          bg={txInProgress ? "#999" : "#51CAF3"}
                           disabled={txInProgress ? true : false}
                           onClick={() => { delegateAction(account)}}
                         >
@@ -543,21 +543,43 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
           <Item align="stretch" margin="0px 0px 0px 0px">
             <QnAItem>
               <Question
+                onClick={() => {toggleShowAnswer(0)}}
+                hover="#e20880"
+              >
+                <Span>
+                  What are PUSH Delegatees?
+                </Span>
+                <BsChevronExpand size={20} color={"#ddd"}/>
+              </Question>
+
+              {showAnswers[0] &&
+                <Answer>
+                  <Span>
+                    Active community members who have at least <b>75,000 $PUSH</b> delegated to them.
+                    They will be able to create proposals on Snapshot that are approved on the <AMod href="https://gov.epns.io/"> forum </AMod>
+                  </Span>
+                </Answer>
+              }
+            </QnAItem>
+
+            <QnAItem>
+              <Question
                 onClick={() => {toggleShowAnswer(1)}}
                 hover="#e20880"
               >
                 <Span>
-                  Who are PUSHERS?
+                  What are PUSH Nominees
                 </Span>
                 <BsChevronExpand size={20} color={"#ddd"}/>
               </Question>
 
               {showAnswers[1] &&
                 <Answer>
-                  <Span>A key part of our decentralization is making sure the community feels empowered.
-                    PUSHers are active community members who strongly align with our mission to build a protocol for blockchain based notifications
-                    that are platform agnostic and incentivized, and have shown time and time again their willingness to take a role in the EPNS ecosystem.
-                    PUSHers will allow EPNS to accelerate our decentralization, eventually turning all governance over to the community.</Span>
+                  <Span>
+                  Active community members who can be delegated $PUSH to vote for proposals Snapshot. If you wish to be PUSH Nominee, submit your nomination 
+                  <AMod href="https://gov.epns.io/t/epns-push-delegatee-nominations/21"> here. </AMod>
+                   Once they get at least <b>75,000 $PUSH </b> delegated to them, they become a PUSH Delegatee.
+                  </Span>
                 </Answer>
               }
             </QnAItem>
@@ -568,20 +590,30 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                 hover="#e20880"
               >
                 <Span>
-                  How can one become a PUSHER?
+                  How can I become a PUSH Nominee?
                 </Span>
                 <BsChevronExpand size={20} color={"#ddd"}/>
               </Question>
 
               {showAnswers[2] &&
                 <Answer>
-                  <Span></Span>
-
-                  <Span>To become a PUSHER visit <AMod href="https://gov.epns.io/" target="_blank" title="Join our EPNS's Telegram channel">EPNS Governance Portal</AMod> and introduce yoursef on the platform in the suggested format.</Span>
-                  <Span>Criteria to become a PUSHER:</Span>
-                  <Span>1.</Span>
-                  <Span>2.</Span>
-                  <Span>3.</Span>
+                  <Span>Step-by-step process:</Span>
+                  <UL>
+                    <LI>
+                      <Span>Sign up on:- <AMod href="https://gov.epns.io/" target="_blank" title="Join our EPNS's Telegram channel">EPNS Governance Portal</AMod></Span>
+                    </LI>
+                    <LI>
+                      <Span>Go to:- <AMod href="https://gov.epns.io/t/epns-push-delegatee-nominations/21" target="_blank" title="Join our EPNS's Telegram channel">https://gov.epns.io/t/epns-push-delegatee-nominations/21</AMod></Span>
+                    </LI>
+                    <LI>
+                      <Span>Submit your nomination by replying to the above post in the PROPOSED TEMPLATE.</Span>
+                    </LI>
+                  </UL>
+                  <Span>
+                    Now, once your nomination receives minimum of 10 likes,
+                    We will be adding your wallet address on our Governance Front end within 5-7 days (launching soon!)
+                    And later community members can start delegating votes to you.
+                  </Span>
                 </Answer>
               }
             </QnAItem>
@@ -592,15 +624,16 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                 hover="#e20880"
               >
                 <Span>
-                  Where should I start?
+                  What if I don't wish to be a PUSH Nominee?
                 </Span>
                 <BsChevronExpand size={20} color={"#ddd"}/>
               </Question>
 
               {showAnswers[3] &&
                 <Answer>
-                  <Span>Visit <AMod href="https://gov.epns.io/" target="_blank" title="Join our EPNS's Telegram channel">EPNS Governance Portal</AMod> and introduce yoursef on the platform in the suggested format.</Span>
-
+                  <Span>
+                    No problem! You can show support to your favourite PUSH Nominees by liking their nominations <AMod href="https://gov.epns.io/t/epns-push-delegatee-nominations/21">here</AMod>.
+                  </Span>
                 </Answer>
               }
             </QnAItem>
@@ -611,15 +644,14 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                 hover="#e20880"
               >
                 <Span>
-                  What happens to the delegated voting power when I sell my PUSH tokens?
+                  Where should I start?
                 </Span>
                 <BsChevronExpand size={20} color={"#ddd"}/>
               </Question>
 
               {showAnswers[4] &&
                 <Answer>
-                  <Span>If you have delegated your voting power to someone/yourself and later you sold your
-                    PUSH tokens, then the voting power gets delegated to the new owner of PUSH tokens. </Span>
+                  <Span>Visit <AMod href="https://gov.epns.io/" target="_blank" title="Join our EPNS's Telegram channel">EPNS Governance Portal</AMod> and introduce yoursef on the platform in the suggested format.</Span>
 
                 </Answer>
               }
@@ -631,14 +663,16 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                 hover="#e20880"
               >
                 <Span>
-                  How can I cast my vote?
+                  What happens to the delegated voting power when I sell my PUSH tokens?
                 </Span>
                 <BsChevronExpand size={20} color={"#ddd"}/>
               </Question>
 
               {showAnswers[5] &&
                 <Answer>
-                  <Span>Please visit <AMod href="https://snapshot.org/#/epns.eth" target="_blank" title="EPNS Governance - Snapshot Portal">EPNS Governance - Snapshot Portal</AMod> to view the ongoing on-chain proposals and cast your vote.</Span>
+                  <Span>If you have delegated your voting power to someone/yourself and later you sold your
+                    PUSH tokens, then the voting power gets delegated to the new owner of PUSH tokens. </Span>
+
                 </Answer>
               }
             </QnAItem>
@@ -649,12 +683,30 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                 hover="#e20880"
               >
                 <Span>
-                  How can I keep up with EPNS Governance?
+                  How can I cast my vote?
                 </Span>
                 <BsChevronExpand size={20} color={"#ddd"}/>
               </Question>
 
               {showAnswers[6] &&
+                <Answer>
+                  <Span>Please visit <AMod href="https://snapshot.org/#/epns.eth" target="_blank" title="EPNS Governance - Snapshot Portal">EPNS Governance - Snapshot Portal</AMod> to view the ongoing on-chain proposals and cast your vote.</Span>
+                </Answer>
+              }
+            </QnAItem>
+
+            <QnAItem>
+              <Question
+                onClick={() => {toggleShowAnswer(7)}}
+                hover="#e20880"
+              >
+                <Span>
+                  How can I keep up with EPNS Governance?
+                </Span>
+                <BsChevronExpand size={20} color={"#ddd"}/>
+              </Question>
+
+              {showAnswers[7] &&
                 <Answer>
                   <Span>Join our <AMod href="https://t.me/epnsproject" target="_blank" title="Join our EPNS's Telegram channel">Telegram</AMod>, follow us on <AMod href="https://twitter.com/epnsproject" target="_blank" title="Join our EPNS's Twitter channel">Twitter</AMod>, and sign up for our 5 minute <AMod href="https://epns.substack.com/" target="_blank" title="Join our EPNS's Twitter channel">weekly product updates</AMod>.</Span>
                 </Answer>
@@ -952,6 +1004,10 @@ const ButtonAlt = styled(Button)`
         pointer: default;
       }
     `}
+`;
+
+const CurvedSpan = styled(Span)`
+  font-size: 14px;
 `;
 
 // css styles

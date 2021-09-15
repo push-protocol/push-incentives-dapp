@@ -1,6 +1,6 @@
 import React from "react";
 import styled, { css } from 'styled-components';
-import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField} from 'components/SharedStyling';
+import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, FormSubmision, Input, TextField} from 'components/SharedStyling';
 import Loader from 'react-loader-spinner'
 import { Waypoint } from "react-waypoint";
 import { BsChevronExpand } from 'react-icons/bs';
@@ -301,6 +301,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                 justify="flex-start"
                 self="stretch"
                 bg="#fff"
+                op="1"
               >
                 <StatsHeading bg="#e20880">Governance Dashboard</StatsHeading>
                 <StatsContent>
@@ -449,7 +450,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
             self="stretch"
             bg="#fff"
           >
-            <StatsHeading bg="#35c5f3">Meet the PUSH Delegatee Nominees</StatsHeading>
+            <StatsHeading bg="#35c5f3">Meet the PUSH Nominees</StatsHeading>
             <NomineeContainer>
               {delegateesLoading ? (
                   <ContainerInfo>
@@ -465,14 +466,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                     {
                       pushNominees.map((onePushNominee) => {
                         return (
-                          <FloatContainer>
-                            <ViewDelegateeItem
-                              key={onePushNominee.wallet}
-                              delegateeObject={onePushNominee}
-                              epnsToken={epnsToken}
-                              pushBalance={tokenBalance}
+                          <ViewDelegateeItem
+                            key={onePushNominee.wallet}
+                            delegateeObject={onePushNominee}
+                            epnsToken={epnsToken}
+                            pushBalance={tokenBalance}
+                            theme="nominee"
                           />
-                          </FloatContainer>
                         )
                       })
                     }
@@ -487,9 +487,9 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       <Content padding="20px 20px 0px">
         <Item align="flex-start" margin="0px 15px 0px 15px">
           <H2 textTransform="uppercase" spacing="0.1em">
-            <Span weight="200">Push for </Span><Span bg="#35c5f3" color="#fff" weight="600" padding="0px 8px">Governance</Span>
+            <Span weight="200">PUSH </Span><Span bg="#35c5f3" color="#fff" weight="600" padding="0px 8px">DELEGATEES</Span>
           </H2>
-          <H3>Like <B>someone?</B> Go ahead and delegate your votes and start Governing!!</H3>
+          <H3>Let's start <B>governing!!</B> </H3>
         </Item>
 
         <Item>
@@ -505,8 +505,18 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
           }
 
           {!dashboardLoading && controlAt == 0 &&
-            <ItemH id="scrollstyle-secondary">
-              {pushDelegatees.map((oneDelegatee) => {
+            <ItemH
+              padding="0px 20px 20px 20px"
+              self="stretch"
+            >
+              {pushDelegatees.length == 0  &&
+                <Item align="flex-start" self="stretch">
+                  <Span padding="10px 10px" margin="10px 0px" bg="#666" color="#fff" weight="600">🤷 Awkward!!</Span>
+                  <Span padding="10px 10px" margin="10px 0px" bg="#666" color="#fff" weight="600">Show some 💕 to Nominees to kickstart Governance!</Span>
+                </Item>
+              }
+              {pushDelegatees.length > 0  &&
+                pushDelegatees.map((oneDelegatee) => {
                   return (
                     <>
                     <ViewDelegateeItem
@@ -514,18 +524,19 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                       delegateeObject={oneDelegatee}
                       epnsToken={epnsToken}
                       pushBalance={tokenBalance}
+                      theme="delegate"
                     />
                     </>
                   );
-
-              })}
+                })
+              }
             </ItemH>
           }
         </Item>
       </Content>
 
       {/* FAQs */}
-      <Content padding="20px 20px 0px">
+      <Content padding="20px 20px 35px" theme="#fff">
         <Item align="stretch" justify="flex-start" margin="-10px 20px 0px 20px">
 
           {/* Question */}
@@ -684,11 +695,11 @@ const Items = styled.div`
 const Question = styled(Button)`
   align-items: stretch;
   align-self: stretch;
+  background: #fff;
 `
 const Answer = styled(Item)`
   align-items: stretch;
   align-self: stretch;
-
 `
 
 const QnAItem = styled(Item)`
@@ -815,7 +826,7 @@ const StatsCard = styled(Item)`
   border: 1px solid rgb(225, 225, 225);
 
   &:hover {
-    opacity: 0.9;
+    opacity: ${props => props.op ? "0.9" : props.op}
   }
 `;
 
@@ -843,9 +854,9 @@ const StatsHeading = styled(Item)`
 `
 
 const NomineeContainer = styled.div`
-  padding: 20px 20px;
+  padding: 0px 20px 0px 20px;
   position: relative;
-  height: 370px;
+  height: 420px;
   overflow-y: hidden;
   overflow-x: auto;
   display: flex;
@@ -865,17 +876,14 @@ const StatsContent = styled(Item)`
   padding: 20px 20px;
 `
 
-const FloatContainer = styled.div`
-  float: left;
-`
-
 const AbsoluteWrapper = styled.div`
   position: absolute;
-    top: 0;
-    left: 0;
-    width: max-content;
-    overflow: scroll;
-}
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: max-content;
+  overflow: scroll;
+  display: flex;
 `
 
 const StatsPreview = styled(Span)`

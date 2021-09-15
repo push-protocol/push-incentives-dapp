@@ -1,43 +1,35 @@
 {
     "delegatee01":{
-        "name": "Balaji S. Srinivansan",
-        "wallet": "0x73133bcD1f0Bf04FFc15aC75e9Ac6047d87984f7",
-        "url": "https://balajis.com/",
-        "pic": "balaji"
+        "name": "Auryn Macmillan",
+        "wallet": "auryn.eth",
+        "url": "https://twitter.com/auryn_macmillan",
+        "pic": "auryn",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/3"
     },
     "delegatee02":{
-        "name": "Kenneth Ng",
+        "name": "Luka Sučić",
         "wallet": "0x276B820E8382f17ECB9FA77B0952ca4E67287601",
-        "url": "https://twitter.com/nkennethk",
-        "pic": "ken"
+        "url": "https://twitter.com/beler",
+        "pic": "beler",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/4"
     },
     "delegatee03":{
-        "name": "Mariano Conti",
-        "wallet": "0x12345679890h46fj",
-        "url": "https://twitter.com/nanexcool",
-        "pic": "mariano"
+        "name": "DefiDad",
+        "wallet": "defidad.eth",
+        "pic": "defi_dad",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/7"
     },
     "delegatee04":{
-        "name": "Scott Moore",
-        "wallet": "0x12347567890h46fj",
-        "url": "https://twitter.com/notscottmoore",
-        "pic": "scott"
-    },
-    "delegatee05":{
-        "name": "Preethi Kasireddy",
-        "wallet": "0x12345697890h46fj",
-        "url": "https://twitter.com/iam_preethi",
-        "pic": "preethi"
+        "name": "Anton Mozgovoy",
+        "wallet": "mozgovoy.eth",
+        "url": "https://twitter.com/mozgovoy_anton",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/8"
     },
     "delegatee06":{
-        "name": "Amar Ananya",
-        "wallet": "0x123456872890h46fj",
-        "url": "https://twitter.com/iam_amar"
-    },
-    "delegatee07":{
-        "name": "Ishaan Shyla",
-        "wallet": "0x12734567890h46fj",
-        "url": "https://twitter.com/iam_preethi"
+        "name": "Vijay Gir",
+        "wallet": "0x4498e30066c3188eA5B8908780A7A576e21f3eE3",
+        "url": "https://twitter.com/imvijaygir",
+        "pic": "imvijaygir",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/10"
     }
-
 }

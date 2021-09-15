@@ -11,13 +11,15 @@ import Loader from 'react-loader-spinner';
 
 import Skeleton from '@yisheng90/react-loading';
 import { FiTwitter } from 'react-icons/fi';
+import { FaPlusCircle } from 'react-icons/fa';
+import { IoMdShareAlt } from 'react-icons/io';
 
 import { addresses, abis } from "@project/contracts";
 import { useWeb3React } from '@web3-react/core';
 import { ethers } from "ethers";
 import { keccak256, arrayify, hashMessage, recoverPublicKey } from 'ethers/utils';
 
-function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
+function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance, theme }) {
   const { account, library } = useWeb3React();
   const [ loading, setLoading ] = React.useState(true);
   const [ txInProgress, setTxInProgress ] = React.useState(false);
@@ -93,8 +95,6 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
       })
   }
 
-
-
   // toast customize
   const LoaderToast = ({ msg, color }) => (
     <Toaster>
@@ -110,74 +110,88 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance }) {
 
   // render
   return (
-    <>
     <Item
-    key={delegateeObject.wallet}
+      key={delegateeObject.wallet}
     >
-    <ChannelLogo
-      theme={
-        !!account && !!library ?
-          "#e20880" : "#fff"
-      }
-    >
-      <ChannelLogoOuter>
-        <ChannelLogoInner>
-          {loading &&
-            <Skeleton color="#eee" width="100%" height="100%" />
-          }
-          {!loading &&
-          <>
-          {
-            delegateeObject.pic ? (
+      <DelegateeItem
+        theme={theme}
+      >
+        <DelegateeImageOuter>
+          <DelegateeImageInner>
+            {loading &&
+              <Skeleton color="#eee" width="100%" height="100%" />
+            }
+            {!loading && delegateeObject.pic &&
               <Image
-                src={`./delegatees/${delegateeObject.pic}.png`}
-                srcSet={`./delegatees/${delegateeObject.pic}@2x.png 2x, ./delegatees/${delegateeObject.pic}@3x.png 3x`}
+                src={`./delegatees/${delegateeObject.pic}.jpg`}
+                srcSet={`./delegatees/${delegateeObject.pic}@2x.jpg 2x, ./delegatees/${delegateeObject.pic}@3x.jpg 3x`}
                 alt= {delegateeObject.name}
               />
-            ) : (
+            }
+            {!loading && !delegateeObject.pic &&
               <Blockies seed={delegateeObject.wallet.toLowerCase()} opts={{seed: delegateeObject.wallet.toLowerCase(), size: 30, scale: 10}}/>
-            )
-          }
-          </>
-          }
-        </ChannelLogoInner>
-      </ChannelLogoOuter>
+            }
+          </DelegateeImageInner>
 
-    {!!account && !!library &&
-      <ItemH>
-        <Anchor
+          <ItemH
+            position="absolute"
+            top="10px"
+            left="10px"
+            bg="#00000088"
+            padding="6px 10px"
+            radius="22px"
+          >
+            <FaPlusCircle size={12} color="#fff"/>
+            <Span size="12px" color="#fff" padding="0px 0px 0px 10px" spacing="0.2em" weight="600" textAlign="center">{delegateeObject.votingPower.toLocaleString()}</Span>
+          </ItemH>
+        </DelegateeImageOuter>
+
+        <DelegateeProfile>
+          <Item>
+            <ItemH>
+              <Span weight="400" textAlign="center">{delegateeObject.name}</Span>
+              <Anchor
                 href={delegateeObject.url}
                 target="_blank"
                 title={"Visit Twitter profile of " + delegateeObject.name}
                 bg="transparent"
                 radius="4px"
+                padding="4px"
+                margin="0px 6px"
               >
-                <FiTwitter size={12} color="#e20880"/>
+                <FiTwitter size={12} color="#35c5f3" />
               </Anchor>
-        <Span size="0.85em" color="#233234" spacing="0.2em" weight="400" textAlign="center">{delegateeObject.name}</Span>
-          <Span size="0.5em" color="#233234" spacing="0.2em" weight="600" textAlign="center">Wallet Address: {delegateeObject.wallet}</Span>
-          <Span size="0.5em" color="#233234" spacing="0.2em" weight="600" textAlign="center">Voting Power: {delegateeObject.votingPower.toLocaleString()}</Span>
+            </ItemH>
 
+            <DelegateeWallet size="0.5em" color="#aaa" spacing="0.2em" weight="600" textAlign="center">{delegateeObject.wallet}</DelegateeWallet>
+          </Item>
           <ItemBreak></ItemBreak>
-        <ChannelActions>
-          {loading &&
-            <SkeletonButton>
-              <Skeleton />
-            </SkeletonButton>
-          }
-          {!!account && !!library && !loading &&
-            <UnsubscribeButton >
-              <ActionTitle onClick={() => {delegateAction(delegateeObject.wallet)
-              }}
-                >Delegate</ActionTitle>
-            </UnsubscribeButton>
-          }
-        </ChannelActions>
-      </ItemH>
-    }
-    </ChannelLogo>
-  </Item>
-  </>
+          <UnsubscribeButton >
+            <ActionTitle onClick={() => {delegateAction(delegateeObject.wallet)
+            }}
+              >Delegate</ActionTitle>
+          </UnsubscribeButton>
+
+          <Item
+            position="absolute"
+            bottom="2px"
+            left="-2px"
+            padding="4px"
+          >
+            <Anchor
+              href={delegateeObject.forum}
+              target="_blank"
+              title={"Visit forum post of " + delegateeObject.name}
+              bg="transparent"
+              radius="4px"
+              padding="2px"
+            >
+              <IoMdShareAlt size={16} color="#fff" />
+            </Anchor>
+          </Item>
+        </DelegateeProfile>
+      </DelegateeItem>
+    </Item>
   );
 }
 
@@ -193,25 +207,15 @@ const Container = styled.div`
 
   margin: 15px 0px;
   justify-content: center;
-  padding: 10px;
+  padding: 0px;
 `
 
-const SkeletonWrapper = styled.div`
-  overflow: hidden;
-  width: ${props => props.atW + '%' || '100%'};
-  height: ${props => props.atH}px;
-  border-radius: ${props => props.borderRadius || 10}px;
-  margin-bottom: ${props => props.marginBottom || 5}px;
-  margin-right: ${props => props.marginRight || 0}px;
-`
-
-const ChannelLogo = styled.div`
-  max-width: 100px;
-  min-width: 250px;
-  // min-width: 32px;
+const DelegateeItem = styled.div`
+  max-width: 220px;
+  min-width: 220px;
   flex: 1;
-  margin: 5px;
-  padding: 10px;
+  margin: 20px 20px;
+  padding: 4px;
   border: 2px solid #fafafa;
   overflow: hidden;
   border-radius: 20px;
@@ -219,105 +223,48 @@ const ChannelLogo = styled.div`
   flex-direction: column;
   justify-content: center;
   align-self: flex-start;
+  position: relative;
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: ${props => props.theme == "nominee" ? "#35c5f3" : "linear-gradient( 283deg, #34c5f2 0%, #e20880 45%, #35c5f3 100%)"};
+  }
 `
 
-const ChannelLogoOuter = styled.div`
+const DelegateeImageOuter = styled.div`
   padding-top: 100%;
   position: relative;
 `
 
-const ChannelLogoInner = styled.div`
+const DelegateeImageInner = styled.div`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   overflow: hidden;
-  border-radius: 20px;
+  border-top-right-radius: 16px;
+  border-top-left-radius: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
 `
 
-const ChannelLogoImg = styled.img`
-  object-fit: contain;
-  width: 100%;
-  border-radius: 20px;
-  overflow: hidden;
+const DelegateeProfile = styled(ItemH)`
+  background: #fff;
+  border-bottom-right-radius: 16px;
+  border-bottom-left-radius: 90px;
+  padding: 20px;
 `
 
-const ChannelInfo = styled.div`
-  flex: 1;
-  margin: 5px 10px;
-  min-width: 120px;
-  flex-grow: 4;
-  flex-direction: column;
-  display: flex;
-`
-
-const ChannelTitle = styled.div`
-  margin-bottom: 5px;
-`
-
-const ChannelTitleLink = styled.a`
-  text-decoration: none;
-  font-weight: 600;
-  color: #e20880;
-  font-size: 20px;
-  &:hover {
-    text-decoration: underline;
-    cursor: pointer;
-    pointer: hand;
-  }
-`
-
-const ChannelDesc = styled.div`
-  flex: 1;
-  display: flex;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.75);
-  font-weight: 400;
-  flex-direction: column;
-`
-
-const ChannelDescLabel = styled.label`
-  flex: 1;
-`
-
-const ChannelMeta = styled.div`
-  display: flex;
-  flex-direction: row;
-  font-size: 13px;
-`
-
-const ChannelMetaBox = styled.label`
-  margin: 0px 5px;
-  color: #fff;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-`
-
-const Subscribers = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`
-
-const SubscribersCount = styled(ChannelMetaBox)`
-  background: #35c4f3;
-`
-
-const Pool = styled.div`
-  margin: 0px 10px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`
-
-const PoolShare = styled(ChannelMetaBox)`
-  background: #674c9f;
+const DelegateeWallet = styled(Span)`
+  word-break: break-all;
+  padding-top: 4px;
 `
 
 const LineBreak = styled.div`
@@ -410,7 +357,7 @@ const SubscribeButton = styled(ChannelActionButton)`
 `
 
 const UnsubscribeButton = styled(ChannelActionButton)`
-  background: #674c9f;
+  background: #000;
 `
 
 const DisabledDelegate = styled(ChannelActionButton)`

@@ -30,7 +30,7 @@ function Home({ setBadgeCount, bellPressed }) {
   const [epnsReadProvider, setEpnsReadProvider] = React.useState(null);
   const [epnsWriteProvider, setEpnsWriteProvider] = React.useState(null);
 
-  const [controlAt, setControlAt] = React.useState(1);
+  const [controlAt, setControlAt] = React.useState(0);
   const [adminStatusLoaded, setAdminStatusLoaded] = React.useState(false);
   const [channelAdmin, setChannelAdmin] = React.useState(false);
   const [channelJson, setChannelJson] = React.useState([]);

@@ -915,9 +915,7 @@ const NomineeContainer = styled.div`
   justify-content: center;
   align-items: center;
   /* width */
-  ::-webkit-scrollbar {
-    height: 5px;
-  }
+
   /* Track */
   ::-webkit-scrollbar-track {
     border-radius: 10px;

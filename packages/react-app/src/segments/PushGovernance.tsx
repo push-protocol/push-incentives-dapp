@@ -611,7 +611,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                   </UL>
                   <Span>
                     Now, once your nomination receives minimum of 10 likes,
-                    We will be adding your wallet address on our Governance Front end within 5-7 days (launching soon!)
+                    We will be adding your wallet address on our Governance Front end within 5-7 days.
                     And later community members can start delegating votes to you.
                   </Span>
                 </Answer>
@@ -670,8 +670,8 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
               {showAnswers[5] &&
                 <Answer>
-                  <Span>If you have delegated your voting power to someone/yourself and later you sold your
-                    PUSH tokens, then the voting power gets delegated to the new owner of PUSH tokens. </Span>
+                  <Span>If you delegate your voting power to someone/yourself and later you sell your
+                    PUSH tokens, then the voting power of those tokens gets revoked. Now the new owner gets to decide whom to delegate to. </Span>
 
                 </Answer>
               }

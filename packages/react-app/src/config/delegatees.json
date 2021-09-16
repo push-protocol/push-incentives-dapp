@@ -8,7 +8,7 @@
     },
     "delegatee02":{
         "name": "Luka Sučić",
-        "wallet": "0x276B820E8382f17ECB9FA77B0952ca4E67287601",
+        "wallet": "lukaskywalker.eth",
         "url": "https://twitter.com/beler",
         "pic": "beler",
         "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/4"
@@ -31,5 +31,19 @@
         "url": "https://twitter.com/imvijaygir",
         "pic": "imvijaygir",
         "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/10"
+    },
+    "delegatee07":{
+        "name": "Robin Roy",
+        "wallet": "0x73eEf70d9B803f0066a1569393d6299369fA3C87",
+        "url": "https://twitter.com/robin_rrtx",
+        "pic": "robin_rrtx",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/11"
+    },
+    "delegatee08":{
+        "name": "Jaf",
+        "wallet": "mrjaf.eth",
+        "url": "https://twitter.com/jafetsc",
+        "pic": "jaf",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/12"
     }
 }

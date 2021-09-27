@@ -45,5 +45,11 @@
         "url": "https://twitter.com/jafetsc",
         "pic": "jaf",
         "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/12"
+    },
+    "delegatee09":{
+        "name": "Lubna Mohsin",
+        "wallet": "0x836ccDEF1F4d2eFF9402DedF3B4beF69dD13764e",
+        "url": "https://twitter.com/MrsMoo40402659",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/15"
     }
 }

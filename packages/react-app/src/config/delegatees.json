@@ -51,5 +51,45 @@
         "wallet": "0x836ccDEF1F4d2eFF9402DedF3B4beF69dD13764e",
         "url": "https://twitter.com/MrsMoo40402659",
         "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/15"
+    },
+    "delegatee10":{
+        "name": "Aiswarya Walter",
+        "wallet": "0x1c8c125C1Eac1C8d450979cbf0146985D75df55A",
+        "url": "https://twitter.com/miss__walter",
+        "pic": "aiswarya",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/17"
+    },
+    "delegatee11":{
+        "name": "Vamoose",
+        "wallet": "0xeB901cFD3b214247a460861F65502E7332c8aF06",
+        "url": "https://twitter.com/learn4life6",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/19"
+    },
+    "delegatee12":{
+        "name": "Zaryab Afser",
+        "wallet": "0x554d29160f779Adf0a4328597cD33Ea1Df4D9Ee9",
+        "url": "https://twitter.com/Zaryab84339098",
+        "pic": "zaryab",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/21"
+    },
+    "delegatee13":{
+        "name": "Ashis Kumar Pradhan",
+        "wallet": "0x5913760160d245d0C9A05a8a956012694281bEE3",
+        "url": "https://twitter.com/AshisKu88733868",
+        "pic": "ashis",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/22"
+    },
+    "delegatee14":{
+        "name": "Krishnanand V P",
+        "wallet": "0x3cc04C46426C7504b59060981e6b5aD7D848E119",
+        "url": "https://twitter.com/incrypto32",
+        "pic": "krishna",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/25"
+    },
+    "delegatee15":{
+        "name": "Pranshu Rastogi",
+        "wallet": "0xcB034160f7B45E41E6015ECEA09F31A66C144422",
+        "url": "https://twitter.com/pranshu3196",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/26"
     }
 }

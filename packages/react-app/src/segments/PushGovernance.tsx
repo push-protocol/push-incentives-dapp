@@ -576,7 +576,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
               {showAnswers[1] &&
                 <Answer>
                   <Span>
-                  Active community members who can be delegated $PUSH to vote for proposals Snapshot. If you wish to be PUSH Nominee, submit your nomination 
+                  Active community members who can be delegated $PUSH to vote for proposals Snapshot. If you wish to be PUSH Nominee, submit your nomination
                   <AMod href="https://gov.epns.io/t/epns-push-delegatee-nominations/21"> here. </AMod>
                    Once they get at least <b>75,000 $PUSH </b> delegated to them, they become a PUSH Delegatee.
                   </Span>

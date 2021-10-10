@@ -11,7 +11,7 @@ import Loader from 'react-loader-spinner';
 
 import Skeleton from '@yisheng90/react-loading';
 import { FiTwitter } from 'react-icons/fi';
-import { FaPlusCircle } from 'react-icons/fa';
+import { GoVerified } from 'react-icons/go';
 import { IoMdShareAlt } from 'react-icons/io';
 
 import { addresses, abis } from "@project/contracts";
@@ -141,7 +141,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, pushBalance, theme }) {
             padding="6px 10px"
             radius="22px"
           >
-            <FaPlusCircle size={12} color="#fff"/>
+            <GoVerified size={12} color="#fff"/>
             <Span size="12px" color="#fff" padding="0px 0px 0px 10px" spacing="0.2em" weight="600" textAlign="center">{delegateeObject.votingPower.toLocaleString()}</Span>
           </ItemH>
         </DelegateeImageOuter>

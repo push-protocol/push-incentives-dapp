@@ -176,11 +176,11 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     let bal = await epnsToken.balanceOf(account)
     let decimals =  await epnsToken.decimals()
     let tokenBalance = await Number(bal/Math.pow(10, decimals))
-    let newBal = parseFloat(tokenBalance.toLocaleString()).toFixed(3);
+    let newBal = tokenBalance.toString();
     let delegatee = await epnsToken.delegates(account)
     let votes = await epnsToken.getCurrentVotes(account)
     let votingPower = await Number(votes/Math.pow(10, decimals))
-    let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
+    let prettyVotingPower = votingPower.toLocaleString();
     setTokenBalance(tokenBalance)
     setPrettyTokenBalance(newBal)
     setDelegatee(delegatee)

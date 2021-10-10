@@ -30,8 +30,7 @@ const EPNSCoreHelper = {
         let decimals =  await contract.decimals()
         let votes = await contract.getCurrentVotes(delegateeAddress)
         let votingPower = await Number(votes/Math.pow(10, decimals))
-        let prettyVotingPower = parseFloat(votingPower.toLocaleString()).toFixed(3);
-        console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 41 ~ getVotingPower ~ prettyVotingPower", prettyVotingPower)
+        let prettyVotingPower = votingPower.toString();
         return rawFormat ? votingPower : prettyVotingPower;
       }
       catch(err){

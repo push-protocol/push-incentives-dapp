@@ -16,6 +16,7 @@
     "delegatee03":{
         "name": "DefiDad",
         "wallet": "defidad.eth",
+        "url": "https://twitter.com/DeFi_Dad",
         "pic": "defi_dad",
         "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/7"
     },
@@ -90,6 +91,35 @@
         "name": "Pranshu Rastogi",
         "wallet": "0xcB034160f7B45E41E6015ECEA09F31A66C144422",
         "url": "https://twitter.com/pranshu3196",
+        "pic": "pranshu",
         "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/26"
+    },
+    "delegatee16":{
+        "name": "Ray",
+        "wallet": "0x8edF4866E26bb82d288845bF55f15370bb4e6027",
+        "url": "https://twitter.com/Rayomand14",
+        "pic": "ray",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/13"
+    },
+    "delegatee17":{
+        "name": "Alexander",
+        "wallet": "0xC076FE76E995cC6FFF0F1e58fcA10Dbb8Fc5581F",
+        "url": "https://twitter.com/xand6r",
+        "pic": "alex",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/20"
+    },
+    "delegatee18":{
+        "name": "Ashwani Mittal",
+        "wallet": "0x767631aB6d49C41414C318a0E3DB215d36B965Ab",
+        "url": "https://twitter.com/mittalashwani1",
+        "pic": "ashwani",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/24"
+    },
+    "delegatee19":{
+        "name": "Jude Dike",
+        "wallet": "dumebi.eth",
+        "url": "https://twitter.com/bigbrutha_",
+        "pic": "jude",
+        "forum": "https://gov.epns.io/t/epns-push-delegatee-nominations/21/33"
     }
 }

@@ -49,7 +49,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const [selfVotingPower, setSelfVotingPower ] = React.useState(null);
   const [newDelegateeAddress, setNewDelegateeAddress ] = React.useState("0x");
   const [newDelegateeVotingPower, setNewDelegateeVotingPower ] = React.useState(null);
-
+  const [signerObject, setSignerObject ] = React.useState(null);
   const toggleShowAnswer = (id) => {
     let newShowAnswers = [...showAnswers];
     newShowAnswers[id] = !newShowAnswers[id];
@@ -84,6 +84,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     console.log(account)
     if (!!(library && account)) {
       let signer = library.getSigner(account);
+      setSignerObject(signer)
       const epnsTokenContract = new ethers.Contract(addresses.epnsToken, abis.epnsToken, signer);
       setEpnsToken(epnsTokenContract);
     }
@@ -186,8 +187,43 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     setDelegatee(delegatee)
     setSelfVotingPower(prettyVotingPower)
   }
+  const createTransactionObject= async(newDelegatee)=>{
+    const contractName = await epnsToken.name()
+    const nonce = await signerObject.getTransactionCount()
+    const chainId = 1
+    const contractAddress = addresses.epnsToken
+    const now = new Date()
+    const secondsSinceEpoch = Math.round(now.getTime() / 1000)
+    const expiry = (secondsSinceEpoch + 10000).toString()
+
+    const domain = {
+      name: contractName,
+      chainId: chainId,
+      verifyingContract: contractAddress
+    }
+
+    const types = {
+      Delegation: [
+        {name: "delegatee", type: "address"},
+        {name: "nonce", type: "uint256"},
+        {name: "expiry", type: "uint256"},
+      ]
+    }
+
+    const value ={
+      'delegatee': newDelegatee,
+      'nonce': nonce,
+      'expiry':expiry
+    }
+    const signature = await signerObject._signTypedData(domain, types, value)
+    const sig = ethers.utils.splitSignature(signature)
+    console.log(sig)
+    
+  }
 
   const delegateAction = async (newDelegatee) => {
+    
+
     setTxInProgress(true);
 
     const isAddress = await isValidAddress(newDelegatee)
@@ -209,9 +245,12 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       });
       setTxInProgress(false);
       return;
-    }
+    }    
 
     let sendWithTxPromise;
+    //gasless delegation
+    createTransactionObject(newDelegatee)
+    //call the server API
     sendWithTxPromise = epnsToken.delegate(newDelegatee);
     sendWithTxPromise
       .then(async tx => {

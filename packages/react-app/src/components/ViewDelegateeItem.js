@@ -1,4 +1,5 @@
 import React from "react";
+import Loader from 'react-loader-spinner'
 import styled, { css } from 'styled-components';
 import Blockies from "components/BlockiesIdenticon";
 import { Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField } from 'components/SharedStyling';
@@ -7,7 +8,6 @@ import { Device } from 'assets/Device';
 import { ToastContainer, toast } from 'react-toastify';
 import EPNSCoreHelper from "helpers/EPNSCoreHelper";
 import 'react-toastify/dist/ReactToastify.min.css';
-import Loader from 'react-loader-spinner';
 
 import Skeleton from '@yisheng90/react-loading';
 import { FiTwitter } from 'react-icons/fi';
@@ -19,11 +19,40 @@ import { useWeb3React } from '@web3-react/core';
 import { ethers } from "ethers";
 import { keccak256, arrayify, hashMessage, recoverPublicKey } from 'ethers/utils';
 
+export const PUSH_BALANCE_TRESHOLD = 500; //minimum number of push
+export const GAS_LIMIT = 50; //dollars limit of gas;
+export const ERROR_TOAST_DEFAULTS = {
+  type: toast.TYPE.ERROR,
+  autoClose: 5000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  progress: undefined
+};
+
+
 function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalance, theme }) {
   const { account, library } = useWeb3React();
   const [loading, setLoading] = React.useState(true);
+  const [txLoading, setTxLoading] = React.useState(false);
   const [txInProgress, setTxInProgress] = React.useState(false);
   const [isBalance, setIsBalance] = React.useState(false);
+
+  const checkForDelegateError = async(gasEstimate) => {
+    // return false if no error
+    // otherwise return error message
+    if(pushBalance < PUSH_BALANCE_TRESHOLD){
+      return "Insufficient Push Balance, Please make sure you have at least 500 PUSH" 
+    }
+    // get gas price
+    const gasPrice = await EPNSCoreHelper.getGasPriceInDollars(library);
+    const totalCost = gasPrice * gasEstimate;
+    if(totalCost > GAS_LIMIT){
+      return "Gas Price is too high, Please try again in a while." 
+    }
+    return false
+  }
 
   React.useEffect(() => {
     setLoading(false);
@@ -35,7 +64,6 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   const createTransactionObject = async (newDelegatee) => {
     const contractName = await epnsToken.name()
     const nonce = await epnsToken.nonces(account)
-    console.log(nonce.toString())
     const chainId = 1
     const contractAddress = addresses.epnsToken
     const now = new Date()
@@ -63,9 +91,27 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
       'expiry': expiry
     }
     const signature = await signerObject._signTypedData(domain, types, value)
-    console.log(signature)
-    await callDelegateAPI(signature, newDelegatee, nonce, expiry)
+    var {r, s, v} = ethers.utils.splitSignature(signature);
+    const gasEstimate = await epnsToken.estimateGas.delegateBySig(newDelegatee, nonce, expiry, v, r, s);
 
+    const errorMessage = await checkForDelegateError(gasEstimate);
+    if(errorMessage){
+      toast.dark(errorMessage, {
+        position: "bottom-right",
+        ...ERROR_TOAST_DEFAULTS
+      });
+    }
+    try{
+      await callDelegateAPI(signature, newDelegatee, nonce, expiry)
+    }catch(err){
+      toast.dark(err.message, {
+        position: "bottom-right",
+        ...ERROR_TOAST_DEFAULTS
+      });
+    }
+    finally{
+      setTxLoading(false);
+    }
   }
 
   const callDelegateAPI = async (signature, delegatee, nonce, expiry) => {
@@ -74,6 +120,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
 
 
   const delegateAction = async (delegateeAddress) => {
+    if(txInProgress) return;
     setTxInProgress(true);
     if (!isBalance) {
       toast.dark("No PUSH to Delegate!", {
@@ -90,6 +137,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
       setTxInProgress(false);
       return;
     }
+    setTxLoading(true);
     await createTransactionObject(delegateeAddress)
     // let sendWithTxPromise;
     // sendWithTxPromise = epnsToken.delegate(delegateeAddress);
@@ -209,10 +257,23 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
           </Item>
           <ItemBreak></ItemBreak>
           <UnsubscribeButton >
-            <ActionTitle onClick={() => {
-              delegateAction(delegateeObject.wallet)
-            }}
-            >Delegate</ActionTitle>
+            {
+              txLoading ? (
+                <ActionTitle>
+                 <Loader
+                   type="Oval"
+                   color="#35c5f3"
+                   height={20}
+                   width={20}
+                />
+                </ActionTitle>
+              ): (
+                <ActionTitle onClick={() => {
+                  delegateAction(delegateeObject.wallet)
+                }}
+                >Delegate</ActionTitle>
+              )
+            }
           </UnsubscribeButton>
 
           <Item

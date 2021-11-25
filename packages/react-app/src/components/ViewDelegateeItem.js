@@ -96,7 +96,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
 
     const errorMessage = await checkForDelegateError(gasEstimate);
     if(errorMessage){
-      toast.dark(errorMessage, {
+      return toast.dark(errorMessage, {
         position: "bottom-right",
         ...ERROR_TOAST_DEFAULTS
       });

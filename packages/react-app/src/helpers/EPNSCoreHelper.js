@@ -1,13 +1,24 @@
 import React from "react";
-
+import axios from 'axios';
 import { addresses, abis } from "@project/contracts";
 import { ethers } from "ethers";
 import { parseEther, bigNumber } from 'ethers/utils'
 
 // FeedDB Helper Function
 const EPNSCoreHelper = {
+  // get gas price in dollars
+  getGasPriceInDollars: async (library) => {
+    const ethPrice = await axios.get("https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD") 
+    .then(({data}) => data.USD || 0);
+    const gasPriceInWei = await library.getGasPrice();
+    const gasPriceInEth = ethers.utils.formatEther(gasPriceInWei);
+    const gasPriceInUsd = gasPriceInEth * ethPrice;
+    return gasPriceInUsd;
+  },
+
   // To get owner info
   getOwnerInfo: async (contract) => {
+    
     const enableLogs = 0;
 
     return new Promise ((resolve, reject) => {

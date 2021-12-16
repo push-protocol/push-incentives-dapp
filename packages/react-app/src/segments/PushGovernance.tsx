@@ -11,7 +11,7 @@ import { addresses, abis } from "@project/contracts";
 import EPNSCoreHelper from 'helpers/EPNSCoreHelper';
 import { ethers } from "ethers";
 import { GAS_LIMIT, PUSH_BALANCE_TRESHOLD, ERROR_TOAST_DEFAULTS } from "../components/ViewDelegateeItem";
-
+import { postReq } from "../api/index";
 import Blockies from "components/BlockiesIdenticon";
 
 import DisplayNotice from "components/DisplayNotice";
@@ -45,7 +45,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
   const [showDelegateePrompt, setShowDelegateePrompt] = React.useState(false);
   const [delegatee, setDelegatee] = React.useState(null);
-  const [delegateTxLoading ,setDelegateTxLoading] = React.useState(false);
+  const [delegateTxLoading, setDelegateTxLoading] = React.useState(false);
 
   const [showAnswers, setShowAnswers] = React.useState([]);
   const [selfVotingPower, setSelfVotingPower] = React.useState(null);
@@ -58,17 +58,17 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     setShowAnswers(newShowAnswers);
   }
 
-  const checkForDelegateError = async(gasEstimate) => {
+  const checkForDelegateError = async (gasEstimate) => {
     // return false if no error
     // otherwise return error message
-    if(tokenBalance < PUSH_BALANCE_TRESHOLD){
-      return "Insufficient Push Balance, Please make sure you have at least 500 PUSH" 
+    if (tokenBalance < PUSH_BALANCE_TRESHOLD) {
+      return "Insufficient Push Balance, Please make sure you have at least 500 PUSH"
     }
     // get gas price
     const gasPrice = await EPNSCoreHelper.getGasPriceInDollars(library);
     const totalCost = gasPrice * gasEstimate;
-    if(totalCost > GAS_LIMIT){
-      return "Gas Price is too high, Please try again in a while." 
+    if (totalCost > GAS_LIMIT) {
+      return "Gas Price is too high, Please try again in a while."
     }
     return false
   }
@@ -238,32 +238,32 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       'expiry': expiry
     }
     const signature = await signerObject._signTypedData(domain, types, value)
-    var {r, s, v} = ethers.utils.splitSignature(signature);
+    var { r, s, v } = ethers.utils.splitSignature(signature);
     const gasEstimate = await epnsToken.estimateGas.delegateBySig(newDelegatee, nonce, expiry, v, r, s);
     const errorMessage = await checkForDelegateError(gasEstimate);
 
-    if(errorMessage){
+    if (errorMessage) {
       return toast.dark(errorMessage, {
         position: "bottom-right",
         ...ERROR_TOAST_DEFAULTS
       });
     }
-    try{
+    try {
       await callDelegateAPI(signature, newDelegatee, nonce, expiry)
-    }catch(err){
+    } catch (err) {
       toast.dark(err.message, {
         position: "bottom-right",
         ...ERROR_TOAST_DEFAULTS
       });
     }
-    finally{
+    finally {
       setTxInProgress(false);
     }
   }
-//Alex
-//
+  //Alex
+  //
   const callDelegateAPI = async (signature, delegatee, nonce, expiry) => {
-
+    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delgatee: delegatee, nonce: nonce, expiry: expiry })
   }
 
   const delegateAction = async (newDelegatee) => {

@@ -7,6 +7,7 @@ import { Device } from 'assets/Device';
 
 import { ToastContainer, toast } from 'react-toastify';
 import EPNSCoreHelper from "helpers/EPNSCoreHelper";
+import {postReq} from "../api/index"
 import 'react-toastify/dist/ReactToastify.min.css';
 
 import Skeleton from '@yisheng90/react-loading';
@@ -115,7 +116,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   }
 
   const callDelegateAPI = async (signature, delegatee, nonce, expiry) => {
-
+    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delgatee: delegatee, nonce: nonce, expiry: expiry })
   }
 
 

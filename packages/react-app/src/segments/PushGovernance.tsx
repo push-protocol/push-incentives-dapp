@@ -208,7 +208,6 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
   const createTransactionObject = async (newDelegatee) => {
     const contractName = await epnsToken.name()
-    console.log(epnsToken)
     const nonce = await epnsToken.nonces(account)
     console.log(nonce.toString())
     const chainId = 1
@@ -216,14 +215,12 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     const now = new Date()
     const secondsSinceEpoch = Math.round(now.getTime() / 1000)
     const expiry = (secondsSinceEpoch + 10800).toString()
-    console.log(expiry)
 
     const domain = {
       name: contractName,
       chainId: chainId,
       verifyingContract: contractAddress
     }
-
     const types = {
       Delegation: [
         { name: "delegatee", type: "address" },
@@ -231,11 +228,10 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
         { name: "expiry", type: "uint256" },
       ]
     }
-
     const value = {
-      'delegatee': newDelegatee,
-      'nonce': nonce,
-      'expiry': expiry
+      'delegatee': newDelegatee.toString(),
+      'nonce': nonce.toString(),
+      'expiry': expiry.toString()
     }
     const signature = await signerObject._signTypedData(domain, types, value)
     var { r, s, v } = ethers.utils.splitSignature(signature);
@@ -263,7 +259,8 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   //Alex
   //
   const callDelegateAPI = async (signature, delegatee, nonce, expiry) => {
-    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delgatee: delegatee, nonce: nonce, expiry: expiry })
+    // console.log(`🚀 ~ file: PushGovernance.tsx ~ line 271 ~ callDelegateAPI ~ signature obj delegator: ${account} signature: ${signature} delegatee: ${delegatee} nonce: ${nonce} expiry: ${expiry}  `)
+    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delegatee: delegatee, nonce: nonce.toString(), expiry: expiry })
   }
 
   const delegateAction = async (newDelegatee) => {

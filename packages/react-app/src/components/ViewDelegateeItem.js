@@ -40,12 +40,16 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   const [txInProgress, setTxInProgress] = React.useState(false);
   const [isBalance, setIsBalance] = React.useState(false);
 
+  React.useEffect(() => {
+    setLoading(false);
+    if (pushBalance !== 0) {
+      setIsBalance(true)
+    }
+  }, [account, delegateeObject]);
+
   const checkForDelegateError = async(gasEstimate) => {
     // return false if no error
     // otherwise return error message
-    if(pushBalance < PUSH_BALANCE_TRESHOLD){
-      return "Insufficient Push Balance, Please make sure you have at least 500 PUSH" 
-    }
     // get gas price
     const gasPrice = await EPNSCoreHelper.getGasPriceInDollars(library);
     const totalCost = gasPrice * gasEstimate;
@@ -55,13 +59,6 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
     return false
   }
 
-  React.useEffect(() => {
-    setLoading(false);
-    if (pushBalance !== 0) {
-      setIsBalance(true)
-    }
-  }, [account, delegateeObject]);
-//Alex
   const createTransactionObject = async (newDelegatee) => {
     const contractName = await epnsToken.name()
     const nonce = await epnsToken.nonces(account)
@@ -87,9 +84,9 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
     }
 
     const value = {
-      'delegatee': newDelegatee,
-      'nonce': nonce,
-      'expiry': expiry
+      'delegatee': newDelegatee.toString(),
+      'nonce': nonce.toString(),
+      'expiry': expiry.toString()
     }
     const signature = await signerObject._signTypedData(domain, types, value)
     var {r, s, v} = ethers.utils.splitSignature(signature);
@@ -116,9 +113,64 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   }
 
   const callDelegateAPI = async (signature, delegatee, nonce, expiry) => {
-    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delgatee: delegatee, nonce: nonce, expiry: expiry })
+    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delgatee: delegatee, nonce: nonce.toString(), expiry: expiry })
   }
 
+  //execute delegate tx wth gas when tokenbalance < PUSH_BALANCE_TRESHOLD
+  const executeDelegateTx = async (delegateeAddress) => {
+    let sendWithTxPromise;
+    sendWithTxPromise = epnsToken.delegate(delegateeAddress);
+    sendWithTxPromise
+      .then(async tx => {
+
+        let txToast = toast.dark(<LoaderToast msg="Waiting for Confirmation..." color="#35c5f3"/>, {
+          position: "bottom-right",
+          autoClose: false,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
+        try {
+          await library.waitForTransaction(tx.hash);
+
+          toast.update(txToast, {
+            render: "Transaction Completed!",
+            type: toast.TYPE.SUCCESS,
+            autoClose: 5000
+          });
+
+          setTxInProgress(false);
+          setShowDelegateePrompt(false);
+        }
+        catch(e) {
+          toast.update(txToast, {
+            render: "Transaction Failed! (" + e.name + ")",
+            type: toast.TYPE.ERROR,
+            autoClose: 5000
+          });
+
+          setTxInProgress(false);
+        }
+      })
+      .catch(err => {
+        toast.dark('Transaction Cancelled!', {
+          position: "bottom-right",
+          type: toast.TYPE.ERROR,
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
+        setTxInProgress(false);
+      })
+
+  }
 
   const delegateAction = async (delegateeAddress) => {
     if(txInProgress) return;
@@ -139,51 +191,11 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
       return;
     }
     setTxLoading(true);
+    if (pushBalance < PUSH_BALANCE_TRESHOLD) {
+      executeDelegateTx(delegateeAddress)
+      return;
+    }
     await createTransactionObject(delegateeAddress)
-    // let sendWithTxPromise;
-    // sendWithTxPromise = epnsToken.delegate(delegateeAddress);
-    // sendWithTxPromise
-    //   .then(async tx => {
-    //     let txToast = toast.dark(<LoaderToast msg="Waiting for Confirmation..." color="#35c5f3"/>, {
-    //       position: "bottom-right",
-    //       autoClose: false,
-    //       hideProgressBar: true,
-    //       closeOnClick: true,
-    //       pauseOnHover: true,
-    //       draggable: true,
-    //       progress: undefined,
-    //     });
-    //     try {
-    //       await library.waitForTransaction(tx.hash);
-    //       toast.update(txToast, {
-    //         render: "Transaction Completed!",
-    //         type: toast.TYPE.SUCCESS,
-    //         autoClose: 5000
-    //       });
-    //       setTxInProgress(false);
-    //     }
-    //     catch(e) {
-    //       toast.update(txToast, {
-    //         render: "Transaction Failed! (" + e.name + ")",
-    //         type: toast.TYPE.ERROR,
-    //         autoClose: 5000
-    //       });
-    //       setTxInProgress(false);
-    //     }
-    //   })
-    //   .catch(err => {
-    //     toast.dark('Transaction Cancelled!', {
-    //       position: "bottom-right",
-    //       type: toast.TYPE.ERROR,
-    //       autoClose: 5000,
-    //       hideProgressBar: false,
-    //       closeOnClick: true,
-    //       pauseOnHover: true,
-    //       draggable: true,
-    //       progress: undefined,
-    //     });
-    //     setTxInProgress(false);
-    //   })
   }
 
   // toast customize

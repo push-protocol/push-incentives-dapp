@@ -143,7 +143,6 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
           });
 
           setTxInProgress(false);
-          setShowDelegateePrompt(false);
         }
         catch(e) {
           toast.update(txToast, {

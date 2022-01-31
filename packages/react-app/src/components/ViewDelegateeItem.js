@@ -20,7 +20,7 @@ import { useWeb3React } from '@web3-react/core';
 import { ethers } from "ethers";
 import { keccak256, arrayify, hashMessage, recoverPublicKey } from 'ethers/utils';
 
-export const PUSH_BALANCE_TRESHOLD = 250; //minimum number of push
+export const PUSH_BALANCE_TRESHOLD = 100; //minimum number of push
 export const GAS_LIMIT = 50; //dollars limit of gas;
 export const ERROR_TOAST_DEFAULTS = {
   type: toast.TYPE.ERROR,

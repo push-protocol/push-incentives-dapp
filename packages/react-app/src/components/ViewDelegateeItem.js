@@ -60,6 +60,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   }
 
   const createTransactionObject = async (newDelegatee) => {
+  console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 63 ~ createTransactionObject ~ newDelegatee", newDelegatee)
     const contractName = await epnsToken.name()
     const nonce = await epnsToken.nonces(account)
     const chainId = 1
@@ -113,11 +114,13 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   }
 
   const callDelegateAPI = async (signature, delegatee, nonce, expiry) => {
-    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delgatee: delegatee, nonce: nonce.toString(), expiry: expiry })
+    console.log(`🚀 ~ file: PushGovernance.tsx ~ line 271 ~ callDelegateAPI ~ signature obj delegator: ${account} signature: ${signature} delegatee: ${delegatee} nonce: ${nonce} expiry: ${expiry}  `)
+    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delegatee: delegatee, nonce: nonce.toString(), expiry: expiry })
   }
 
   //execute delegate tx wth gas when tokenbalance < PUSH_BALANCE_TRESHOLD
   const executeDelegateTx = async (delegateeAddress) => {
+    console.log("delegateeAddress", delegateeAddress)
     let sendWithTxPromise;
     sendWithTxPromise = epnsToken.delegate(delegateeAddress);
     sendWithTxPromise

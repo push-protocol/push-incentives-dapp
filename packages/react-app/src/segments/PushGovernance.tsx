@@ -254,7 +254,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   }
   //call backend api to execute the delegate tx
   const callDelegateAPI = async (signature, delegatee, nonce, expiry) => {
-    // console.log(`🚀 ~ file: PushGovernance.tsx ~ line 271 ~ callDelegateAPI ~ signature obj delegator: ${account} signature: ${signature} delegatee: ${delegatee} nonce: ${nonce} expiry: ${expiry}  `)
+    console.log(`🚀 ~ file: PushGovernance.tsx ~ line 271 ~ callDelegateAPI ~ signature obj delegator: ${account} signature: ${signature} delegatee: ${delegatee} nonce: ${nonce} expiry: ${expiry}  `)
     await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delegatee: delegatee, nonce: nonce.toString(), expiry: expiry })
   }
 

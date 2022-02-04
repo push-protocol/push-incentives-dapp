@@ -30,7 +30,7 @@ function Home({ setBadgeCount, bellPressed }) {
   const [epnsReadProvider, setEpnsReadProvider] = React.useState(null);
   const [epnsWriteProvider, setEpnsWriteProvider] = React.useState(null);
 
-  const [controlAt, setControlAt] = React.useState(0);
+  const [controlAt, setControlAt] = React.useState(1);
   const [adminStatusLoaded, setAdminStatusLoaded] = React.useState(false);
   const [channelAdmin, setChannelAdmin] = React.useState(false);
   const [channelJson, setChannelJson] = React.useState([]);
@@ -112,14 +112,14 @@ function Home({ setBadgeCount, bellPressed }) {
   return (
     <Container>
       <Controls>
-        <ControlButton index={0} active={controlAt == 0 ? 1 : 0} border="#e20880"
+        {/* <ControlButton index={0} active={controlAt == 0 ? 1 : 0} border="#e20880"
           onClick={() => {
             userClickedAt(0)
           }}
         >
           <ControlImage src="./svg/yield.svg" active={controlAt == 0 ? 1 : 0} />
           <ControlText active={controlAt == 0 ? 1 : 0}>Yield Farming</ControlText>
-        </ControlButton>
+        </ControlButton> */}
 
         {/*
         <ControlButton index={1} active={controlAt == 1 ? 1 : 0} border="#35c5f3"

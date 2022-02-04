@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const BASE_URL = "https://backend-staging.epns.io/apis"; 
-const BASE_URL = "https://tooling.epns.io/apis"; 
+const BASE_URL = "https://staging-tooling.epns.io/apis"; 
 // const BASE_URL = "";
 // const BASE_URL = "http://localhost:4000/apis"; //for local push node
 

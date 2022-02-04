@@ -19,7 +19,7 @@ const RPC_URLS: { [chainId: number]: string } = {
   3: process.env.REACT_APP_RPC_URL_3 as string
 }
 
-export const injected = new InjectedConnector({ supportedChainIds: [1] })
+export const injected = new InjectedConnector({ supportedChainIds: [3] })
 
 // export const network = new NetworkConnector({
 //   urls: { 3: RPC_URLS[3] },
@@ -44,7 +44,7 @@ export const ledger = new LedgerConnector({ chainId: 1, url: RPC_URLS[1], pollin
 console.log(RPC_URLS[1]);
 
 export const trezor = new TrezorConnector({
-  chainId: 1,
+  chainId: 42,
   url: RPC_URLS[1],
   pollingInterval: POLLING_INTERVAL,
   manifestEmail: 'support@epns.io',

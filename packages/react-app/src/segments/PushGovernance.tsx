@@ -206,7 +206,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     const contractName = await epnsToken.name()
     const nonce = await epnsToken.nonces(account)
     console.log(nonce.toString())
-    const chainId = 1
+    const chainId = 3
     const contractAddress = addresses.epnsToken
     const now = new Date()
     const secondsSinceEpoch = Math.round(now.getTime() / 1000)
@@ -323,6 +323,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       setTxInProgress(false);
       return;
     }
+    console.log("balance",tokenBalance);
     if (tokenBalance == 0) {
       toast.dark("No PUSH to Delegate!", {
         position: "bottom-right",

@@ -478,8 +478,18 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                           }
                         }}
                       >
-                        <Span color="#fff" weight="400">Delegate to Others</Span>
-                      </ButtonAlt>
+               {          txInProgress ? (
+                <ActionTitle>
+                 <Loader
+                   type="Oval"
+                   color="#35c5f3"
+                   height={20}
+                   width={20}
+                />
+                </ActionTitle>
+              ):(<Span color="#fff" weight="400">Delegate to Others</Span>)
+               }  
+              </ButtonAlt>
 
                       {!showDelegateePrompt &&
                         <ButtonAlt
@@ -487,8 +497,20 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                           disabled={txInProgress ? true : false}
                           onClick={() => { delegateAction(account) }}
                         >
+                         {
+                        txInProgress ? (
+                          <ActionTitle>
+                           <Loader
+                             type="Oval"
+                             color="#35c5f3"
+                             height={20}
+                             width={20}
+                          />
+                          </ActionTitle>
+                        ):
                           <Span color="#fff" weight="400">Delegate to Myself</Span>
-                        </ButtonAlt>
+                        }
+                          </ButtonAlt>
                       }
 
                       <ButtonAlt
@@ -503,9 +525,22 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                             }
                           }
                         }
-                      >
+                      >{
+                        txInProgress ? (
+                          <ActionTitle>
+                           <Loader
+                             type="Oval"
+                             color="#35c5f3"
+                             height={20}
+                             width={20}
+                          />
+                          </ActionTitle>
+                        ):
+                      
+                      
                         <Span color="#fff" weight="400">Query Voting Power</Span>
-                      </ButtonAlt>
+                        }
+                        </ButtonAlt>
 
                       {showDelegateePrompt &&
                         <ButtonAlt

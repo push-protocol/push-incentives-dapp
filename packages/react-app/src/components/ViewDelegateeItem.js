@@ -113,7 +113,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   }
 
   const callDelegateAPI = async (signature, delegatee, nonce, expiry) => {
-    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delgatee: delegatee, nonce: nonce.toString(), expiry: expiry })
+    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delegatee: delegatee, nonce: nonce.toString(), expiry: expiry })
   }
 
   //execute delegate tx wth gas when tokenbalance < PUSH_BALANCE_TRESHOLD

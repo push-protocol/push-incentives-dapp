@@ -39,7 +39,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   const [txLoading, setTxLoading] = React.useState(false);
   const [txInProgress, setTxInProgress] = React.useState(false);
   const [isBalance, setIsBalance] = React.useState(false);
-
+  const [transactionMode,setTransactionMode] = React.useState('gasless');
   React.useEffect(() => {
     setLoading(false);
     if (pushBalance !== 0) {
@@ -193,6 +193,10 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
       return;
     }
     setTxLoading(true);
+    if(transactionMode === 'withgas'){
+      executeDelegateTx(delegateeAddress)
+      return;
+    }
     if (pushBalance < PUSH_BALANCE_TRESHOLD) {
       executeDelegateTx(delegateeAddress)
       return;
@@ -271,8 +275,16 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
             <DelegateeWallet size="0.5em" color="#aaa" spacing="0.2em" weight="600" textAlign="center">{delegateeObject.wallet}</DelegateeWallet>
           </Item>
           <ItemBreak></ItemBreak>
+          
+                <SelectTag onChange={e=>setTransactionMode(e.target.value)}>
+                  <option value="gasless">Gasless</option>
+                  <option value="withgas">With Gas</option>
+                </SelectTag>
+          <ItemBreak></ItemBreak>
           <UnsubscribeButton >
+                
             {
+              
               txLoading ? (
                 <ActionTitle>
                  <Loader
@@ -283,17 +295,20 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
                 />
                 </ActionTitle>
               ): (
+                <>
+               
                 <ActionTitle onClick={() => {
                   delegateAction(delegateeObject.wallet)
                 }}
                 >Delegate</ActionTitle>
+                </>
               )
             }
           </UnsubscribeButton>
 
           <Item
             position="absolute"
-            bottom="2px"
+            bottom="10px"
             left="-2px"
             padding="4px"
           >
@@ -315,6 +330,12 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
 }
 
 // css styles
+const SelectTag=styled.select`
+  border: none;
+  padding: 0 10px;
+  background: transparent;
+  outline: none;
+`;
 const Container = styled.div`
   flex: 1;
   display: flex;
@@ -334,7 +355,7 @@ const DelegateeItem = styled.div`
   min-width: 220px;
   flex: 1;
   margin: 20px 20px;
-  padding: 4px;
+  padding: 1px;
   border: 2px solid #fafafa;
   overflow: hidden;
   border-radius: 20px;
@@ -343,7 +364,7 @@ const DelegateeItem = styled.div`
   justify-content: center;
   align-self: flex-start;
   position: relative;
-
+  
   &:before {
     content: '';
     position: absolute;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled, { css } from 'styled-components';
 import { Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, LI, Image, P, Span, Anchor, Button, FormSubmision, Input, TextField, UL } from 'components/SharedStyling';
 import Loader from 'react-loader-spinner'
@@ -52,6 +52,10 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const [newDelegateeAddress, setNewDelegateeAddress] = React.useState("0x");
   const [newDelegateeVotingPower, setNewDelegateeVotingPower] = React.useState(null);
   const [signerObject, setSignerObject] = React.useState(null);
+  const [gaslessInfo,setGaslessInfo]=useState([]);
+  const [transactionMode,setTransactionMode] = React.useState('gasless');
+
+
   const toggleShowAnswer = (id) => {
     let newShowAnswers = [...showAnswers];
     newShowAnswers[id] = !newShowAnswers[id];
@@ -338,6 +342,10 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       setTxInProgress(false);
       return;
     }
+    if(transactionMode === 'withgas'){
+      executeDelegateTx(newDelegatee)
+      return;
+    }
     if (tokenBalance < PUSH_BALANCE_TRESHOLD) {
       executeDelegateTx(newDelegatee)
       return;
@@ -421,8 +429,25 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                       <ItemH flex="initial" padding="5px">
                         <Span weight="500" padding="0px 8px 0px 0px">Voting Power: </Span>
                         <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{selfVotingPower}</CurvedSpan>
-                      </ItemH>
+                        </ItemH>
 
+
+                      {
+                        (!gaslessInfo.length)?
+                        // <Item align="flex-start" self="stretch" padding="10px" size="16px">
+                        <>
+                      <ItemH flex="initial" padding="5px">
+                        <Span weight="500" padding="0px 8px 0px 0px">Gasless Delegatated On: </Span>
+                        <CurvedSpan bg="#e20880" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{selfVotingPower}</CurvedSpan>
+                        </ItemH>
+                        <ItemH flex="initial" padding="5px">
+                        <Span weight="500" padding="0px 8px 0px 0px">Gasless Delegated To: </Span>
+                        <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{selfVotingPower}</CurvedSpan>
+                        </ItemH>
+                        </>
+                        :
+                        <p>User don't have any recent gasless delegation </p>
+                      }
                       {delegatee !== "0x0000000000000000000000000000000000000000" &&
                         <ItemH flex="initial" padding="5px">
                           <Span padding="0px 8px 0px 0px">Delegated To: </Span>
@@ -465,7 +490,16 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
                   <Item self="stretch" align="flex-end">
                     <ItemH>
-
+                    <RadioGroup >
+                    <div>
+                    <input type="radio" id="age1"  name="age" value="30" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
+                    <Label>GasLess </Label><br/>
+                    </div>
+                    <div>
+                    <input type="radio" id="age2" name="age" value="60" onChange={e=>setTransactionMode(e.target.value)}/>
+                    <Label >With Gas </Label><br/>  
+                    </div>
+                    </RadioGroup>
                       <ButtonAlt
                         bg={txInProgress ? "#999" : "#e20880"}
                         disabled={txInProgress ? true : false}
@@ -839,6 +873,20 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 }
 
 // css styles
+
+const RadioGroup=styled.div`
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  width:200px;
+  margin:0px 20px;
+  div{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    width:100px;
+  }
+`;
 const Container = styled.div`
   display: flex;
   flex: 1;
@@ -979,6 +1027,9 @@ const ActionTitle = styled.span`
     visibility: hidden;
   `};
 `
+const Label=styled.label`
+    margin:"10px";
+`;
 const Toaster = styled.div`
   display: flex;
   flex-direction: row;

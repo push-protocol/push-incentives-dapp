@@ -84,11 +84,11 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
     }
     setTxLoading(true);
     if(transactionMode === 'withgas'){
-      executeDelegateTx(delegateeAddress,epnsToken,toast,setTxInProgress,library,LoaderToast)
+     await executeDelegateTx(delegateeAddress,epnsToken,toast,setTxLoading,library,LoaderToast);
       return;
     }
     if (pushBalance < PUSH_BALANCE_TRESHOLD) {
-      executeDelegateTx(delegateeAddress,epnsToken,toast,setTxInProgress,library,LoaderToast)
+      await  executeDelegateTx(delegateeAddress,epnsToken,toast,setTxLoading,library,LoaderToast)
       return;
     }
     await createTransactionObject(delegateeAddress,account,epnsToken,addresses,signerObject,library,setTxLoading);

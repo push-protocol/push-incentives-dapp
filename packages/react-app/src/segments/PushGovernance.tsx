@@ -55,7 +55,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const [newDelegateeAddress, setNewDelegateeAddress] = React.useState("0x");
   const [newDelegateeVotingPower, setNewDelegateeVotingPower] = React.useState(null);
   const [signerObject, setSignerObject] = React.useState(null);
-  const [gaslessInfo,setGaslessInfo]=useState([]);
+  const [gaslessInfo,setGaslessInfo]=useState(null);
   const [transactionMode,setTransactionMode] = React.useState('gasless');
 
 
@@ -65,8 +65,9 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     setShowAnswers(newShowAnswers);
   }
   React.useEffect(()=>{
-      postReq('/gov/prev_delegation',{"walletAddress": "0xB45024B432F0Bb90497887Dff21138A26d03a921"}).then(res=>{
-        console.log("result",res)
+      postReq('/gov/prev_delegation',{"walletAddress": account}).then(res=>{
+        console.log("result",res.data.user)
+        setGaslessInfo(res.data.user);
       }
       )
   },[]);
@@ -338,16 +339,16 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                       }
 
                       {
-                        (gaslessInfo.length)?
+                        (gaslessInfo)?
                         // <Item align="flex-start" self="stretch" padding="10px" size="16px">
                         <>
                       <ItemH flex="initial" padding="5px">
                         <Span weight="500" padding="0px 8px 0px 0px">Gasless Delegatated On: </Span>
-                        <CurvedSpan bg="#e20880" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{selfVotingPower}</CurvedSpan>
+                        <CurvedSpan bg="#e20880" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{new Date(gaslessInfo.timestamp).toLocaleDateString()}</CurvedSpan>
                         </ItemH>
                         <ItemH flex="initial" padding="5px">
                         <Span weight="500" padding="0px 8px 0px 0px">Gasless Delegated To: </Span>
-                        <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{selfVotingPower}</CurvedSpan>
+                        <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{gaslessInfo.delegatee}</CurvedSpan>
                         </ItemH>
                         </>
                         :
@@ -393,13 +394,14 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                     <RadioGroup >
                     <div>
                     <input type="radio" id="gasless" checked   name="gasless" value="gasless" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
-                    <Label>GasLess </Label><br/>
+                    <Label>Gasless </Label><br/>
                     </div>
                     <div>
                     <input type="radio" id="withgas" name="gasless" value="withgas" onChange={e=>setTransactionMode(e.target.value)}/>
                     <Label >With Gas </Label><br/>  
                     </div>
                     </RadioGroup>
+                  {!txInProgress &&
                       <ButtonAlt
                         bg={txInProgress ? "#999" : "#e20880"}
                         disabled={txInProgress ? true : false}
@@ -412,38 +414,19 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                           }
                         }}
                       >
-               {          txInProgress ? (
-                <ActionTitle>
-                 <Loader
-                   type="Oval"
-                   color="#35c5f3"
-                   height={20}
-                   width={20}
-                />
-                </ActionTitle>
-              ):(<Span color="#fff" weight="400">Delegate to Others</Span>)
-               }  
-              </ButtonAlt>
-
-                      {!showDelegateePrompt &&
+                      
+                <Span color="#fff" weight="400">Delegate to Others</Span>
+                 
+                </ButtonAlt>
+               }
+                      {!showDelegateePrompt && !txInProgress &&
                         <ButtonAlt
                           bg={txInProgress ? "#999" : "#51CAF3"}
                           disabled={txInProgress ? true : false}
                           onClick={() => { delegateAction(account) }}
                         >
-                         {
-                        txInProgress ? (
-                          <ActionTitle>
-                           <Loader
-                             type="Oval"
-                             color="#35c5f3"
-                             height={20}
-                             width={20}
-                          />
-                          </ActionTitle>
-                        ):
                           <Span color="#fff" weight="400">Delegate to Myself</Span>
-                        }
+                        
                           </ButtonAlt>
                       }
 

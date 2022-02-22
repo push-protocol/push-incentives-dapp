@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled, { css } from 'styled-components';
 import { Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, LI, Image, P, Span, Anchor, Button, FormSubmision, Input, TextField, UL } from 'components/SharedStyling';
 import Loader from 'react-loader-spinner'
@@ -19,6 +19,9 @@ import ViewDelegateeItem from "components/ViewDelegateeItem";
 
 import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
 import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
+import {createTransactionObject} from '../helpers/GaslessHelper';
+import {executeDelegateTx} from '../helpers/WithGasHelper';
+
 const delegateesJSON = require("config/delegatees.json")
 const VOTING_TRESHOLD = 75000; //the treshold for delegates
 // Create Header
@@ -52,12 +55,22 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const [newDelegateeAddress, setNewDelegateeAddress] = React.useState("0x");
   const [newDelegateeVotingPower, setNewDelegateeVotingPower] = React.useState(null);
   const [signerObject, setSignerObject] = React.useState(null);
+  const [gaslessInfo,setGaslessInfo]=useState(null);
+  const [transactionMode,setTransactionMode] = React.useState('gasless');
+
+
   const toggleShowAnswer = (id) => {
     let newShowAnswers = [...showAnswers];
     newShowAnswers[id] = !newShowAnswers[id];
     setShowAnswers(newShowAnswers);
   }
-
+  React.useEffect(()=>{
+      postReq('/gov/prev_delegation',{"walletAddress": account}).then(res=>{
+        console.log("result",res.data.user)
+        setGaslessInfo(res.data.user);
+      }
+      )
+  },[]);
   React.useEffect(() => {
     if (account && account != '') {
       // Check if the address is the same
@@ -202,117 +215,9 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     return false
   }
 
-  const createTransactionObject = async (newDelegatee) => {
-    const contractName = await epnsToken.name()
-    const nonce = await epnsToken.nonces(account)
-    console.log(nonce.toString())
-    const chainId = 1
-    const contractAddress = addresses.epnsToken
-    const now = new Date()
-    const secondsSinceEpoch = Math.round(now.getTime() / 1000)
-    const expiry = (secondsSinceEpoch + 10800).toString()
-
-    const domain = {
-      name: contractName,
-      chainId: chainId,
-      verifyingContract: contractAddress
-    }
-    const types = {
-      Delegation: [
-        { name: "delegatee", type: "address" },
-        { name: "nonce", type: "uint256" },
-        { name: "expiry", type: "uint256" },
-      ]
-    }
-    const value = {
-      'delegatee': newDelegatee.toString(),
-      'nonce': nonce.toString(),
-      'expiry': expiry.toString()
-    }
-    const signature = await signerObject._signTypedData(domain, types, value)
-    var { r, s, v } = ethers.utils.splitSignature(signature);
-    const gasEstimate = await epnsToken.estimateGas.delegateBySig(newDelegatee, nonce, expiry, v, r, s);
-    const errorMessage = await checkForDelegateError(gasEstimate);
-
-    if (errorMessage) {
-      return toast.dark(errorMessage, {
-        position: "bottom-right",
-        ...ERROR_TOAST_DEFAULTS
-      });
-    }
-    try {
-      await callDelegateAPI(signature, newDelegatee, nonce, expiry)
-    } catch (err) {
-      toast.dark(err.message, {
-        position: "bottom-right",
-        ...ERROR_TOAST_DEFAULTS
-      });
-    }
-    finally {
-      setTxInProgress(false);
-    }
-  }
-  //call backend api to execute the delegate tx
-  const callDelegateAPI = async (signature, delegatee, nonce, expiry) => {
-    // console.log(`🚀 ~ file: PushGovernance.tsx ~ line 271 ~ callDelegateAPI ~ signature obj delegator: ${account} signature: ${signature} delegatee: ${delegatee} nonce: ${nonce} expiry: ${expiry}  `)
-    await postReq("/gov/gasless_delegate", { delegator: account, signature: signature, delegatee: delegatee, nonce: nonce.toString(), expiry: expiry })
-  }
 
   //execute delegate tx wth gas when tokenbalance < PUSH_BALANCE_TRESHOLD
-  const executeDelegateTx = async (newDelegatee) => {
-    let sendWithTxPromise;
-    sendWithTxPromise = epnsToken.delegate(newDelegatee);
-    sendWithTxPromise
-      .then(async tx => {
-
-        let txToast = toast.dark(<LoaderToast msg="Waiting for Confirmation..." color="#35c5f3"/>, {
-          position: "bottom-right",
-          autoClose: false,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-
-        try {
-          await library.waitForTransaction(tx.hash);
-
-          toast.update(txToast, {
-            render: "Transaction Completed!",
-            type: toast.TYPE.SUCCESS,
-            autoClose: 5000
-          });
-
-          setTxInProgress(false);
-          setShowDelegateePrompt(false);
-        }
-        catch(e) {
-          toast.update(txToast, {
-            render: "Transaction Failed! (" + e.name + ")",
-            type: toast.TYPE.ERROR,
-            autoClose: 5000
-          });
-
-          setTxInProgress(false);
-        }
-      })
-      .catch(err => {
-        toast.dark('Transaction Cancelled!', {
-          position: "bottom-right",
-          type: toast.TYPE.ERROR,
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-
-        setTxInProgress(false);
-      })
-
-  }
+  
 
   const delegateAction = async (newDelegatee) => {
     setTxInProgress(true);
@@ -323,6 +228,8 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       setTxInProgress(false);
       return;
     }
+    console.log("balance",tokenBalance);
+   
     if (tokenBalance == 0) {
       toast.dark("No PUSH to Delegate!", {
         position: "bottom-right",
@@ -337,11 +244,16 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       setTxInProgress(false);
       return;
     }
-    if (tokenBalance < PUSH_BALANCE_TRESHOLD) {
-      executeDelegateTx(newDelegatee)
+    
+    if(transactionMode === 'withgas'){
+      executeDelegateTx(newDelegatee,epnsToken,toast,setTxInProgress,library,LoaderToast)
       return;
     }
-    await createTransactionObject(newDelegatee)
+    if (tokenBalance < PUSH_BALANCE_TRESHOLD) {
+      executeDelegateTx(newDelegatee,epnsToken,toast,setTxInProgress,library,LoaderToast)
+      return;
+    }
+    await createTransactionObject(newDelegatee,account,epnsToken,addresses,signerObject,library,setTxInProgress);
     
   }
 
@@ -420,14 +332,31 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                       <ItemH flex="initial" padding="5px">
                         <Span weight="500" padding="0px 8px 0px 0px">Voting Power: </Span>
                         <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{selfVotingPower}</CurvedSpan>
-                      </ItemH>
-
-                      {delegatee !== "0x0000000000000000000000000000000000000000" &&
+                        </ItemH>
+                        {delegatee !== "0x0000000000000000000000000000000000000000" &&
                         <ItemH flex="initial" padding="5px">
                           <Span padding="0px 8px 0px 0px">Delegated To: </Span>
                           <Span weight="600">{delegatee}</Span>
                         </ItemH>
                       }
+
+                      {
+                        (gaslessInfo)?
+                        // <Item align="flex-start" self="stretch" padding="10px" size="16px">
+                        <>
+                      <ItemH flex="initial" padding="5px">
+                        <Span weight="500" padding="0px 8px 0px 0px">Gasless Delegatated On: </Span>
+                        <CurvedSpan bg="#e20880" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{new Date(gaslessInfo.timestamp).toLocaleDateString()}</CurvedSpan>
+                        </ItemH>
+                        <ItemH flex="initial" padding="5px">
+                        <Span weight="500" padding="0px 8px 0px 0px">Gasless Delegated To: </Span>
+                        <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{gaslessInfo.delegatee}</CurvedSpan>
+                        </ItemH>
+                        </>
+                        :
+                        <p>User don't have any recent gasless delegation </p>
+                      }
+                    
                     </Item>
                   </ItemH>
 
@@ -464,7 +393,17 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
                   <Item self="stretch" align="flex-end">
                     <ItemH>
-
+                    <RadioGroup >
+                    <div>
+                    <input type="radio" id="gasless" checked   name="gasless" value="gasless" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
+                    <Label>Gasless </Label><br/>
+                    </div>
+                    <div>
+                    <input type="radio" id="withgas" name="gasless" value="withgas" onChange={e=>setTransactionMode(e.target.value)}/>
+                    <Label >With Gas </Label><br/>  
+                    </div>
+                    </RadioGroup>
+                  {!txInProgress &&
                       <ButtonAlt
                         bg={txInProgress ? "#999" : "#e20880"}
                         disabled={txInProgress ? true : false}
@@ -477,17 +416,20 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                           }
                         }}
                       >
-                        <Span color="#fff" weight="400">Delegate to Others</Span>
-                      </ButtonAlt>
-
-                      {!showDelegateePrompt &&
+                      
+                <Span color="#fff" weight="400">Delegate to Others</Span>
+                 
+                </ButtonAlt>
+               }
+                      {!showDelegateePrompt && !txInProgress &&
                         <ButtonAlt
                           bg={txInProgress ? "#999" : "#51CAF3"}
                           disabled={txInProgress ? true : false}
                           onClick={() => { delegateAction(account) }}
                         >
                           <Span color="#fff" weight="400">Delegate to Myself</Span>
-                        </ButtonAlt>
+                        
+                          </ButtonAlt>
                       }
 
                       <ButtonAlt
@@ -502,9 +444,22 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                             }
                           }
                         }
-                      >
+                      >{
+                        txInProgress ? (
+                          <ActionTitle>
+                           <Loader
+                             type="Oval"
+                             color="#35c5f3"
+                             height={20}
+                             width={20}
+                          />
+                          </ActionTitle>
+                        ):
+                      
+                      
                         <Span color="#fff" weight="400">Query Voting Power</Span>
-                      </ButtonAlt>
+                        }
+                        </ButtonAlt>
 
                       {showDelegateePrompt &&
                         <ButtonAlt
@@ -803,6 +758,20 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 }
 
 // css styles
+
+const RadioGroup=styled.div`
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  width:200px;
+  margin:0px 20px;
+  div{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    width:100px;
+  }
+`;
 const Container = styled.div`
   display: flex;
   flex: 1;
@@ -943,6 +912,9 @@ const ActionTitle = styled.span`
     visibility: hidden;
   `};
 `
+const Label=styled.label`
+    margin:"10px";
+`;
 const Toaster = styled.div`
   display: flex;
   flex-direction: row;

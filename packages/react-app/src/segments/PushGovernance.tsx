@@ -229,6 +229,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       return;
     }
     console.log("balance",tokenBalance);
+   
     if (tokenBalance == 0) {
       toast.dark("No PUSH to Delegate!", {
         position: "bottom-right",
@@ -243,6 +244,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       setTxInProgress(false);
       return;
     }
+    
     if(transactionMode === 'withgas'){
       executeDelegateTx(newDelegatee,epnsToken,toast,setTxInProgress,library,LoaderToast)
       return;

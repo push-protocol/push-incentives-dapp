@@ -70,18 +70,10 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
     if (!isBalance) {
       toast.dark("No PUSH to Delegate!", {
         position: "bottom-right",
-        type: toast.TYPE.ERROR,
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
+        ...ERROR_TOAST_DEFAULTS
       });
-
-      setTxInProgress(false);
-      return;
     }
+ 
     setTxLoading(true);
     if(transactionMode === 'withgas'){
      await executeDelegateTx(delegateeAddress,epnsToken,toast,setTxLoading,library,LoaderToast);

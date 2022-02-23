@@ -37,7 +37,7 @@ export const createTransactionObject = async (newDelegatee,account,epnsToken,add
     console.log("🚀 ~ file: ViewDelegateeItem.js ~ line 63 ~ createTransactionObject ~ newDelegatee", newDelegatee)
       const contractName = await epnsToken.name()
       const nonce = await epnsToken.nonces(account)
-      const chainId = 3
+      const chainId = 1
       const contractAddress = addresses.epnsToken
       const now = new Date()
       const secondsSinceEpoch = Math.round(now.getTime() / 1000)

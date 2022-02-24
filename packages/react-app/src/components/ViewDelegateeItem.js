@@ -35,7 +35,7 @@ export const ERROR_TOAST_DEFAULTS = {
 };
 
 
-function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalance, theme }) {
+function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalance,setGaslessInfo, theme }) {
   const { account, library } = useWeb3React();
   const [loading, setLoading] = React.useState(true);
   const [txLoading, setTxLoading] = React.useState(false);
@@ -84,6 +84,32 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
       return;
     }
     await createTransactionObject(delegateeAddress,account,epnsToken,addresses,signerObject,library,setTxLoading);
+    postReq('/gov/prev_delegation',{"walletAddress": account}).then(res=>{
+      console.log("result",res.data.user)
+      setGaslessInfo(res.data.user);
+      toast.dark("Successfully Delegated", {
+        position: "bottom-right",
+        type: toast.TYPE.SUCCESS,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+    ).catch(e=>{
+      toast.dark(e, {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    })
   }
 
   // toast customize

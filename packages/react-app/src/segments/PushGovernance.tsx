@@ -70,7 +70,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
         setGaslessInfo(res.data.user);
       }
       )
-  },[]);
+  },[gaslessInfo]);
   React.useEffect(() => {
     if (account && account != '') {
       // Check if the address is the same
@@ -254,7 +254,32 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       return;
     }
     await createTransactionObject(newDelegatee,account,epnsToken,addresses,signerObject,library,setTxInProgress);
-    
+    postReq('/gov/prev_delegation',{"walletAddress": account}).then(res=>{
+      console.log("result",res.data.user)
+      setGaslessInfo(res.data.user);
+      toast.dark("Successfully Delegated", {
+        position: "bottom-right",
+        type: toast.TYPE.SUCCESS,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+    ).catch(e=>{
+      toast.dark(e, {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    })
   }
 
 
@@ -508,6 +533,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                           epnsToken={epnsToken}
                           pushBalance={tokenBalance}
                           signerObject={signerObject}
+                          setGaslessInfo={setGaslessInfo}
                           theme="nominee"
                         />
                       )
@@ -562,6 +588,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                         epnsToken={epnsToken}
                         signerObject={signerObject}
                         pushBalance={tokenBalance}
+                        setGaslessInfo={setGaslessInfo}
                         theme="delegate"
                       />
                     </>

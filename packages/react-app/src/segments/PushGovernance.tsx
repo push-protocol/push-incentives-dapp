@@ -70,7 +70,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
         setGaslessInfo(res.data.user);
       }
       )
-  },[gaslessInfo]);
+  },[]);
   React.useEffect(() => {
     if (account && account != '') {
       // Check if the address is the same

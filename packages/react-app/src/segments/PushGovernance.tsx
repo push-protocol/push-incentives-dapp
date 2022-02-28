@@ -257,16 +257,16 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     postReq('/gov/prev_delegation',{"walletAddress": account}).then(res=>{
       console.log("result",res.data.user)
       setGaslessInfo(res.data.user);
-      toast.dark("Successfully Delegated", {
-        position: "bottom-right",
-        type: toast.TYPE.SUCCESS,
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      // toast.dark("Successfully Fetched Prev Delegation Data", {
+      //   position: "bottom-right",
+      //   type: toast.TYPE.SUCCESS,
+      //   autoClose: 5000,
+      //   hideProgressBar: false,
+      //   closeOnClick: true,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      // });
     }
     ).catch(e=>{
       toast.dark(e, {

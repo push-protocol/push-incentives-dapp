@@ -24,6 +24,7 @@ const checkForDelegateError = async(gasEstimate,library) => {
 
     const gasPrice = await EPNSCoreHelper.getGasPriceInDollars(library);
     const totalCost = gasPrice * gasEstimate;
+    alert(totalCost)
     if(totalCost > GAS_LIMIT){
       return "Gas Price is too high, Please try again in a while." 
     }
@@ -78,6 +79,16 @@ export const createTransactionObject = async (newDelegatee,account,epnsToken,add
       }
       try{
         await callDelegateAPI(signature, newDelegatee, nonce, expiry, account)
+         toast.dark("Successfully Delegated", {
+        position: "bottom-right",
+        type: toast.TYPE.SUCCESS,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       }catch(err){
         toast.dark(err.message, {
           position: "bottom-right",

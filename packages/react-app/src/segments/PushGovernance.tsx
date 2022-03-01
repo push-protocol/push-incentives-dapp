@@ -379,7 +379,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                         </ItemH>
                         </>
                         :
-                        <p>User don't have any recent gasless delegation </p>
+                        <p>No recent Gasless Delegation </p>
                       }
                     
                     </Item>

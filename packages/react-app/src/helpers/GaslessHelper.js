@@ -24,7 +24,6 @@ const checkForDelegateError = async(gasEstimate,library) => {
 
     const gasPrice = await EPNSCoreHelper.getGasPriceInDollars(library);
     const totalCost = gasPrice * gasEstimate;
-    alert(totalCost)
     if(totalCost > GAS_LIMIT){
       return "Gas Price is too high, Please try again in a while." 
     }

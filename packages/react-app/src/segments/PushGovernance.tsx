@@ -250,7 +250,17 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       return;
     }
     if (tokenBalance < PUSH_BALANCE_TRESHOLD) {
-      executeDelegateTx(newDelegatee,epnsToken,toast,setTxInProgress,library,LoaderToast)
+      toast.dark("Atleast " + PUSH_BALANCE_TRESHOLD +" PUSH required for gasless delegation!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setTxInProgress(false);
       return;
     }
     await createTransactionObject(newDelegatee,account,epnsToken,addresses,signerObject,library,setTxInProgress);

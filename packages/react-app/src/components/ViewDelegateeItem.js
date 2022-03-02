@@ -22,7 +22,7 @@ import { keccak256, arrayify, hashMessage, recoverPublicKey } from 'ethers/utils
 import {createTransactionObject} from '../helpers/GaslessHelper';
 import {executeDelegateTx} from '../helpers/WithGasHelper';
 
-export const PUSH_BALANCE_TRESHOLD = 0; //minimum number of push
+export const PUSH_BALANCE_TRESHOLD = -1; //minimum number of push
 export const GAS_LIMIT = 50; //dollars limit of gas;
 export const ERROR_TOAST_DEFAULTS = {
   type: toast.TYPE.ERROR,
@@ -67,13 +67,13 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   const delegateAction = async (delegateeAddress) => {
     if(txInProgress) return;
     setTxInProgress(true);
-    if (!isBalance) {
-      toast.dark("No PUSH to Delegate!", {
-        position: "bottom-right",
-        ...ERROR_TOAST_DEFAULTS
-      });
-      return;
-    }
+    // if (!isBalance) {
+    //   toast.dark("No PUSH to Delegate!", {
+    //     position: "bottom-right",
+    //     ...ERROR_TOAST_DEFAULTS
+    //   });
+    //   return;
+    // }
  
     setTxLoading(true);
     if(transactionMode === 'withgas'){
@@ -81,10 +81,23 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
       return;
     }
     if (pushBalance < PUSH_BALANCE_TRESHOLD) {
-      await  executeDelegateTx(delegateeAddress,epnsToken,toast,setTxLoading,library,LoaderToast)
+      // await  executeDelegateTx(delegateeAddress,epnsToken,toast,setTxLoading,library,LoaderToast)
+      toast.dark("Atleast " + PUSH_BALANCE_TRESHOLD +" PUSH required for gasless delegation!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setTxLoading(false);
+      setTxInProgress(false);
       return;
     }
     await createTransactionObject(delegateeAddress,account,epnsToken,addresses,signerObject,library,setTxLoading);
+    setTxInProgress(false);
     postReq('/gov/prev_delegation',{"walletAddress": account}).then(res=>{
       console.log("result",res.data.user)
       setGaslessInfo(res.data.user);
@@ -100,6 +113,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
       // });
     }
     ).catch(e=>{
+      setTxInProgress(false);
       toast.dark(e, {
         position: "bottom-right",
         type: toast.TYPE.ERROR,
@@ -207,7 +221,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
                 <>
                
                 <ActionTitle onClick={() => {
-                  delegateAction(delegateeObject.wallet)
+                 delegateAction(delegateeObject.wallet)
                 }}
                 >Delegate</ActionTitle>
                 </>

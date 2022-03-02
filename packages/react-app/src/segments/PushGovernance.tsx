@@ -420,11 +420,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                     <ItemH>
                     <RadioGroup >
                     <div>
-                    <input type="radio" id="gasless"    name="gasless" value="gasless" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
+                    <input type="radio" id="gasless"  checked={transactionMode=="gasless"}  name="gasless" value="gasless" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
                     <Label>Gasless </Label><br/>
                     </div>
                     <div>
-                    <input type="radio" id="withgas" name="gasless" value="withgas" onChange={e=>setTransactionMode(e.target.value)}/>
+                    <input type="radio" id="withgas" 
+                    checked={transactionMode=="withgas"}
+                    name="gas" value="withgas" onChange={e=>setTransactionMode(e.target.value)}/>
                     <Label >With Gas </Label><br/>  
                     </div>
                     </RadioGroup>

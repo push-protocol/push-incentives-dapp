@@ -5,7 +5,7 @@ import Loader from 'react-loader-spinner'
 import { Waypoint } from "react-waypoint";
 import { BsChevronExpand } from 'react-icons/bs';
 import { ToastContainer, toast } from 'react-toastify';
-
+import InfoTooltip from "components/InfoTooltip";
 import { useWeb3React } from '@web3-react/core'
 import { addresses, abis } from "@project/contracts";
 import EPNSCoreHelper from 'helpers/EPNSCoreHelper';
@@ -426,18 +426,20 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                     </Item>
                   }
 
-                  <Item self="stretch" align="flex-end">
-                    <ItemH>
+                  <Item self="stretch" align="flex-end" >
+                    <ItemH >
                     <RadioGroup >
-                    <div>
+                    <div style={{marginRight:"0px"}}>
                     <input type="radio" id="gasless"  checked={transactionMode=="gasless"}  name="gasless" value="gasless" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
-                    <Label>Gasless </Label><br/>
-                    </div>
-                    <div>
+                    <Label><div style={{width:"2rem"}}>  Gasless  <InfoTooltip Infocolor={"gray"} title={"The total rewards you have already claimed from the pool. This includes all the rewards including the ones already harvested."} /> </div>      
+                     </Label><br/>
+                   </div>
+                    <div style={{width:"8rem"}}>
                     <input type="radio" id="withgas" 
                     checked={transactionMode=="withgas"}
                     name="gas" value="withgas" onChange={e=>setTransactionMode(e.target.value)}/>
-                    <Label >With Gas </Label><br/>  
+                    <Label > <div style={{width:"5rem"}}> With Gas   <InfoTooltip Infocolor={"gray"} title={"The total rewards you have already claimed from the pool. This includes all the rewards including the ones already harvested."} /> </div>
+                    </Label><br/>  
                     </div>
                     </RadioGroup>
                   {!txInProgress &&
@@ -802,7 +804,7 @@ const RadioGroup=styled.div`
   display:flex;
   justify-content:space-around;
   align-items:center;
-  width:200px;
+  width:300px;
   margin:0px 20px;
   div{
     display:flex;

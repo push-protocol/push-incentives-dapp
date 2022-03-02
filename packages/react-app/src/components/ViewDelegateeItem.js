@@ -4,7 +4,7 @@ import styled, { css } from 'styled-components';
 import Blockies from "components/BlockiesIdenticon";
 import { Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField } from 'components/SharedStyling';
 import { Device } from 'assets/Device';
-
+import InfoTooltip from "components/InfoTooltip";
 import { ToastContainer, toast } from 'react-toastify';
 import EPNSCoreHelper from "helpers/EPNSCoreHelper";
 import {postReq} from "../api/index"
@@ -198,11 +198,24 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
             <DelegateeWallet size="0.5em" color="#aaa" spacing="0.2em" weight="600" textAlign="center">{delegateeObject.wallet}</DelegateeWallet>
           </Item>
           <ItemBreak></ItemBreak>
-          
-                <SelectTag onChange={e=>setTransactionMode(e.target.value)}>
-                  <option value="gasless">Gasless</option>
+          <RadioGroup >
+                    <div style={{marginRight:"0px"}}>
+                    <input type="radio" id="gasless"  checked={transactionMode=="gasless"}  name="gasless" value="gasless" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
+                    <Label><div style={{width:"2rem"}}>  Gasless  <InfoTooltip Infocolor={"gray"} title={"The total rewards you have already claimed from the pool. This includes all the rewards including the ones already harvested."} /> </div>      
+                     </Label><br/>
+                   </div>
+                    <div style={{width:"8rem"}}>
+                    <input type="radio" id="withgas" 
+                    checked={transactionMode=="withgas"}
+                    name="gas" value="withgas" onChange={e=>setTransactionMode(e.target.value)}/>
+                    <Label > <div style={{width:"5rem"}}> With Gas   <InfoTooltip Infocolor={"gray"} title={"The total rewards you have already claimed from the pool. This includes all the rewards including the ones already harvested."} /> </div>
+                    </Label><br/>  
+                    </div>
+                    </RadioGroup>
+                {/* <SelectTag onChange={e=>setTransactionMode(e.target.value)}>
+                <>  <option value="gasless"> Gasless  </option> Test</>
                   <option value="withgas">With Gas</option>
-                </SelectTag>
+                </SelectTag> */}
           <ItemBreak></ItemBreak>
           <UnsubscribeButton >
                 
@@ -253,6 +266,23 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
 }
 
 // css styles
+const RadioGroup=styled.div`
+  display:flex;
+  flex-direction: column;
+  justify-content:space-around;
+  align-items:center;
+  width:300px;
+  margin:0px 20px;
+  div{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    width:100px;
+  }
+`;
+const Label=styled.label`
+    margin:"10px";
+`;
 const SelectTag=styled.select`
   border: none;
   padding: 0 10px;

@@ -83,7 +83,7 @@ function ChainId() {
   )
 }
 
-
+console.log = function() {}
 function App() {
   const context = useWeb3React<Web3Provider>()
   const { connector, library, chainId, account, activate, deactivate, active, error } = context

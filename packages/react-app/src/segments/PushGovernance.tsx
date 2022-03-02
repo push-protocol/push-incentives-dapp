@@ -230,20 +230,20 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     }
     console.log("balance",tokenBalance);
    
-    // if (tokenBalance == 0) {
-    //   toast.dark("No PUSH to Delegate!", {
-    //     position: "bottom-right",
-    //     type: toast.TYPE.ERROR,
-    //     autoClose: 5000,
-    //     hideProgressBar: false,
-    //     closeOnClick: true,
-    //     pauseOnHover: true,
-    //     draggable: true,
-    //     progress: undefined,
-    //   });
-    //   setTxInProgress(false);
-    //   return;
-    // }
+    if (tokenBalance == 0) {
+      toast.dark("No PUSH to Delegate!", {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setTxInProgress(false);
+      return;
+    }
     
     if(transactionMode === 'withgas'){
       executeDelegateTx(newDelegatee,epnsToken,toast,setTxInProgress,library,LoaderToast)

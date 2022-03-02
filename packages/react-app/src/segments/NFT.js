@@ -2,7 +2,6 @@ import React from "react";
 
 import styled, { css } from 'styled-components';
 import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, Para, Image, P, Span, Anchor, Button, Showoff, FormSubmision, Input, TextField} from 'components/SharedStyling';
-
 import { BsChevronExpand } from 'react-icons/bs';
 
 import Loader from 'react-loader-spinner'

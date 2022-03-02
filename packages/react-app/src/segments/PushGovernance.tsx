@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import styled, { css } from 'styled-components';
-import {Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3,LI, Image, P, Span, Anchor, Button, FormSubmision, Input, TextField, UL} from 'components/SharedStyling';
+import { Section, Content, Item, ItemH, ItemBreak, A, B, H1, H2, H3, LI, Image, P, Span, Anchor, Button, FormSubmision, Input, TextField, UL } from 'components/SharedStyling';
 import Loader from 'react-loader-spinner'
 import { Waypoint } from "react-waypoint";
 import { BsChevronExpand } from 'react-icons/bs';
@@ -10,7 +10,8 @@ import { useWeb3React } from '@web3-react/core'
 import { addresses, abis } from "@project/contracts";
 import EPNSCoreHelper from 'helpers/EPNSCoreHelper';
 import { ethers } from "ethers";
-
+import { GAS_LIMIT, PUSH_BALANCE_TRESHOLD, ERROR_TOAST_DEFAULTS } from "../components/ViewDelegateeItem";
+import { postReq } from "../api/index";
 import Blockies from "components/BlockiesIdenticon";
 
 import DisplayNotice from "components/DisplayNotice";
@@ -18,6 +19,9 @@ import ViewDelegateeItem from "components/ViewDelegateeItem";
 
 import ChannelsDataStore, { ChannelEvents } from "singletons/ChannelsDataStore";
 import UsersDataStore, { UserEvents } from "singletons/UsersDataStore";
+import {createTransactionObject} from '../helpers/GaslessHelper';
+import {executeDelegateTx} from '../helpers/WithGasHelper';
+
 const delegateesJSON = require("config/delegatees.json")
 const VOTING_TRESHOLD = 75000; //the treshold for delegates
 // Create Header
@@ -31,7 +35,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const [dashboardLoading, setDashboardLoading] = React.useState(true);
   const [delegateesLoading, setDelegateesLoading] = React.useState(true);
 
-  const [txInProgress, setTxInProgress ] = React.useState(false);
+  const [txInProgress, setTxInProgress] = React.useState(false);
   const [controlAt, setControlAt] = React.useState(0);
   const [user, setUser] = React.useState(null);
   const [owner, setOwner] = React.useState(null);
@@ -44,19 +48,29 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
   const [showDelegateePrompt, setShowDelegateePrompt] = React.useState(false);
   const [delegatee, setDelegatee] = React.useState(null);
+  const [delegateTxLoading, setDelegateTxLoading] = React.useState(false);
 
   const [showAnswers, setShowAnswers] = React.useState([]);
-  const [selfVotingPower, setSelfVotingPower ] = React.useState(null);
-  const [newDelegateeAddress, setNewDelegateeAddress ] = React.useState("0x");
-  const [newDelegateeVotingPower, setNewDelegateeVotingPower ] = React.useState(null);
+  const [selfVotingPower, setSelfVotingPower] = React.useState(null);
+  const [newDelegateeAddress, setNewDelegateeAddress] = React.useState("0x");
+  const [newDelegateeVotingPower, setNewDelegateeVotingPower] = React.useState(null);
+  const [signerObject, setSignerObject] = React.useState(null);
+  const [gaslessInfo,setGaslessInfo]=useState(null);
+  const [transactionMode,setTransactionMode] = React.useState('gasless');
+
 
   const toggleShowAnswer = (id) => {
     let newShowAnswers = [...showAnswers];
     newShowAnswers[id] = !newShowAnswers[id];
     setShowAnswers(newShowAnswers);
   }
-
-
+  React.useEffect(()=>{
+      postReq('/gov/prev_delegation',{"walletAddress": account}).then(res=>{
+        console.log("result",res.data.user)
+        setGaslessInfo(res.data.user);
+      }
+      )
+  },[]);
   React.useEffect(() => {
     if (account && account != '') {
       // Check if the address is the same
@@ -66,7 +80,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
         // get ens
         library
-          .lookupAddress(account).then(function(name) {
+          .lookupAddress(account).then(function (name) {
             setENS(name);
             setENSFetched(true);
             setAddress(account);
@@ -84,43 +98,44 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     console.log(account)
     if (!!(library && account)) {
       let signer = library.getSigner(account);
+      setSignerObject(signer)
       const epnsTokenContract = new ethers.Contract(addresses.epnsToken, abis.epnsToken, signer);
       setEpnsToken(epnsTokenContract);
     }
-  }, [account,library]);
+  }, [account, library]);
 
   React.useEffect(() => {
-    if(epnsToken){
+    if (epnsToken) {
       getMyInfo()
     }
-  }, [epnsToken,account,library, prettyTokenBalance, tokenBalance]);
+  }, [epnsToken, account, library, prettyTokenBalance, tokenBalance]);
 
   React.useEffect(() => {
     setDashboardLoading(false);
   }, [account]);
 
   React.useEffect(() => {
-    if(!epnsToken) return;
+    if (!epnsToken) return;
     const delegateesList = Object.values(delegateesJSON);
     // write helper function to sort by voting power
     const votingPowerSorter = (a, b) => {
-      return  b.votingPower - a.votingPower
+      return b.votingPower - a.votingPower
     };
 
 
     // go through all the delegates json and get their voting power
-    const allDelegateesPromise = delegateesList.map(async (oneDelegate:any) => {
+    const allDelegateesPromise = delegateesList.map(async (oneDelegate: any) => {
       const { wallet } = oneDelegate;
       const votingPower = await EPNSCoreHelper.getVotingPower(wallet, epnsToken);
-      return {...oneDelegate, votingPower: Number(votingPower)};
+      return { ...oneDelegate, votingPower: Number(votingPower) };
     });
 
 
     Promise.all(allDelegateesPromise).then((allDelegatees) => {
       // filter for delegates (i.e) Those who have above 75000 power,
       // use the parameter votingPowerSimulate parameter to simulate voting power above the treshold
-      const delegateesAbove75k = allDelegatees.filter(({votingPower, votingPowerSimulate}) => {
-        return (votingPower >=  VOTING_TRESHOLD)
+      const delegateesAbove75k = allDelegatees.filter(({ votingPower, votingPowerSimulate }) => {
+        return (votingPower >= VOTING_TRESHOLD)
       });
 
       // sort by voting power
@@ -128,8 +143,8 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       setPushDelegatees(sortedDelegatees);
 
       // calculate for  the nominees (i.e peoplw who have voting power less than 75k)
-      const delegateesBelow75k = allDelegatees.filter(({votingPower}) => {
-        return votingPower <  VOTING_TRESHOLD
+      const delegateesBelow75k = allDelegatees.filter(({ votingPower }) => {
+        return votingPower < VOTING_TRESHOLD
       });
 
       const sortedNominees = [...delegateesBelow75k].sort(votingPowerSorter);
@@ -144,10 +159,10 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   }, [epnsToken])
 
   const isValidAddress = (address) => {
-    if(ethers.utils.isAddress(address)){
+    if (ethers.utils.isAddress(address)) {
       return true
     }
-    else{
+    else {
       toast.dark("Invalid address!", {
         position: "bottom-right",
         type: toast.TYPE.ERROR,
@@ -163,23 +178,23 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   }
 
   const getVotingPower = async (address) => {
-    try{
+    try {
       const votingPower = await EPNSCoreHelper.getVotingPower(address, epnsToken, true)
       setNewDelegateeVotingPower(votingPower)
     }
-    catch(err){
-    console.log("🚀 ~ file: Delegate.tsx ~ line 86 ~ getVotingPower ~ err", err)
+    catch (err) {
+      console.log("🚀 ~ file: Delegate.tsx ~ line 86 ~ getVotingPower ~ err", err)
     }
   }
 
   const getMyInfo = async () => {
     let bal = await epnsToken.balanceOf(account)
-    let decimals =  await epnsToken.decimals()
-    let tokenBalance = await Number(bal/Math.pow(10, decimals))
+    let decimals = await epnsToken.decimals()
+    let tokenBalance = await Number(bal / Math.pow(10, decimals))
     let newBal = tokenBalance.toString();
     let delegatee = await epnsToken.delegates(account)
     let votes = await epnsToken.getCurrentVotes(account)
-    let votingPower = await Number(votes/Math.pow(10, decimals))
+    let votingPower = await Number(votes / Math.pow(10, decimals))
     let prettyVotingPower = votingPower.toLocaleString();
     setTokenBalance(tokenBalance)
     setPrettyTokenBalance(newBal)
@@ -187,15 +202,34 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
     setSelfVotingPower(prettyVotingPower)
   }
 
+  const checkForDelegateError = async (gasEstimate) => {
+    // return false if no error
+    // otherwise return error message
+    
+    // get gas price
+    const gasPrice = await EPNSCoreHelper.getGasPriceInDollars(library);
+    const totalCost = gasPrice * gasEstimate;
+    if (totalCost > GAS_LIMIT) {
+      return "Gas Price is too high, Please try again in a while."
+    }
+    return false
+  }
+
+
+  //execute delegate tx wth gas when tokenbalance < PUSH_BALANCE_TRESHOLD
+  
+
   const delegateAction = async (newDelegatee) => {
     setTxInProgress(true);
 
     const isAddress = await isValidAddress(newDelegatee)
     console.log(isAddress)
-    if(!isAddress){
+    if (!isAddress) {
       setTxInProgress(false);
       return;
     }
+    console.log("balance",tokenBalance);
+   
     if (tokenBalance == 0) {
       toast.dark("No PUSH to Delegate!", {
         position: "bottom-right",
@@ -210,58 +244,42 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
       setTxInProgress(false);
       return;
     }
-
-    let sendWithTxPromise;
-    sendWithTxPromise = epnsToken.delegate(newDelegatee);
-    sendWithTxPromise
-      .then(async tx => {
-
-        let txToast = toast.dark(<LoaderToast msg="Waiting for Confirmation..." color="#35c5f3"/>, {
-          position: "bottom-right",
-          autoClose: false,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-
-        try {
-          await library.waitForTransaction(tx.hash);
-
-          toast.update(txToast, {
-            render: "Transaction Completed!",
-            type: toast.TYPE.SUCCESS,
-            autoClose: 5000
-          });
-
-          setTxInProgress(false);
-          setShowDelegateePrompt(false);
-        }
-        catch(e) {
-          toast.update(txToast, {
-            render: "Transaction Failed! (" + e.name + ")",
-            type: toast.TYPE.ERROR,
-            autoClose: 5000
-          });
-
-          setTxInProgress(false);
-        }
-      })
-      .catch(err => {
-        toast.dark('Transaction Cancelled!', {
-          position: "bottom-right",
-          type: toast.TYPE.ERROR,
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-
-        setTxInProgress(false);
-      })
+    
+    if(transactionMode === 'withgas'){
+      executeDelegateTx(newDelegatee,epnsToken,toast,setTxInProgress,library,LoaderToast)
+      return;
+    }
+    if (tokenBalance < PUSH_BALANCE_TRESHOLD) {
+      executeDelegateTx(newDelegatee,epnsToken,toast,setTxInProgress,library,LoaderToast)
+      return;
+    }
+    await createTransactionObject(newDelegatee,account,epnsToken,addresses,signerObject,library,setTxInProgress);
+    postReq('/gov/prev_delegation',{"walletAddress": account}).then(res=>{
+      console.log("result",res.data.user)
+      setGaslessInfo(res.data.user);
+      // toast.dark("Successfully Fetched Prev Delegation Data", {
+      //   position: "bottom-right",
+      //   type: toast.TYPE.SUCCESS,
+      //   autoClose: 5000,
+      //   hideProgressBar: false,
+      //   closeOnClick: true,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      // });
+    }
+    ).catch(e=>{
+      toast.dark(e, {
+        position: "bottom-right",
+        type: toast.TYPE.ERROR,
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    })
   }
 
 
@@ -275,10 +293,10 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
   const LoaderToast = ({ msg, color }) => (
     <Toaster>
       <Loader
-       type="Oval"
-       color={color}
-       height={30}
-       width={30}
+        type="Oval"
+        color={color}
+        height={30}
+        width={30}
       />
       <ToasterMsg>{msg}</ToasterMsg>
     </Toaster>
@@ -309,24 +327,24 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                     <Item align="center" self="center" flex="initial" padding="10px">
                       <Blocky>
                         <BlockyInner>
-                           <Blockies seed={account.toLowerCase()} opts={{seed: account.toLowerCase(), size: 10, scale: 10}}/>
+                          <Blockies seed={account.toLowerCase()} opts={{ seed: account.toLowerCase(), size: 10, scale: 10 }} />
                         </BlockyInner>
                       </Blocky>
                       <Wallet>
-                      {!ensFetched &&
-                        <Loader
-                           type="Oval"
-                           color="#FFF"
-                           height={16}
-                           width={16}
-                        />
-                      }
-                      {ensFetched && ens &&
-                        <>{ens}</>
-                      }
-                      {ensFetched && !ens &&
-                        <>{account.substring(0, 6)}.....{account.substring(account.length - 6)}</>
-                      }
+                        {!ensFetched &&
+                          <Loader
+                            type="Oval"
+                            color="#FFF"
+                            height={16}
+                            width={16}
+                          />
+                        }
+                        {ensFetched && ens &&
+                          <>{ens}</>
+                        }
+                        {ensFetched && !ens &&
+                          <>{account.substring(0, 6)}.....{account.substring(account.length - 6)}</>
+                        }
                       </Wallet>
                     </Item>
 
@@ -337,16 +355,33 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                       </ItemH>
 
                       <ItemH flex="initial" padding="5px">
-                        <Span weight="500"  padding="0px 8px 0px 0px">Voting Power: </Span>
+                        <Span weight="500" padding="0px 8px 0px 0px">Voting Power: </Span>
                         <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{selfVotingPower}</CurvedSpan>
-                      </ItemH>
-
-                      {delegatee !== "0x0000000000000000000000000000000000000000" &&
+                        </ItemH>
+                        {delegatee !== "0x0000000000000000000000000000000000000000" &&
                         <ItemH flex="initial" padding="5px">
                           <Span padding="0px 8px 0px 0px">Delegated To: </Span>
                           <Span weight="600">{delegatee}</Span>
                         </ItemH>
                       }
+
+                      {
+                        (gaslessInfo)?
+                        // <Item align="flex-start" self="stretch" padding="10px" size="16px">
+                        <>
+                      <ItemH flex="initial" padding="5px">
+                        <Span weight="500" padding="0px 8px 0px 0px">Last Gasless Delegation On: </Span>
+                        <CurvedSpan bg="#e20880" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{new Date(gaslessInfo.timestamp).toLocaleDateString()}</CurvedSpan>
+                        </ItemH>
+                        <ItemH flex="initial" padding="5px">
+                        <Span weight="500" padding="0px 8px 0px 0px">Last Gasless Delegation To: </Span>
+                        <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{gaslessInfo.delegatee}</CurvedSpan>
+                        </ItemH>
+                        </>
+                        :
+                        <p>No recent Gasless Delegation </p>
+                      }
+                    
                     </Item>
                   </ItemH>
 
@@ -368,7 +403,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                           self="stretch"
                           bg="#fff"
                           value={newDelegateeAddress}
-                          onChange={async(e) => {
+                          onChange={async (e) => {
                             setNewDelegateeAddress(e.target.value)
                             setNewDelegateeVotingPower(null)
                           }}
@@ -383,7 +418,19 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
                   <Item self="stretch" align="flex-end">
                     <ItemH>
-
+                    <RadioGroup >
+                    <div>
+                    <input type="radio" id="gasless"  checked={transactionMode=="gasless"}  name="gasless" value="gasless" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
+                    <Label>Gasless </Label><br/>
+                    </div>
+                    <div>
+                    <input type="radio" id="withgas" 
+                    checked={transactionMode=="withgas"}
+                    name="gas" value="withgas" onChange={e=>setTransactionMode(e.target.value)}/>
+                    <Label >With Gas </Label><br/>  
+                    </div>
+                    </RadioGroup>
+                  {!txInProgress &&
                       <ButtonAlt
                         bg={txInProgress ? "#999" : "#e20880"}
                         disabled={txInProgress ? true : false}
@@ -395,18 +442,21 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                             setShowDelegateePrompt(true)
                           }
                         }}
-                        >
-                          <Span color="#fff" weight="400">Delegate to Others</Span>
-                      </ButtonAlt>
-
-                      {!showDelegateePrompt &&
+                      >
+                      
+                <Span color="#fff" weight="400">Delegate to Others</Span>
+                 
+                </ButtonAlt>
+               }
+                      {!showDelegateePrompt && !txInProgress &&
                         <ButtonAlt
                           bg={txInProgress ? "#999" : "#51CAF3"}
                           disabled={txInProgress ? true : false}
-                          onClick={() => { delegateAction(account)}}
+                          onClick={() => { delegateAction(account) }}
                         >
-                            <Span color="#fff" weight="400">Delegate to Myself</Span>
-                        </ButtonAlt>
+                          <Span color="#fff" weight="400">Delegate to Myself</Span>
+                        
+                          </ButtonAlt>
                       }
 
                       <ButtonAlt
@@ -421,16 +471,29 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                             }
                           }
                         }
-                      >
+                      >{
+                        txInProgress ? (
+                          <ActionTitle>
+                           <Loader
+                             type="Oval"
+                             color="#35c5f3"
+                             height={20}
+                             width={20}
+                          />
+                          </ActionTitle>
+                        ):
+                      
+                      
                         <Span color="#fff" weight="400">Query Voting Power</Span>
-                      </ButtonAlt>
+                        }
+                        </ButtonAlt>
 
                       {showDelegateePrompt &&
                         <ButtonAlt
                           bg="#000"
                           onClick={() => { setShowDelegateePrompt(false) }}
                         >
-                            <Span color="#fff" weight="400">Close</Span>
+                          <Span color="#fff" weight="400">Close</Span>
                         </ButtonAlt>
                       }
                     </ItemH>
@@ -453,31 +516,33 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
             <StatsHeading bg="#35c5f3">Meet the PUSH Nominees</StatsHeading>
             <NomineeContainer>
               {delegateesLoading ? (
-                  <ContainerInfo>
-                    <Loader
-                      type="Oval"
-                      color="#35c5f3"
-                      height={40}
-                      width={40}
-                    />
-                  </ContainerInfo>
-                ) : (
-                  <AbsoluteWrapper>
-                    {
-                      pushNominees.map((onePushNominee) => {
-                        return (
-                          <ViewDelegateeItem
-                            key={onePushNominee.wallet}
-                            delegateeObject={onePushNominee}
-                            epnsToken={epnsToken}
-                            pushBalance={tokenBalance}
-                            theme="nominee"
-                          />
-                        )
-                      })
-                    }
-                  </AbsoluteWrapper>
-                )
+                <ContainerInfo>
+                  <Loader
+                    type="Oval"
+                    color="#35c5f3"
+                    height={40}
+                    width={40}
+                  />
+                </ContainerInfo>
+              ) : (
+                <AbsoluteWrapper>
+                  {
+                    pushNominees.map((onePushNominee) => {
+                      return (
+                        <ViewDelegateeItem
+                          key={onePushNominee.wallet}
+                          delegateeObject={onePushNominee}
+                          epnsToken={epnsToken}
+                          pushBalance={tokenBalance}
+                          signerObject={signerObject}
+                          setGaslessInfo={setGaslessInfo}
+                          theme="nominee"
+                        />
+                      )
+                    })
+                  }
+                </AbsoluteWrapper>
+              )
               }
             </NomineeContainer>
           </StatsCard>
@@ -509,23 +574,25 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
               padding="0px 20px 20px 20px"
               self="stretch"
             >
-              {pushDelegatees.length == 0  &&
+              {pushDelegatees.length == 0 &&
                 <Item align="flex-start" self="stretch">
                   <Span padding="10px 10px" margin="10px 0px" bg="#666" color="#fff" weight="600">🤷 Awkward!!</Span>
                   <Span padding="10px 10px" margin="10px 0px" bg="#666" color="#fff" weight="600">Show some 💕 to Nominees to kickstart Governance!</Span>
                 </Item>
               }
-              {pushDelegatees.length > 0  &&
+              {pushDelegatees.length > 0 &&
                 pushDelegatees.map((oneDelegatee) => {
                   return (
                     <>
-                    <ViewDelegateeItem
-                      key={oneDelegatee.wallet}
-                      delegateeObject={oneDelegatee}
-                      epnsToken={epnsToken}
-                      pushBalance={tokenBalance}
-                      theme="delegate"
-                    />
+                      <ViewDelegateeItem
+                        key={oneDelegatee.wallet}
+                        delegateeObject={oneDelegatee}
+                        epnsToken={epnsToken}
+                        signerObject={signerObject}
+                        pushBalance={tokenBalance}
+                        setGaslessInfo={setGaslessInfo}
+                        theme="delegate"
+                      />
                     </>
                   );
                 })
@@ -543,13 +610,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
           <Item align="stretch" margin="0px 0px 0px 0px">
             <QnAItem>
               <Question
-                onClick={() => {toggleShowAnswer(0)}}
+                onClick={() => { toggleShowAnswer(0) }}
                 hover="#e20880"
               >
                 <Span>
                   What are PUSH Delegatees?
                 </Span>
-                <BsChevronExpand size={20} color={"#ddd"}/>
+                <BsChevronExpand size={20} color={"#ddd"} />
               </Question>
 
               {showAnswers[0] &&
@@ -564,21 +631,21 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
             <QnAItem>
               <Question
-                onClick={() => {toggleShowAnswer(1)}}
+                onClick={() => { toggleShowAnswer(1) }}
                 hover="#e20880"
               >
                 <Span>
                   What are PUSH Nominees
                 </Span>
-                <BsChevronExpand size={20} color={"#ddd"}/>
+                <BsChevronExpand size={20} color={"#ddd"} />
               </Question>
 
               {showAnswers[1] &&
                 <Answer>
                   <Span>
-                  Active community members who can be delegated $PUSH to vote for proposals Snapshot. If you wish to be PUSH Nominee, submit your nomination
-                  <AMod href="https://gov.epns.io/t/epns-push-delegatee-nominations/21"> here. </AMod>
-                   Once they get at least <b>75,000 $PUSH </b> delegated to them, they become a PUSH Delegatee.
+                    Active community members who can be delegated $PUSH to vote for proposals Snapshot. If you wish to be PUSH Nominee, submit your nomination
+                    <AMod href="https://gov.epns.io/t/epns-push-delegatee-nominations/21"> here. </AMod>
+                    Once they get at least <b>75,000 $PUSH </b> delegated to them, they become a PUSH Delegatee.
                   </Span>
                 </Answer>
               }
@@ -586,13 +653,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
             <QnAItem>
               <Question
-                onClick={() => {toggleShowAnswer(2)}}
+                onClick={() => { toggleShowAnswer(2) }}
                 hover="#e20880"
               >
                 <Span>
                   How can I become a PUSH Nominee?
                 </Span>
-                <BsChevronExpand size={20} color={"#ddd"}/>
+                <BsChevronExpand size={20} color={"#ddd"} />
               </Question>
 
               {showAnswers[2] &&
@@ -620,13 +687,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
             <QnAItem>
               <Question
-                onClick={() => {toggleShowAnswer(3)}}
+                onClick={() => { toggleShowAnswer(3) }}
                 hover="#e20880"
               >
                 <Span>
                   What if I don't wish to be a PUSH Nominee?
                 </Span>
-                <BsChevronExpand size={20} color={"#ddd"}/>
+                <BsChevronExpand size={20} color={"#ddd"} />
               </Question>
 
               {showAnswers[3] &&
@@ -640,13 +707,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
             <QnAItem>
               <Question
-                onClick={() => {toggleShowAnswer(4)}}
+                onClick={() => { toggleShowAnswer(4) }}
                 hover="#e20880"
               >
                 <Span>
                   Where should I start?
                 </Span>
-                <BsChevronExpand size={20} color={"#ddd"}/>
+                <BsChevronExpand size={20} color={"#ddd"} />
               </Question>
 
               {showAnswers[4] &&
@@ -659,13 +726,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
             <QnAItem>
               <Question
-                onClick={() => {toggleShowAnswer(5)}}
+                onClick={() => { toggleShowAnswer(5) }}
                 hover="#e20880"
               >
                 <Span>
                   What happens to the delegated voting power when I sell my PUSH tokens?
                 </Span>
-                <BsChevronExpand size={20} color={"#ddd"}/>
+                <BsChevronExpand size={20} color={"#ddd"} />
               </Question>
 
               {showAnswers[5] &&
@@ -679,13 +746,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
             <QnAItem>
               <Question
-                onClick={() => {toggleShowAnswer(6)}}
+                onClick={() => { toggleShowAnswer(6) }}
                 hover="#e20880"
               >
                 <Span>
                   How can I cast my vote?
                 </Span>
-                <BsChevronExpand size={20} color={"#ddd"}/>
+                <BsChevronExpand size={20} color={"#ddd"} />
               </Question>
 
               {showAnswers[6] &&
@@ -697,13 +764,13 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 
             <QnAItem>
               <Question
-                onClick={() => {toggleShowAnswer(7)}}
+                onClick={() => { toggleShowAnswer(7) }}
                 hover="#e20880"
               >
                 <Span>
                   How can I keep up with EPNS Governance?
                 </Span>
-                <BsChevronExpand size={20} color={"#ddd"}/>
+                <BsChevronExpand size={20} color={"#ddd"} />
               </Question>
 
               {showAnswers[7] &&
@@ -720,6 +787,20 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
 }
 
 // css styles
+
+const RadioGroup=styled.div`
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  width:200px;
+  margin:0px 20px;
+  div{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    width:100px;
+  }
+`;
 const Container = styled.div`
   display: flex;
   flex: 1;
@@ -814,7 +895,7 @@ const EpicButton = styled(A)`
   border-radius: 8px;
   background: linear-gradient(273deg, #674c9f 0%, rgba(226,8,128,1) 100%);
   `
-  const ChannelActionButton = styled.button`
+const ChannelActionButton = styled.button`
   border: 0;
   outline: 0;
   display: flex;
@@ -838,7 +919,7 @@ const EpicButton = styled(A)`
     cursor: pointer;
     pointer: hand;
   }
-  ${ props => props.disabled && css`
+  ${props => props.disabled && css`
     &:hover {
       opacity: 1;
       cursor: default;
@@ -851,15 +932,18 @@ const EpicButton = styled(A)`
     }
   `}
 `
-  const GradientButton = styled(ChannelActionButton)`
+const GradientButton = styled(ChannelActionButton)`
   // background: #674c9f;
   background: linear-gradient(273deg, #674c9f 0%, rgba(226,8,128,1) 100%);
   `
-  const ActionTitle = styled.span`
-  ${ props => props.hideit && css`
+const ActionTitle = styled.span`
+  ${props => props.hideit && css`
     visibility: hidden;
   `};
 `
+const Label=styled.label`
+    margin:"10px";
+`;
 const Toaster = styled.div`
   display: flex;
   flex-direction: row;

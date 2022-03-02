@@ -370,11 +370,11 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                         // <Item align="flex-start" self="stretch" padding="10px" size="16px">
                         <>
                       <ItemH flex="initial" padding="5px">
-                        <Span weight="500" padding="0px 8px 0px 0px">Gasless Delegatated On: </Span>
+                        <Span weight="500" padding="0px 8px 0px 0px">Last Gasless Delegation On: </Span>
                         <CurvedSpan bg="#e20880" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{new Date(gaslessInfo.timestamp).toLocaleDateString()}</CurvedSpan>
                         </ItemH>
                         <ItemH flex="initial" padding="5px">
-                        <Span weight="500" padding="0px 8px 0px 0px">Gasless Delegated To: </Span>
+                        <Span weight="500" padding="0px 8px 0px 0px">Last Gasless Delegation To: </Span>
                         <CurvedSpan bg="#35c5f3" color="#fff" weight="600" padding="4px 8px" textTransform="uppercase">{gaslessInfo.delegatee}</CurvedSpan>
                         </ItemH>
                         </>

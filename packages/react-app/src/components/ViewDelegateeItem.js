@@ -78,7 +78,8 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
     setTxLoading(true);
     if(transactionMode === 'withgas'){
      await executeDelegateTx(delegateeAddress,epnsToken,toast,setTxLoading,library,LoaderToast);
-      return;
+     setTxInProgress(false); 
+     return;
     }
     if (pushBalance < PUSH_BALANCE_TRESHOLD) {
       // await  executeDelegateTx(delegateeAddress,epnsToken,toast,setTxLoading,library,LoaderToast)
@@ -124,6 +125,9 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
         draggable: true,
         progress: undefined,
       });
+    }).finally(()=>{
+      setTxInProgress(false);
+
     })
   }
 
@@ -198,7 +202,7 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
             <DelegateeWallet size="0.5em" color="#aaa" spacing="0.2em" weight="600" textAlign="center">{delegateeObject.wallet}</DelegateeWallet>
           </Item>
           <ItemBreak></ItemBreak>
-          <RadioGroup >
+          {/* <RadioGroup >
                     <div style={{marginRight:"0px"}}>
                     <input type="radio" id="gasless"  checked={transactionMode=="gasless"}  name="gasless" value="gasless" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
                     <Label><div style={{width:"2rem"}}>  Gasless  <InfoTooltip Infocolor={"gray"} title={"The total rewards you have already claimed from the pool. This includes all the rewards including the ones already harvested."} /> </div>      
@@ -211,11 +215,11 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
                     <Label > <div style={{width:"5rem"}}> With Gas   <InfoTooltip Infocolor={"gray"} title={"The total rewards you have already claimed from the pool. This includes all the rewards including the ones already harvested."} /> </div>
                     </Label><br/>  
                     </div>
-                    </RadioGroup>
-                {/* <SelectTag onChange={e=>setTransactionMode(e.target.value)}>
+                    </RadioGroup> */}
+                <SelectTag onChange={e=>setTransactionMode(e.target.value)}>
                 <>  <option value="gasless"> Gasless  </option> Test</>
                   <option value="withgas">With Gas</option>
-                </SelectTag> */}
+                </SelectTag>
           <ItemBreak></ItemBreak>
           <UnsubscribeButton >
                 

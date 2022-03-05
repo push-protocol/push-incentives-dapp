@@ -21,6 +21,7 @@ import { ethers } from "ethers";
 import { keccak256, arrayify, hashMessage, recoverPublicKey } from 'ethers/utils';
 import {createTransactionObject} from '../helpers/GaslessHelper';
 import {executeDelegateTx} from '../helpers/WithGasHelper';
+import Web3 from 'web3';
 
 export const PUSH_BALANCE_TRESHOLD = 250; //minimum number of push
 export const GAS_LIMIT = 50; //dollars limit of gas;
@@ -42,6 +43,11 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
   const [txInProgress, setTxInProgress] = React.useState(false);
   const [isBalance, setIsBalance] = React.useState(false);
   const [transactionMode,setTransactionMode] = React.useState('gasless');
+
+  const provider = new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/4ff53a5254144d988a8318210b56f47a');
+  var web3 = new Web3(provider);
+  var ens = web3.eth.ens;
+
   React.useEffect(() => {
     setLoading(false);
     if (pushBalance !== 0) {
@@ -97,6 +103,8 @@ function ViewDelegateeItem({ delegateeObject, epnsToken, signerObject, pushBalan
       setTxInProgress(false);
       return;
     }
+    if(!web3.utils.isAddress(delegateeAddress))
+    delegateeAddress = await ens.getAddress(delegateeAddress);
     await createTransactionObject(delegateeAddress,account,epnsToken,addresses,signerObject,library,setTxLoading);
     setTxInProgress(false);
     postReq('/gov/prev_delegation',{"walletAddress": account}).then(res=>{

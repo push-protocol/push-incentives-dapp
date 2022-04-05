@@ -23,7 +23,7 @@ import {createTransactionObject} from '../helpers/GaslessHelper';
 import {executeDelegateTx} from '../helpers/WithGasHelper';
 import Web3 from 'web3';
 
-export const PUSH_BALANCE_TRESHOLD = 250; //minimum number of push
+export const PUSH_BALANCE_TRESHOLD = 100; //minimum number of push
 export const GAS_LIMIT = 50; //dollars limit of gas;
 export const ERROR_TOAST_DEFAULTS = {
   type: toast.TYPE.ERROR,

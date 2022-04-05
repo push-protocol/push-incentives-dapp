@@ -432,7 +432,7 @@ function Delegate({ epnsReadProvider, epnsWriteProvide }) {
                     <div style={{marginRight:"0px"}}>
                     <input type="radio" id="gasless"  checked={transactionMode=="gasless"}  name="gasless" value="gasless" onChange={e=>setTransactionMode(e.target.value)}/> <br/>
                     <Label><div style={{width:"2rem"}}>  Gasless  <InfoTooltip Infocolor={"gray"}
-                     title={  "Delegate your PUSH votes without paying gas fee.   " + "Conditions: " +"Wallet address must hold at least 250 PUSH."+ "Gasless delegation is enabled only when the gas fee is less than $50"+"Once delegated, the same wallet address could do gasless delegation again only after 7 days"} /> </div>      
+                     title={  "Delegate your PUSH votes without paying gas fee.   " + "Conditions: " +"Wallet address must hold at least 100 PUSH."+ "Gasless delegation is enabled only when the gas fee is less than $50"+"Once delegated, the same wallet address could do gasless delegation again only after 7 days"} /> </div>      
                      </Label><br/>
                    </div>
                     <div style={{width:"8rem"}}>

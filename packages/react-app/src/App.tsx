@@ -98,6 +98,9 @@ function App() {
   // handle logic to recognize the connector currently being activated
   const [activatingConnector, setActivatingConnector] = React.useState<AbstractConnector>()
   React.useEffect(() => {
+    window.location.replace('https://app.epns.io/#/yield');
+  }, [])
+  React.useEffect(() => {
     if (activatingConnector && activatingConnector === connector) {
       setActivatingConnector(undefined)
     }
